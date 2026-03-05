@@ -29,8 +29,8 @@ export function SiteFooter() {
           </div>
         </div>
         <div className="mt-10 pt-6 border-t border-border">
-          <p className="text-xs text-muted-foreground">
-            {'\u00A9'} {new Date().getFullYear()} Whiteprint. All rights reserved. All content is for informational purposes only and does not constitute investment advice.
+          <p className="text-xs text-muted-foreground" suppressHydrationWarning>
+            {'\u00A9'} 2026 Whiteprint. All rights reserved. All content is for informational purposes only and does not constitute investment advice.
           </p>
         </div>
       </div>
