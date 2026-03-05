@@ -1,0 +1,75 @@
+import Link from "next/link"
+import type { PostMeta } from "@/lib/posts"
+
+function formatDate(dateStr: string) {
+  const date = new Date(dateStr + "T00:00:00")
+  return date.toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  })
+}
+
+function categoryLabel(category: string) {
+  switch (category) {
+    case "macro":
+      return "Macro"
+    case "equity":
+      return "Equity Research"
+    case "market-notes":
+      return "Market Notes"
+    default:
+      return category
+  }
+}
+
+function categoryHref(category: string) {
+  switch (category) {
+    case "macro":
+      return "/macro"
+    case "equity":
+      return "/equity"
+    case "market-notes":
+      return "/market-notes"
+    default:
+      return "/"
+  }
+}
+
+export function PostCard({ post }: { post: PostMeta }) {
+  return (
+    <article className="group py-6 border-b border-border last:border-b-0">
+      <div className="flex flex-col gap-2">
+        <div className="flex items-center gap-3 text-xs text-muted-foreground">
+          <Link
+            href={categoryHref(post.category)}
+            className="uppercase tracking-widest font-medium hover:text-foreground transition-colors"
+          >
+            {categoryLabel(post.category)}
+          </Link>
+          <span aria-hidden="true">{'/'}</span>
+          <time dateTime={post.date}>{formatDate(post.date)}</time>
+        </div>
+        <Link href={`/posts/${post.slug}`} className="block">
+          <h3 className="font-serif text-xl font-semibold tracking-tight text-foreground group-hover:text-muted-foreground transition-colors">
+            {post.title}
+          </h3>
+        </Link>
+        <p className="text-sm text-muted-foreground leading-relaxed max-w-2xl">
+          {post.excerpt}
+        </p>
+        <div className="flex items-center gap-2 mt-1">
+          {post.tags.map((tag) => (
+            <Link
+              key={tag}
+              href={`/search?tag=${encodeURIComponent(tag)}`}
+              className="text-xs text-muted-foreground hover:text-foreground transition-colors"
+            >
+              #{tag}
+            </Link>
+          ))}
+        </div>
+      </div>
+    </article>
+  )
+}
