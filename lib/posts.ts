@@ -12,6 +12,13 @@ export interface PostMeta {
   tags: string[]
   excerpt: string
   readTime?: string
+  sources?: number
+  scenarios?: number
+  featured?: boolean
+  briefLabel?: string
+  briefBadge?: string
+  briefBadgeType?: "hold" | "watch" | "caution"
+  briefSummary?: string
 }
 
 export interface Post extends PostMeta {
@@ -36,6 +43,13 @@ export function getAllPosts(): PostMeta[] {
         tags: data.tags ?? [],
         excerpt: data.excerpt ?? "",
         readTime: data.readTime ?? undefined,
+        sources: data.sources ?? undefined,
+        scenarios: data.scenarios ?? undefined,
+        featured: data.featured ?? undefined,
+        briefLabel: data.briefLabel ?? undefined,
+        briefBadge: data.briefBadge ?? undefined,
+        briefBadgeType: data.briefBadgeType ?? undefined,
+        briefSummary: data.briefSummary ?? undefined,
       } as PostMeta
     })
   return posts.sort((a, b) => (a.date > b.date ? -1 : 1))

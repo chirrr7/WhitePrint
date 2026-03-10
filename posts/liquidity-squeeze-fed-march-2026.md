@@ -4,5 +4,12 @@ date: "2026-03-10"
 category: "macro"
 tags: ["macro", "equity", "rates", "fed", "liquidity", "positioning", "factor-investing"]
 readTime: "20 min"
+sources: 12
+scenarios: 4
+featured: true
+briefLabel: "Fed"
+briefBadge: "Hold"
+briefBadgeType: "hold"
+briefSummary: "The March 17–18 decision is fully priced as a hold. The analytical interest lies in the dot plot revision and whether Powell's final press conference signals any shift in the committee's medium-term easing bias."
 excerpt: "The FOMC convenes March 17–18 against a backdrop of residual funding market strain, a pending leadership transition, and a late-February geopolitical escalation in the Middle East that threatens to re-accelerate energy prices. Three overlapping pressures make this one of the more analytically complex meetings in recent memory."
 ---
