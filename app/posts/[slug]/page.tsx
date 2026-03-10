@@ -1,4 +1,4 @@
-import { notFound } from "next/navigation"
+import { notFound, redirect } from "next/navigation"
 import Link from "next/link"
 import type { Metadata } from "next"
 import { getAllPosts, getPostBySlug } from "@/lib/posts"
@@ -63,6 +63,7 @@ export default async function PostPage({ params }: Props) {
   const { slug } = await params
   const post = getPostBySlug(slug)
   if (!post) notFound()
+  if (post.redirectTo) redirect(post.redirectTo)
 
   return (
     <article className="mx-auto max-w-3xl px-6 py-12">
@@ -81,6 +82,8 @@ export default async function PostPage({ params }: Props) {
           </span>
           <span aria-hidden="true">{'/'}</span>
           <time dateTime={post.date}>{formatDate(post.date)}</time>
+          <span aria-hidden="true">{'/'}</span>
+          <span>{post.readTime} min read</span>
         </div>
         <h1 className="font-serif text-3xl md:text-4xl font-bold tracking-tight text-foreground text-balance">
           {post.title}
@@ -95,7 +98,7 @@ export default async function PostPage({ params }: Props) {
               href={`/search?tag=${encodeURIComponent(tag)}`}
               className="text-xs text-muted-foreground hover:text-foreground transition-colors border border-border px-2 py-1"
             >
-              {tag}
+              #{tag}
             </Link>
           ))}
         </div>

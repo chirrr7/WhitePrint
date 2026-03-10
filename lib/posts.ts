@@ -11,10 +11,25 @@ export interface PostMeta {
   category: "macro" | "equity" | "market-notes"
   tags: string[]
   excerpt: string
+  readTime: number
+  redirectTo?: string
 }
 
 export interface Post extends PostMeta {
   content: string
+}
+
+function estimateReadTime(content: string): number {
+  const words = content
+    .replace(/```[\s\S]*?```/g, " ")
+    .replace(/`[^`]*`/g, " ")
+    .replace(/\[[^\]]*\]\([^)]*\)/g, " ")
+    .replace(/[>#*_~\-]/g, " ")
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean).length
+
+  return Math.max(1, Math.round(words / 225))
 }
 
 export function getAllPosts(): PostMeta[] {
@@ -26,7 +41,7 @@ export function getAllPosts(): PostMeta[] {
       const slug = fileName.replace(/\.md$/, "")
       const fullPath = path.join(postsDirectory, fileName)
       const fileContents = fs.readFileSync(fullPath, "utf8")
-      const { data } = matter(fileContents)
+      const { data, content } = matter(fileContents)
       return {
         slug,
         title: data.title ?? "",
@@ -34,6 +49,8 @@ export function getAllPosts(): PostMeta[] {
         category: data.category ?? "macro",
         tags: data.tags ?? [],
         excerpt: data.excerpt ?? "",
+        readTime: Number(data.readTime) || estimateReadTime(content),
+        redirectTo: data.redirectTo,
       } as PostMeta
     })
   return posts.sort((a, b) => (a.date > b.date ? -1 : 1))
@@ -55,6 +72,8 @@ export function getPostBySlug(slug: string): Post | null {
     category: data.category ?? "macro",
     tags: data.tags ?? [],
     excerpt: data.excerpt ?? "",
+    readTime: Number(data.readTime) || estimateReadTime(content),
+    redirectTo: data.redirectTo,
     content,
   }
 }
