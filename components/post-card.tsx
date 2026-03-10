@@ -49,6 +49,8 @@ export function PostCard({ post }: { post: PostMeta }) {
           </Link>
           <span aria-hidden="true">{'/'}</span>
           <time dateTime={post.date}>{formatDate(post.date)}</time>
+          <span aria-hidden="true">{'/'}</span>
+          <span>{post.readTime} min read</span>
         </div>
         <Link href={`/posts/${post.slug}`} className="block">
           <h3 className="font-serif text-xl font-semibold tracking-tight text-foreground group-hover:text-muted-foreground transition-colors">

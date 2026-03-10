@@ -4,6 +4,11 @@ import matter from "gray-matter"
 
 const postsDirectory = path.join(process.cwd(), "posts")
 
+const visiblePostSlugs = new Set([
+  "liquidity-squeeze-fed-march-2026",
+  "fed-decision-week-three-things-to-watch",
+])
+
 export interface PostMeta {
   slug: string
   title: string
@@ -11,10 +16,24 @@ export interface PostMeta {
   category: "macro" | "equity" | "market-notes"
   tags: string[]
   excerpt: string
+  readTime: number
 }
 
 export interface Post extends PostMeta {
   content: string
+}
+
+function estimateReadTime(content: string): number {
+  const words = content
+    .replace(/```[\s\S]*?```/g, " ")
+    .replace(/`[^`]*`/g, " ")
+    .replace(/\[[^\]]*\]\([^)]*\)/g, " ")
+    .replace(/[>#*_~\-]/g, " ")
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean).length
+
+  return Math.max(1, Math.round(words / 225))
 }
 
 export function getAllPosts(): PostMeta[] {
@@ -22,11 +41,12 @@ export function getAllPosts(): PostMeta[] {
   const fileNames = fs.readdirSync(postsDirectory)
   const posts = fileNames
     .filter((name) => name.endsWith(".md"))
+    .filter((name) => visiblePostSlugs.has(name.replace(/\.md$/, "")))
     .map((fileName) => {
       const slug = fileName.replace(/\.md$/, "")
       const fullPath = path.join(postsDirectory, fileName)
       const fileContents = fs.readFileSync(fullPath, "utf8")
-      const { data } = matter(fileContents)
+      const { data, content } = matter(fileContents)
       return {
         slug,
         title: data.title ?? "",
@@ -34,6 +54,7 @@ export function getAllPosts(): PostMeta[] {
         category: data.category ?? "macro",
         tags: data.tags ?? [],
         excerpt: data.excerpt ?? "",
+        readTime: Number(data.readTime) || estimateReadTime(content),
       } as PostMeta
     })
   return posts.sort((a, b) => (a.date > b.date ? -1 : 1))
@@ -44,6 +65,7 @@ export function getPostsByCategory(category: string): PostMeta[] {
 }
 
 export function getPostBySlug(slug: string): Post | null {
+  if (!visiblePostSlugs.has(slug)) return null
   const fullPath = path.join(postsDirectory, `${slug}.md`)
   if (!fs.existsSync(fullPath)) return null
   const fileContents = fs.readFileSync(fullPath, "utf8")
@@ -55,6 +77,7 @@ export function getPostBySlug(slug: string): Post | null {
     category: data.category ?? "macro",
     tags: data.tags ?? [],
     excerpt: data.excerpt ?? "",
+    readTime: Number(data.readTime) || estimateReadTime(content),
     content,
   }
 }
