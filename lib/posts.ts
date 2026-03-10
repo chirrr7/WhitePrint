@@ -4,6 +4,11 @@ import matter from "gray-matter"
 
 const postsDirectory = path.join(process.cwd(), "posts")
 
+const visiblePostSlugs = new Set([
+  "liquidity-squeeze-fed-march-2026",
+  "fed-decision-week-three-things-to-watch",
+])
+
 export interface PostMeta {
   slug: string
   title: string
@@ -12,7 +17,6 @@ export interface PostMeta {
   tags: string[]
   excerpt: string
   readTime: number
-  redirectTo?: string
 }
 
 export interface Post extends PostMeta {
@@ -37,6 +41,7 @@ export function getAllPosts(): PostMeta[] {
   const fileNames = fs.readdirSync(postsDirectory)
   const posts = fileNames
     .filter((name) => name.endsWith(".md"))
+    .filter((name) => visiblePostSlugs.has(name.replace(/\.md$/, "")))
     .map((fileName) => {
       const slug = fileName.replace(/\.md$/, "")
       const fullPath = path.join(postsDirectory, fileName)
@@ -50,7 +55,6 @@ export function getAllPosts(): PostMeta[] {
         tags: data.tags ?? [],
         excerpt: data.excerpt ?? "",
         readTime: Number(data.readTime) || estimateReadTime(content),
-        redirectTo: data.redirectTo,
       } as PostMeta
     })
   return posts.sort((a, b) => (a.date > b.date ? -1 : 1))
@@ -61,6 +65,7 @@ export function getPostsByCategory(category: string): PostMeta[] {
 }
 
 export function getPostBySlug(slug: string): Post | null {
+  if (!visiblePostSlugs.has(slug)) return null
   const fullPath = path.join(postsDirectory, `${slug}.md`)
   if (!fs.existsSync(fullPath)) return null
   const fileContents = fs.readFileSync(fullPath, "utf8")
@@ -73,7 +78,6 @@ export function getPostBySlug(slug: string): Post | null {
     tags: data.tags ?? [],
     excerpt: data.excerpt ?? "",
     readTime: Number(data.readTime) || estimateReadTime(content),
-    redirectTo: data.redirectTo,
     content,
   }
 }

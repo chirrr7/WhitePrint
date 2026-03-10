@@ -1,4 +1,4 @@
-import { notFound, redirect } from "next/navigation"
+import { notFound } from "next/navigation"
 import Link from "next/link"
 import type { Metadata } from "next"
 import { getAllPosts, getPostBySlug } from "@/lib/posts"
@@ -63,7 +63,6 @@ export default async function PostPage({ params }: Props) {
   const { slug } = await params
   const post = getPostBySlug(slug)
   if (!post) notFound()
-  if (post.redirectTo) redirect(post.redirectTo)
 
   return (
     <article className="mx-auto max-w-3xl px-6 py-12">

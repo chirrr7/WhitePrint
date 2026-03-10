@@ -5,7 +5,6 @@ category: "market-notes"
 tags: ["fed", "macro", "rates", "energy", "inflation"]
 excerpt: "The Federal Reserve meets March 17–18. Rates are not moving — but the signals that come out of this meeting could shape how markets behave for months."
 readTime: 3
-redirectTo: "/posts/liquidity-squeeze-fed-march-2026"
 ---
 The Federal Reserve's upcoming meeting is expected to end with no change to interest rates. With that outcome already priced in, the real question is what the Fed says — not what it does.
 
@@ -16,3 +15,5 @@ Three overlapping pressures make this meeting unusually consequential:
 3. **The Fed leadership handover.** Jerome Powell's term ends in May, and policy expectations may shift as leadership changes.
 
 **Bottom line:** the decision is likely a hold, but tone and forward guidance could drive market reactions well beyond this week.
+
+Read the full macro research: [/posts/liquidity-squeeze-fed-march-2026](/posts/liquidity-squeeze-fed-march-2026).
