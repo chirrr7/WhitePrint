@@ -11,6 +11,7 @@ export interface PostMeta {
   category: "macro" | "equity" | "market-notes"
   tags: string[]
   excerpt: string
+  readTime?: string
 }
 
 export interface Post extends PostMeta {
@@ -34,6 +35,7 @@ export function getAllPosts(): PostMeta[] {
         category: data.category ?? "macro",
         tags: data.tags ?? [],
         excerpt: data.excerpt ?? "",
+        readTime: data.readTime ?? undefined,
       } as PostMeta
     })
   return posts.sort((a, b) => (a.date > b.date ? -1 : 1))
