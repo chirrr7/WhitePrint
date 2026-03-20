@@ -1,4 +1,6 @@
 import type { Metadata } from "next"
+import Link from "next/link"
+import { ArrowLeft } from "lucide-react"
 import { EogResourcesArticle } from "./article"
 
 export const metadata: Metadata = {
