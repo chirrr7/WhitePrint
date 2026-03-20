@@ -7,6 +7,7 @@ const postsDirectory = path.join(process.cwd(), "posts")
 const visiblePostSlugs = new Set([
   "liquidity-squeeze-fed-march-2026",
   "fed-decision-week-three-things-to-watch",
+  "eog-resources-the-base-case-is-priced-in",
 ])
 
 export interface PostMeta {
