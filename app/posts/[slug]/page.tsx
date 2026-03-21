@@ -9,9 +9,15 @@ interface Props {
   params: Promise<{ slug: string }>
 }
 
+// Slugs with their own static page in app/posts/ are excluded here
+// to prevent a build conflict between the static and dynamic routes.
+const STATIC_ROUTE_SLUGS = ["eog-resources"]
+
 export async function generateStaticParams() {
   const posts = getAllPosts()
-  return posts.map((post) => ({ slug: post.slug }))
+  return posts
+    .filter((post) => !STATIC_ROUTE_SLUGS.includes(post.slug))
+    .map((post) => ({ slug: post.slug }))
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
