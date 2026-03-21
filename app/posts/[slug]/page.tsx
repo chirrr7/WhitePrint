@@ -8,11 +8,11 @@ import {
 } from "@/lib/post-meta"
 import {
   getAllPosts,
-  getPostBySlug,
+  getArticleBySlug,
   getPostMetaBySlug,
 } from "@/lib/posts"
-import { ArrowLeft } from "lucide-react"
-import { PostBody } from "@/components/post-body"
+import { ArticleProgressBar } from "./progress-bar"
+import s from "./article.module.css"
 
 interface Props {
   params: Promise<{ slug: string }>
@@ -56,55 +56,136 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function PostPage({ params }: Props) {
   const { slug } = await params
-  const post = await getPostBySlug(slug)
+  const post = await getArticleBySlug(slug)
   if (!post) notFound()
 
+  const categoryHref = getPostCategoryHref(post.category)
+  const categoryLabel = getPostCategoryLabel(post.category)
+
   return (
-    <article className="mx-auto max-w-5xl px-6 py-12">
-      <div className="max-w-3xl">
-        <Link
-          href={getPostCategoryHref(post.category)}
-          className="mb-8 inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
-        >
-          <ArrowLeft className="h-3.5 w-3.5" />
-          {getPostCategoryLabel(post.category)}
-        </Link>
+    <div className={s.wrapper}>
+      <ArticleProgressBar />
 
-        <header className="mb-10">
-          <div className="mb-4 flex items-center gap-3 text-xs text-muted-foreground">
-            <span className="uppercase tracking-widest font-medium">
-              {getPostCategoryLabel(post.category)}
+      {/* Hero */}
+      <div className={s.hero}>
+        <div className={s.heroInner}>
+          <div className={s.heroMeta}>
+            <Link href={categoryHref} className={s.categoryPill}>
+              {categoryLabel}
+            </Link>
+            <span className={s.heroDate}>
+              <time dateTime={post.date}>{formatPostDate(post.date)}</time>
             </span>
-            <span aria-hidden="true">/</span>
-            <time dateTime={post.date}>{formatPostDate(post.date)}</time>
-            <span aria-hidden="true">/</span>
-            <span>{post.readTime} min read</span>
+            <div className={s.heroRule} />
           </div>
-          <h1 className="font-serif text-3xl font-bold tracking-tight text-foreground text-balance md:text-4xl">
-            {post.title}
-          </h1>
-          <p className="mt-4 text-muted-foreground leading-relaxed">
-            {post.excerpt}
-          </p>
-          <div className="mt-4 flex items-center gap-2">
-            {post.tags.map((tag) => (
-              <Link
-                key={tag}
-                href={`/search?tag=${encodeURIComponent(tag)}`}
-                className="border border-border px-2 py-1 text-xs text-muted-foreground transition-colors hover:text-foreground"
-              >
-                #{tag}
-              </Link>
-            ))}
-          </div>
-        </header>
-      </div>
 
-      <div className="border-t border-border pt-10">
-        <div className="max-w-4xl">
-          <PostBody>{post.content}</PostBody>
+          <h1 className={s.title}>{post.title}</h1>
+
+          <p className={s.heroDeck}>{post.excerpt}</p>
+
+          {post.tags.length > 0 && (
+            <div className={s.tags}>
+              {post.tags.map((tag) => (
+                <Link
+                  key={tag}
+                  href={`/search?tag=${encodeURIComponent(tag)}`}
+                  className={s.tag}
+                >
+                  #{tag}
+                </Link>
+              ))}
+            </div>
+          )}
+
+          <div className={s.byline}>
+            <div className={s.bylineText}>
+              <div className={s.bylineName}>Whiteprint Research</div>
+              <div className={s.bylineSub}>Independent Analysis</div>
+            </div>
+            <div className={s.bylineStats}>
+              <div className={s.bylineStat}>
+                <span className={s.bylineStatVal}>{post.readTime}</span>
+                Min Read
+              </div>
+              <div className={s.bylineStat}>
+                <span className={s.bylineStatVal}>{post.tags.length}</span>
+                Tags
+              </div>
+            </div>
+          </div>
         </div>
       </div>
-    </article>
+
+      {/* Body layout */}
+      <div className={s.layout}>
+        {/* Main article */}
+        <div className={s.article}>
+          {post.content}
+        </div>
+
+        {/* Sidebar */}
+        <aside className={s.sidebar}>
+          {/* Article info card */}
+          <div className={s.sidebarCard}>
+            <div className={s.sidebarHead}>Article Info</div>
+            <div className={s.sidebarBody}>
+              <div className={s.kvRow}>
+                <span className={s.kvLabel}>Category</span>
+                <span className={s.kvValueMono}>{categoryLabel}</span>
+              </div>
+              <div className={s.kvRow}>
+                <span className={s.kvLabel}>Published</span>
+                <span className={s.kvValueMono}>{formatPostDate(post.date)}</span>
+              </div>
+              <div className={s.kvRow}>
+                <span className={s.kvLabel}>Read Time</span>
+                <span className={s.kvValue}>{post.readTime} min</span>
+              </div>
+            </div>
+            <div className={s.sidebarNote}>
+              All content is for informational purposes only and does not constitute investment advice.
+            </div>
+          </div>
+
+          {/* Tags card */}
+          {post.tags.length > 0 && (
+            <div className={s.sidebarCard}>
+              <div className={s.sidebarHead}>Topics</div>
+              <div className={s.tagCloud}>
+                {post.tags.map((tag) => (
+                  <Link
+                    key={tag}
+                    href={`/search?tag=${encodeURIComponent(tag)}`}
+                    className={s.sidebarTag}
+                  >
+                    {tag}
+                  </Link>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Back link */}
+          <div style={{ marginTop: 8 }}>
+            <Link
+              href={categoryHref}
+              style={{
+                fontFamily: '"JetBrains Mono", monospace',
+                fontSize: 9,
+                letterSpacing: "0.16em",
+                textTransform: "uppercase",
+                color: "#909090",
+                textDecoration: "none",
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 6,
+              }}
+            >
+              ← Back to {categoryLabel}
+            </Link>
+          </div>
+        </aside>
+      </div>
+    </div>
   )
 }

@@ -10,6 +10,8 @@ export interface PostMeta {
   tags: string[]
   excerpt: string
   readTime: number
+  eyebrow?: string
+  stance?: string
 }
 
 export function formatPostDate(date: string): string {

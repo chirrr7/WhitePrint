@@ -77,6 +77,18 @@ export function PostBody({ children }: { children: ReactNode }) {
   )
 }
 
+// Article body components — bare HTML elements, styled via article.module.css descendant selectors
+export const articleBodyComponents = {
+  a: MdxLink,
+  ResearchTable,
+  PullQuote,
+  StatGrid,
+  StatCard,
+  ScenarioGrid,
+  ScenarioCard,
+  DisclaimerBox,
+}
+
 export const postBodyComponents = {
   h1: (props: ComponentPropsWithoutRef<"h1">) => (
     <h1

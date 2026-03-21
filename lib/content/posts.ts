@@ -5,7 +5,7 @@ import matter from "gray-matter"
 import { compileMDX } from "next-mdx-remote/rsc"
 import remarkGfm from "remark-gfm"
 import { z } from "zod"
-import { postBodyComponents } from "@/components/post-body"
+import { articleBodyComponents, postBodyComponents } from "@/components/post-body"
 import { postCategories, type PostCategory, type PostMeta } from "@/lib/post-meta"
 
 const mdxPostsDirectory = path.join(process.cwd(), "content", "posts")
@@ -23,6 +23,9 @@ const postFrontmatterSchema = z.object({
   tags: z.array(z.string().trim().min(1)).default([]),
   excerpt: z.string().trim().min(1),
   readTime: z.number().int().positive().optional(),
+  // Optional editorial fields
+  eyebrow: z.string().trim().optional(),
+  stance: z.string().trim().optional(),
 })
 
 export interface Post extends PostMeta {
@@ -90,6 +93,8 @@ function buildPostMeta(source: PostSource): PostMeta {
     tags: parsed.data.tags,
     excerpt: parsed.data.excerpt,
     readTime: parsed.data.readTime ?? estimateReadTime(content),
+    eyebrow: parsed.data.eyebrow,
+    stance: parsed.data.stance,
   }
 }
 
@@ -190,4 +195,29 @@ export function getAllTags(): string[] {
 
 export function getPostsByTag(tag: string): PostMeta[] {
   return getAllPosts().filter((post) => post.tags.includes(tag))
+}
+
+// Compiles MDX using article-specific components (bare HTML — styled via article.module.css)
+export async function getArticleBySlug(slug: string): Promise<Post | null> {
+  const source = getPostSourceBySlug(slug)
+  if (!source) return null
+
+  const postMeta = buildPostMeta(source)
+  const raw = fs.readFileSync(source.fullPath, "utf8")
+  const { content } = matter(raw)
+
+  const compiled = await compileMDX({
+    source: content,
+    components: articleBodyComponents,
+    options: {
+      mdxOptions: {
+        remarkPlugins: [remarkGfm],
+      },
+    },
+  })
+
+  return {
+    ...postMeta,
+    content: compiled.content,
+  }
 }
