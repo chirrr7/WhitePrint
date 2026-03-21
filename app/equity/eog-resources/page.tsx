@@ -44,7 +44,7 @@ const styles = `
 .eog-wp .article li:last-child { border-bottom: none; }
 .eog-wp .article li strong { font-weight: 600; color: var(--ink); }
 .eog-wp .pull-quote { margin: 44px 0; padding: 28px 32px 28px 28px; background: var(--ink); color: #fff; position: relative; max-width: var(--max-content); }
-.eog-wp .pull-quote::before { content: '\201C'; font-family: var(--display); font-size: 96px; line-height: 0.65; position: absolute; top: 16px; left: 20px; color: var(--accent); opacity: 0.5; }
+.eog-wp .pull-quote::before { content: '\\201C'; font-family: var(--display); font-size: 96px; line-height: 0.65; position: absolute; top: 16px; left: 20px; color: var(--accent); opacity: 0.5; }
 .eog-wp .pull-quote p { font-family: var(--display) !important; font-size: 19px !important; font-style: italic !important; line-height: 1.5 !important; color: #fff !important; margin: 0 0 10px !important; padding-left: 36px; max-width: 100% !important; }
 .eog-wp .pull-quote p::first-letter { float: none !important; font-size: inherit !important; margin: 0 !important; color: inherit !important; }
 .eog-wp .pull-quote cite { display: block; font-family: var(--mono); font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; color: #c8a04a; padding-left: 36px; }
