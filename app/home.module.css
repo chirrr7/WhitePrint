@@ -1,0 +1,556 @@
+.wrapper {
+  --bg: #f7f6f3;
+  --surface: #fff;
+  --ink: #0a0a0a;
+  --ink-2: #1a1a1a;
+  --muted: #555;
+  --subtle: #8a8a8a;
+  --border: #dedad4;
+  --border-light: #eceae5;
+  --accent: #b83025;
+  --gold: #8a6e28;
+  --tag-bg: #edeae4;
+  --brief-bg: #0c0c0c;
+  --mono: "JetBrains Mono", monospace;
+  --serif: "Source Serif 4", Georgia, serif;
+  --display: "Playfair Display", Georgia, serif;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--serif);
+  font-size: 16px;
+  min-height: 100vh;
+}
+
+/* ── Masthead ── */
+.masthead {
+  background: var(--ink);
+  border-bottom: 2px solid var(--accent);
+  padding: 0 40px;
+}
+
+.mastheadInner {
+  justify-content: space-between;
+  align-items: center;
+  max-width: 1160px;
+  margin: 0 auto;
+  padding: 28px 0;
+  display: flex;
+}
+
+.mastheadWordmark {
+  font-family: var(--display);
+  font-size: clamp(28px, 4vw, 44px);
+  font-weight: 700;
+  color: #fff;
+  text-decoration: none;
+}
+
+.mastheadWordmark em {
+  color: var(--accent);
+  font-style: italic;
+}
+
+.mastheadTagline {
+  font-family: var(--mono);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.3);
+  font-size: 10px;
+  margin-top: 6px;
+}
+
+.mastheadRight {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+}
+
+.mastheadIssue {
+  font-family: var(--mono);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.18);
+  font-size: 10px;
+}
+
+/* ── Page wrap ── */
+.pageWrap {
+  max-width: 1160px;
+  margin: 0 auto;
+  padding: 0 40px;
+}
+
+/* ── Section label ── */
+.sectionLabel {
+  border-bottom: 1px solid var(--border);
+  align-items: center;
+  gap: 16px;
+  padding: 36px 0 0;
+  display: flex;
+}
+
+.sectionLabelText {
+  font-family: var(--mono);
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--subtle);
+  padding-bottom: 14px;
+  font-size: 9px;
+  font-weight: 500;
+}
+
+.sectionLabelRule {
+  background: var(--border-light);
+  flex: 1;
+  height: 1px;
+  margin-bottom: 14px;
+}
+
+.sectionLabelLink {
+  font-family: var(--mono);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--subtle);
+  padding-bottom: 14px;
+  font-size: 9px;
+  text-decoration: none;
+  transition: color 0.15s;
+}
+
+.sectionLabelLink:hover {
+  color: var(--ink);
+}
+
+/* ── Two-speed grid ── */
+.twoSpeed {
+  border: 1px solid var(--border);
+  background: var(--border);
+  border-top: none;
+  grid-template-columns: 1fr 320px;
+  gap: 1px;
+  margin-bottom: 52px;
+  display: grid;
+}
+
+/* ── Featured card ── */
+.featured {
+  background: var(--surface);
+  padding: 44px 52px 44px 44px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  position: relative;
+}
+
+.featured::before {
+  content: "";
+  background: var(--accent);
+  width: 3px;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+.kickerRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.kickerPill {
+  font-family: var(--mono);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  padding: 3px 8px;
+  font-size: 9px;
+  font-weight: 500;
+}
+
+.kickerDark {
+  background: var(--ink);
+  color: #fff;
+}
+
+.kickerDate {
+  font-family: var(--mono);
+  letter-spacing: 0.1em;
+  color: var(--subtle);
+  margin-left: auto;
+  font-size: 9px;
+}
+
+.featuredTitle {
+  font-family: var(--display);
+  letter-spacing: -0.03em;
+  color: var(--ink);
+  font-size: clamp(24px, 2.8vw, 38px);
+  font-weight: 700;
+  line-height: 1.08;
+  text-decoration: none;
+}
+
+.featuredTitle:hover {
+  color: var(--accent);
+}
+
+.featuredTitle em {
+  color: var(--accent);
+  font-style: italic;
+}
+
+.featuredDeck {
+  font-family: var(--serif);
+  color: var(--muted);
+  border-left: 2px solid var(--border-light);
+  max-width: 520px;
+  padding-left: 18px;
+  font-size: 15px;
+  font-style: italic;
+  font-weight: 300;
+  line-height: 1.72;
+}
+
+.featuredStats {
+  border: 1px solid var(--border-light);
+  align-self: flex-start;
+  display: flex;
+}
+
+.featuredStat {
+  border-right: 1px solid var(--border-light);
+  flex-direction: column;
+  gap: 2px;
+  padding: 9px 18px;
+  display: flex;
+}
+
+.featuredStat:last-child {
+  border-right: none;
+}
+
+.featuredStatVal {
+  font-family: var(--display);
+  color: var(--ink);
+  font-size: 17px;
+  font-weight: 700;
+}
+
+.featuredStatLabel {
+  font-family: var(--mono);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--subtle);
+  font-size: 8px;
+}
+
+.featuredCta {
+  font-family: var(--mono);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  background: var(--ink);
+  color: #fff;
+  padding: 12px 24px;
+  font-size: 9px;
+  font-weight: 500;
+  text-decoration: none;
+  align-self: flex-start;
+  transition: background 0.15s;
+}
+
+.featuredCta:hover {
+  background: var(--accent);
+}
+
+/* ── Desk Brief panel ── */
+.deskBrief {
+  background: var(--brief-bg);
+  display: flex;
+  flex-direction: column;
+}
+
+.briefHead {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  padding: 18px 22px 14px;
+  display: flex;
+}
+
+.briefHeadTitle {
+  font-family: var(--mono);
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.28);
+  font-size: 8px;
+  font-weight: 500;
+}
+
+.briefItem {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  padding: 20px 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  text-decoration: none;
+}
+
+.briefItem:hover {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.briefItemTop {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.briefItemLabel {
+  font-family: var(--mono);
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--accent);
+  font-size: 8px;
+  font-weight: 500;
+}
+
+.briefItemSep {
+  background: rgba(255, 255, 255, 0.09);
+  width: 1px;
+  height: 9px;
+}
+
+.badgeHold {
+  color: #b89840;
+  background: rgba(138, 110, 40, 0.22);
+  font-family: var(--mono);
+  font-size: 7px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  padding: 2px 6px;
+  font-weight: 500;
+}
+
+.badgeCaution {
+  color: #d06858;
+  background: rgba(184, 48, 37, 0.22);
+  font-family: var(--mono);
+  font-size: 7px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  padding: 2px 6px;
+  font-weight: 500;
+}
+
+.briefItemBody {
+  font-family: var(--serif);
+  color: rgba(255, 255, 255, 0.48);
+  font-size: 12.5px;
+  line-height: 1.65;
+}
+
+.briefItemLink {
+  font-family: var(--mono);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.2);
+  font-size: 8px;
+}
+
+/* ── Research cards ── */
+.rCard {
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  padding: 32px 36px 28px;
+}
+
+.rCardInner {
+  align-items: flex-start;
+  gap: 40px;
+  display: flex;
+}
+
+.rCardLeft {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.rCardRight {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 12px;
+  padding-top: 4px;
+}
+
+.rCardMeta {
+  font-family: var(--mono);
+  letter-spacing: 0.1em;
+  color: var(--subtle);
+  text-transform: uppercase;
+  font-size: 9px;
+}
+
+.rCardTitle {
+  font-family: var(--display);
+  letter-spacing: -0.02em;
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1.18;
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.rCardTitle:hover {
+  color: var(--accent);
+}
+
+.rCardDeck {
+  font-family: var(--serif);
+  color: var(--muted);
+  font-size: 13.5px;
+  line-height: 1.7;
+}
+
+.rCardCta {
+  font-family: var(--mono);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+  border-bottom: 1px solid var(--border);
+  font-size: 9px;
+  text-decoration: none;
+  padding-bottom: 2px;
+  white-space: nowrap;
+  transition: color 0.15s, border-color 0.15s;
+}
+
+.rCardCta:hover {
+  color: var(--ink);
+  border-color: var(--ink);
+}
+
+/* ── Market Note cards ── */
+.nCard {
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  padding: 28px 36px 24px;
+}
+
+.nCardInner {
+  align-items: flex-start;
+  gap: 32px;
+  display: flex;
+}
+
+.nCardLeft {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.nCardRight {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 10px;
+  padding-top: 2px;
+}
+
+.nPillRed {
+  font-family: var(--mono);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  background: var(--accent);
+  color: #fff;
+  padding: 3px 8px;
+  font-size: 8px;
+  font-weight: 500;
+  align-self: flex-start;
+}
+
+.nCardTitle {
+  font-family: var(--display);
+  letter-spacing: -0.015em;
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1.22;
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.nCardTitle:hover {
+  color: var(--accent);
+}
+
+.nCardDeck {
+  font-family: var(--serif);
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.65;
+}
+
+.nCardMeta {
+  font-family: var(--mono);
+  letter-spacing: 0.1em;
+  color: var(--subtle);
+  text-transform: uppercase;
+  font-size: 9px;
+}
+
+.notesBar {
+  border-top: 1px solid var(--border-light);
+  justify-content: space-between;
+  align-items: center;
+  padding: 13px 36px;
+  display: flex;
+}
+
+.nCardCta {
+  font-family: var(--mono);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+  border-bottom: 1px solid var(--border);
+  font-size: 9px;
+  text-decoration: none;
+  padding-bottom: 2px;
+  white-space: nowrap;
+  transition: color 0.15s, border-color 0.15s;
+}
+
+.nCardCta:hover {
+  color: var(--ink);
+  border-color: var(--ink);
+}
+
+/* ── Responsive ── */
+@media (max-width: 960px) {
+  .twoSpeed {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 680px) {
+  .pageWrap {
+    padding: 0 20px;
+  }
+  .masthead {
+    padding: 0 20px;
+  }
+  .featured {
+    padding: 28px 22px;
+  }
+  .mastheadRight {
+    display: none;
+  }
+  .rCardInner,
+  .nCardInner {
+    flex-direction: column;
+    gap: 16px;
+  }
+}
