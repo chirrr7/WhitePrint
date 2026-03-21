@@ -7,6 +7,7 @@ import {
   getPostCategoryLabel,
 } from "@/lib/post-meta"
 import {
+  getAllPosts,
   getPostBySlug,
   getPostMetaBySlug,
 } from "@/lib/posts"
@@ -15,6 +16,19 @@ import { PostBody } from "@/components/post-body"
 
 interface Props {
   params: Promise<{ slug: string }>
+}
+
+const bespokePostSlugs = new Set([
+  "fed-decision-week-three-things-to-watch",
+  "liquidity-squeeze-fed-march-2026",
+])
+
+export const dynamicParams = false
+
+export function generateStaticParams() {
+  return getAllPosts()
+    .filter((post) => !bespokePostSlugs.has(post.slug))
+    .map((post) => ({ slug: post.slug }))
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {

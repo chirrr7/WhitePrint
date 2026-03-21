@@ -58,47 +58,55 @@ export function ResearchTable({
   rows,
   caption,
   notes,
+  children,
 }: {
-  headers: ReactNode[]
-  rows: ReactNode[][]
+  headers?: ReactNode[]
+  rows?: ReactNode[][]
   caption?: ReactNode
   notes?: ReactNode
+  children?: ReactNode
 }) {
+  const hasStructuredData = Array.isArray(headers) && Array.isArray(rows)
+
   return (
     <div className="my-10">
-      <div className="overflow-x-auto border border-border">
-        <table className="w-full min-w-[640px] border-collapse text-sm">
-          <thead className="bg-foreground text-background">
-            <tr>
-              {headers.map((header, index) => (
-                <th
-                  key={`header-${index}`}
-                  className="px-4 py-3 text-left font-mono text-[11px] font-medium uppercase tracking-[0.18em]"
-                >
-                  {header}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {rows.map((row, rowIndex) => (
-              <tr
-                key={`row-${rowIndex}`}
-                className="border-b border-border even:bg-muted/25 last:border-b-0"
-              >
-                {row.map((cell, cellIndex) => (
-                  <td
-                    key={`cell-${rowIndex}-${cellIndex}`}
-                    className="px-4 py-3 align-top text-sm leading-6 text-foreground"
+      {hasStructuredData ? (
+        <div className="overflow-x-auto border border-border">
+          <table className="w-full min-w-[640px] border-collapse text-sm">
+            <thead className="bg-foreground text-background">
+              <tr>
+                {headers.map((header, index) => (
+                  <th
+                    key={`header-${index}`}
+                    className="px-4 py-3 text-left font-mono text-[11px] font-medium uppercase tracking-[0.18em]"
                   >
-                    {cell}
-                  </td>
+                    {header}
+                  </th>
                 ))}
               </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+            </thead>
+            <tbody>
+              {rows.map((row, rowIndex) => (
+                <tr
+                  key={`row-${rowIndex}`}
+                  className="border-b border-border even:bg-muted/25 last:border-b-0"
+                >
+                  {row.map((cell, cellIndex) => (
+                    <td
+                      key={`cell-${rowIndex}-${cellIndex}`}
+                      className="px-4 py-3 align-top text-sm leading-6 text-foreground"
+                    >
+                      {cell}
+                    </td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      ) : (
+        children
+      )}
       {caption ? (
         <p className="mt-3 text-sm leading-6 text-muted-foreground">{caption}</p>
       ) : null}
@@ -135,69 +143,104 @@ export function PullQuote({
   )
 }
 
-export function StatGrid({ items }: { items: StatGridItem[] }) {
+export function StatCard({
+  label,
+  value,
+  detail,
+  tone = "neutral",
+}: StatGridItem) {
   return (
-    <div className="my-10 grid gap-px overflow-hidden border border-border bg-border sm:grid-cols-2 xl:grid-cols-4">
-      {items.map((item, index) => (
-        <div key={`stat-${index}`} className="bg-background p-4">
-          <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
-            {item.label}
-          </div>
-          <div
-            className={cn(
-              "mt-2 font-serif text-3xl font-semibold tracking-tight",
-              statToneClasses[item.tone ?? "neutral"],
-            )}
-          >
-            {item.value}
-          </div>
-          {item.detail ? (
-            <div className="mt-2 font-mono text-[11px] text-muted-foreground">
-              {item.detail}
-            </div>
-          ) : null}
+    <div className="bg-background p-4">
+      <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+        {label}
+      </div>
+      <div
+        className={cn(
+          "mt-2 font-serif text-3xl font-semibold tracking-tight",
+          statToneClasses[tone],
+        )}
+      >
+        {value}
+      </div>
+      {detail ? (
+        <div className="mt-2 font-mono text-[11px] text-muted-foreground">
+          {detail}
         </div>
-      ))}
+      ) : null}
     </div>
   )
 }
 
-export function ScenarioGrid({ items }: { items: ScenarioCardItem[] }) {
+export function StatGrid({
+  items,
+  children,
+}: {
+  items?: StatGridItem[]
+  children?: ReactNode
+}) {
+  return (
+    <div className="my-10 grid gap-px overflow-hidden border border-border bg-border sm:grid-cols-2 xl:grid-cols-4">
+      {Array.isArray(items)
+        ? items.map((item, index) => <StatCard key={`stat-${index}`} {...item} />)
+        : children}
+    </div>
+  )
+}
+
+export function ScenarioCard({
+  name,
+  probability,
+  title,
+  summary,
+  outcome,
+  tone = "neutral",
+}: ScenarioCardItem) {
+  return (
+    <div
+      className={cn(
+        "border border-border border-l-4 bg-background p-5",
+        scenarioToneClasses[tone],
+      )}
+    >
+      <div className="flex items-baseline justify-between gap-3">
+        <div className="font-mono text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
+          {name}
+        </div>
+        {probability ? (
+          <div className="font-serif text-lg font-semibold italic text-foreground">
+            {probability}
+          </div>
+        ) : null}
+      </div>
+      {title ? (
+        <div className="mt-3 font-serif text-lg font-semibold tracking-tight text-foreground">
+          {title}
+        </div>
+      ) : null}
+      <div className="mt-2 text-sm leading-6 text-muted-foreground">
+        {summary}
+      </div>
+      {outcome ? (
+        <div className="mt-4 border-t border-border pt-3 font-mono text-[11px] uppercase tracking-[0.12em] text-foreground">
+          {outcome}
+        </div>
+      ) : null}
+    </div>
+  )
+}
+
+export function ScenarioGrid({
+  items,
+  children,
+}: {
+  items?: ScenarioCardItem[]
+  children?: ReactNode
+}) {
   return (
     <div className="my-10 grid gap-4 md:grid-cols-2">
-      {items.map((item, index) => (
-        <div
-          key={`scenario-${index}`}
-          className={cn(
-            "border border-border border-l-4 bg-background p-5",
-            scenarioToneClasses[item.tone ?? "neutral"],
-          )}
-        >
-          <div className="flex items-baseline justify-between gap-3">
-            <div className="font-mono text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
-              {item.name}
-            </div>
-            {item.probability ? (
-              <div className="font-serif text-lg font-semibold italic text-foreground">
-                {item.probability}
-              </div>
-            ) : null}
-          </div>
-          {item.title ? (
-            <div className="mt-3 font-serif text-lg font-semibold tracking-tight text-foreground">
-              {item.title}
-            </div>
-          ) : null}
-          <div className="mt-2 text-sm leading-6 text-muted-foreground">
-            {item.summary}
-          </div>
-          {item.outcome ? (
-            <div className="mt-4 border-t border-border pt-3 font-mono text-[11px] uppercase tracking-[0.12em] text-foreground">
-              {item.outcome}
-            </div>
-          ) : null}
-        </div>
-      ))}
+      {Array.isArray(items)
+        ? items.map((item, index) => <ScenarioCard key={`scenario-${index}`} {...item} />)
+        : children}
     </div>
   )
 }

@@ -4,7 +4,9 @@ import {
   DisclaimerBox,
   PullQuote,
   ResearchTable,
+  ScenarioCard,
   ScenarioGrid,
+  StatCard,
   StatGrid,
 } from "@/components/research-blocks"
 import { cn } from "@/lib/utils"
@@ -156,6 +158,8 @@ export const postBodyComponents = {
   ResearchTable,
   PullQuote,
   StatGrid,
+  StatCard,
   ScenarioGrid,
+  ScenarioCard,
   DisclaimerBox,
 }

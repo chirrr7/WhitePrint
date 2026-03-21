@@ -26,12 +26,15 @@ readTime: 6
 
 ## Example Components
 
-<StatGrid
-  items={[
-    { label: "Current Price", value: "~$140", detail: "Illustrative only" },
-    { label: "Base Case", value: "$152.73", detail: "+9.0% upside", tone: "positive" },
-  ]}
-/>
+<StatGrid>
+  <StatCard label="Current Price" value="~$140" detail="Illustrative only" />
+  <StatCard
+    label="Base Case"
+    value="$152.73"
+    detail="+9.0% upside"
+    tone="positive"
+  />
+</StatGrid>
 
 <DisclaimerBox title="Research note" tone="warning">
   Use this for caveats, methodology notes, or lightweight disclaimers.
@@ -41,4 +44,32 @@ readTime: 6
   quote="A concise takeaway that deserves visual emphasis."
   attribution="Whiteprint Research"
 />
+
+<ScenarioGrid>
+  <ScenarioCard
+    name="Base case"
+    probability="50%"
+    title="Orderly slowdown"
+    summary="Short scenario summary."
+    outcome="Target $152 | Upside +9.0%"
+    tone="base"
+  />
+</ScenarioGrid>
+
+<ResearchTable caption="Optional caption or source note.">
+  <table>
+    <thead>
+      <tr>
+        <th>Metric</th>
+        <th>Value</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Revenue</td>
+        <td>$22.2B</td>
+      </tr>
+    </tbody>
+  </table>
+</ResearchTable>
 ```
