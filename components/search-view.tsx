@@ -4,29 +4,8 @@ import { useSearchParams, useRouter } from "next/navigation"
 import { useState, useEffect, useCallback, Suspense } from "react"
 import { Search } from "lucide-react"
 import Link from "next/link"
-import type { PostMeta } from "@/lib/posts"
-
-function formatDate(dateStr: string) {
-  const date = new Date(dateStr + "T00:00:00")
-  return date.toLocaleDateString("en-US", {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  })
-}
-
-function categoryLabel(category: string) {
-  switch (category) {
-    case "macro":
-      return "Macro"
-    case "equity":
-      return "Equity Research"
-    case "market-notes":
-      return "Market Notes"
-    default:
-      return category
-  }
-}
+import type { PostMeta } from "@/lib/post-meta"
+import { formatPostDate, getPostCategoryLabel } from "@/lib/post-meta"
 
 function SearchContent() {
   const searchParams = useSearchParams()
@@ -101,10 +80,10 @@ function SearchContent() {
             <article key={post.slug} className="py-6">
               <div className="flex items-center gap-3 text-xs text-muted-foreground mb-2">
                 <span className="uppercase tracking-widest font-medium">
-                  {categoryLabel(post.category)}
+                  {getPostCategoryLabel(post.category)}
                 </span>
                 <span aria-hidden="true">{'/'}</span>
-                <time dateTime={post.date}>{formatDate(post.date)}</time>
+                <time dateTime={post.date}>{formatPostDate(post.date)}</time>
               </div>
               <Link href={`/posts/${post.slug}`}>
                 <h3 className="font-serif text-xl font-semibold tracking-tight text-foreground hover:text-muted-foreground transition-colors">

@@ -1,5 +1,5 @@
 import { PostCard } from "@/components/post-card"
-import type { PostMeta } from "@/lib/posts"
+import type { PostMeta } from "@/lib/post-meta"
 
 interface CategoryPageProps {
   title: string

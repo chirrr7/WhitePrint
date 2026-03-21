@@ -1,0 +1,241 @@
+---
+title: "EOG Resources: The Base Case Is Priced In"
+date: "2026-03-18"
+category: "equity"
+tags: ["equity", "e-and-p", "oil", "dcf", "energy", "eog"]
+excerpt: "At ~$140, the market appears to be pricing EOG's base case. The key driver from here is scenario weighting around the conflict-up oil path."
+readTime: 20
+---
+
+## The Setup
+
+EOG Resources trades at approximately $140. Our base-case DCF -- WTI at $90 declining to $80 by 2030, WACC 8.95%, and 2% terminal growth -- implies $152.73. That is 9% upside. The probability-weighted price across all four scenarios is $146.85, or 4.8% above the current quote. On a pure base-case framing, this stock is not cheap. The market has already done most of the work pricing a constructive oil environment.
+
+What makes the setup interesting rather than simply "fairly valued" is the macro context. On the day this note was finalized, Brent crude briefly touched $119 before partially reversing on reports that Israel is helping to reopen the Strait of Hormuz. Oil has traded above $107 following Iran's threats to energy facilities in Saudi Arabia, the UAE, and Qatar. That is not a base-case environment. That is the conflict-up scenario playing out in real time. At $172.82, the conflict-up DCF implies 23% upside from current levels, and the live macro backdrop raises a legitimate question about whether the current 15% probability weight on that scenario still reflects the actual distribution of outcomes.
+
+The company itself is not the issue. EOG is doing exactly what a disciplined E&P should: generating $6.1 billion of free cash flow in the base case on a $6.5 billion capital program, returning 100% of free cash flow to shareholders, and maintaining a $50 WTI breakeven that covers the dividend even in a severe downturn. The operational story is clean. The valuation story is that most of it is already priced at $140, and the stock now needs either the conflict to stay elevated or execution to come in ahead of expectations to generate material upside from here.
+
+<StatGrid
+  items={[
+    {
+      label: "Current Price",
+      value: "~$140",
+      detail: "NYSE: EOG, March 18, 2026",
+    },
+    {
+      label: "Base DCF",
+      value: "$152.73",
+      detail: "+9.0% upside | WTI $90 -> $80",
+      tone: "positive",
+    },
+    {
+      label: "Prob-Weighted",
+      value: "$146.85",
+      detail: "+4.8% upside | four-scenario blend",
+      tone: "positive",
+    },
+    {
+      label: "Conflict-Up DCF",
+      value: "$172.82",
+      detail: "+23.3% upside | WTI $95 -> $85",
+      tone: "warning",
+    },
+  ]}
+/>
+
+<DisclaimerBox title="Analytical disclaimer">
+  All implied prices are outputs from an internal DCF model and are for analytical discussion only. They do not constitute investment recommendations. Valuation is materially sensitive to commodity price assumptions and model inputs.
+</DisclaimerBox>
+
+## What the Model Is Actually Saying
+
+### Four Scenarios, One Dominant Variable
+
+The model runs four scenarios differentiated primarily by the WTI price path. Gas assumptions also differ, with the conflict-up and bull cases including a mild uplift in Henry Hub from LNG re-routing and energy security flows. Oil dominates the output. EOG's own disclosed sensitivity of $223 million pretax per $1 per barrel of crude is the clearest way to understand why: run $5 above base-case oil for a year and you add over $1 billion of pretax operating cash. Capitalize that across a seven-year explicit DCF period plus terminal value, and the share-price impact is not trivial.
+
+<DisclaimerBox title="Model note | OCF sensitivity" tone="warning">
+  EOG's 2026 plan disclosure implies $223 million of pretax operating cash flow per $1 per barrel of crude, including associated NGL price changes and derivative impacts, plus $83 million pretax per $0.10 per Mcf of gas. The conflict-up scenario runs WTI at $95 in 2026 versus $90 in the base. That $5 differential alone adds roughly $1.1 billion of pretax operating cash in year one before gas uplift.
+</DisclaimerBox>
+
+### The FCF Build by Year
+
+The table below shows the full seven-year unlevered FCF projection for each scenario, exactly as it runs through the DCF engine. Bear-case FCF recovers gradually as the oil path in that scenario lifts from $55 in 2026 to $62 by 2030. The company does not go into distress, but free cash generation is severely compressed in the near term. The three upper scenarios are more tightly clustered than their price paths might suggest, because higher oil drives both higher revenue and higher production taxes.
+
+<ResearchTable
+  headers={["Scenario", "2026E", "2027E", "2028E", "2029E", "2030E", "2031E", "2032E"]}
+  rows={[
+    ["Bear | $55 WTI", "$1.57", "$1.62", "$2.20", "$2.67", "$3.06", "$3.13", "$3.20"],
+    ["Base | $90 WTI", "$6.10", "$6.19", "$6.25", "$6.30", "$6.16", "$6.32", "$6.44"],
+    ["Conflict-Up | $95 WTI", "$6.97", "$7.14", "$7.30", "$7.19", "$6.88", "$7.05", "$7.19"],
+    ["Bull | $100 WTI", "$7.71", "$7.92", "$8.11", "$8.00", "$7.82", "$8.02", "$8.18"],
+  ]}
+  caption="All figures in billions of dollars. The conflict-up FCF path sits roughly 14% above base throughout the projection period."
+/>
+
+All figures are in billions of dollars. The conflict-up FCF path is roughly 14% above base throughout the projection period -- meaningful, but not dramatic. The leverage in the DCF is not just in annual FCF but in the terminal value, which is capitalized at WACC minus growth. A scenario that sustains higher FCF into the terminal year produces a disproportionately larger implied price.
+
+## Scenario Analysis
+
+<ScenarioGrid
+  items={[
+    {
+      name: "Base case",
+      probability: "45%",
+      title: "$90 -> $80 WTI | Controlled easing",
+      summary:
+        "Geopolitical risk premium supports near-term pricing. $80 mid-cycle reflects Saudi fiscal breakeven and long-run marginal cost of supply. Gas stays near the EIA STEO strip at $2.60 per Mcf. 2026E EBITDA is $15.6 billion and FCF is $6.1 billion.",
+      outcome: "DCF $152.73 | EV/EBITDA $150.79 | Upside +9.0%",
+      tone: "base",
+    },
+    {
+      name: "Conflict-up",
+      probability: "15%",
+      title: "$95 -> $85 WTI | Sustained disruption",
+      summary:
+        "Prolonged Gulf supply disruption holds WTI elevated through 2026 and 2027. Gas lifts to $3.00 per Mcf on LNG re-routing and energy-security flows. 2026E EBITDA is $17.0 billion and FCF is $7.0 billion.",
+      outcome: "DCF $172.82 | EV/EBITDA $165.10 | Upside +23.3%",
+      tone: "conflict",
+    },
+    {
+      name: "Bull case",
+      probability: "20%",
+      title: "$100 -> $90 WTI | OPEC+ discipline",
+      summary:
+        "Deeper OPEC+ cuts combine with strong demand and an LNG export boom. Gas reaches $3.20 per Mcf. 2026E EBITDA is $18.3 billion and FCF is $7.7 billion. This requires sustained supply discipline beyond what markets currently price as durable.",
+      outcome: "DCF $196.42 | EV/EBITDA $177.69 | Upside +40.1%",
+      tone: "bull",
+    },
+    {
+      name: "Bear case",
+      probability: "20%",
+      title: "$55 -> $62 WTI | Macro demand shock",
+      summary:
+        "A U.S. recession or sharp global demand contraction breaks WTI to $55. FCF collapses to $1.6 billion. EOG's $50 breakeven still covers the regular dividend, but buybacks stop. Gas falls to $2.20 per Mcf. 2026E EBITDA is $7.8 billion.",
+      outcome: "DCF $64.58 | EV/EBITDA $71.33 | Downside -53.9%",
+      tone: "bear",
+    },
+  ]}
+/>
+
+## Triangulation
+
+DCF and EV/EBITDA are within a few dollars of each other across all four scenarios, which is reassuring. It means the model is not leaning on heroic terminal-value assumptions to generate the implied prices. The base-case TV-to-EV ratio is 62.3%, slightly above the 60% target but acceptable for an E&P with a multi-decade reserve life. FCF yield on EV at base is 7.0%, in line with large-cap E&P peers that maintain high capital-return discipline.
+
+<ResearchTable
+  headers={["Scenario", "WTI 2026E", "DCF Implied", "EV/EBITDA (5.5x)", "Upside / (Down)", "Prob. Weight"]}
+  rows={[
+    ["Bear", "$55", "$64.58", "$71.33", "-53.9%", "20%"],
+    ["Base", "$90", "$152.73", "$150.79", "+9.0%", "45%"],
+    ["Conflict-Up", "$95", "$172.82", "$165.10", "+23.3%", "15%"],
+    ["Bull", "$100", "$196.42", "$177.69", "+40.1%", "20%"],
+    ["Prob-Weighted", "--", "$146.85", "--", "+4.8%", "100%"],
+  ]}
+  caption="DCF and EV/EBITDA outputs remain tightly grouped across scenarios, which makes the valuation framework more credible."
+/>
+
+<PullQuote
+  quote="The base case is priced in. The real question is whether the conflict-up weight of 15% should be closer to 30% given current energy-market conditions."
+  attribution="Whiteprint Research | March 2026"
+/>
+
+## Sensitivity: WTI vs. WACC
+
+The matrix below shows implied DCF price at different WTI assumptions and WACC levels. The model runs WACC at 8.95%, which sits between the 8.5% and 9.0% columns. At the base WTI of $90, implied prices range from $170 at 8.5% WACC to $146 at 9.5%, a $24 spread that illustrates the WACC sensitivity. The more important observation is the oil sensitivity: moving from $90 to $95, the conflict-up oil path, adds roughly $20 to $23 to the implied price at any WACC.
+
+<ResearchTable
+  headers={["WTI $/bbl", "WACC 7.5%", "WACC 8.0%", "WACC 8.5%", "WACC 9.0%", "WACC 9.5%"]}
+  rows={[
+    ["$55 | Bear", "$73", "$66", "$61", "$56", "$51"],
+    ["$70", "$142", "$130", "$119", "$110", "$102"],
+    ["$80", "$188", "$172", "$158", "$146", "$136"],
+    ["$90 | Base", "$234", "$214", "$197", "$183", "$170"],
+    ["$95 | Conflict-Up", "$257", "$235", "$217", "$201", "$187"],
+    ["$100 | Bull", "$280", "$256", "$236", "$219", "$204"],
+  ]}
+  caption="The matrix is a directional overlay against the base operating model, so use the move between cells as the signal rather than the absolute level."
+/>
+
+Note that the sensitivity matrix uses a simplified overlay against the base operating model FCF path, which produces higher absolute numbers than the full DCF. The scenario-specific DCF prices in the previous table -- $152.73 for base and $172.82 for conflict-up -- are the more reliable outputs because they run through the full operating model. Use the matrix for directional sensitivity, not absolute price targets.
+
+## The Conflict Overlay Changes the Probability Weight, Not the Model
+
+The four scenarios and their DCF outputs are fixed. What the Gulf conflict changes is the probability weight, and that is a judgment call rather than a model output. At the current 15% weight on conflict-up, the scenario contributes about $26 to the probability-weighted price of $146.85. Raising that weight to 30% and reducing base from 45% to 30% moves the probability-weighted price to roughly $155, or about $8 higher and meaningfully above the current market price.
+
+Whether that reweighting is warranted depends on how the supply picture develops. Brent touching $119 intraday while Iran threatens Saudi and UAE infrastructure represents an elevated conflict tail, but the same session also saw a partial reversal following reports of diplomatic movement. The market's behavior -- sharp spikes followed by partial reversals without a clean directional trend -- is consistent with elevated uncertainty being priced rather than confirmed structural supply impairment. That supports keeping a high conflict-up weight without treating it as the modal scenario until disruption is demonstrated on a sustained basis.
+
+## The Company: What Has Not Changed
+
+### 2025 Actuals and 2026 Plan
+
+EOG reported $10 billion of net cash from operating activities for full-year 2025, around $4.7 billion of free cash flow, and returned 100% of that free cash flow to shareholders through dividends and buybacks. The 2026 plan calls for $6.5 billion of total capital at midpoint, completion of 585 net wells, oil-volume growth of approximately 5%, and total-production growth of roughly 13%, including the full-year contribution from Encino. The regular quarterly dividend is $1.02 per share, or $4.08 annualized, and $3.3 billion remains on the buyback authorization.
+
+### Why the $50 Breakeven Matters Right Now
+
+In a week where oil swung from $90 to $119 and back toward $107, EOG's downside-protection argument does not depend on oil staying elevated. The company discloses a $50 WTI breakeven that covers the capital program and the regular dividend. In the bear case at $55 oil, the DCF implies $64.58, a 54% drawdown from current price that is severe, but the company is not impaired at the balance-sheet level. The asymmetry is that significant downside sits in the stock, not in the enterprise, and it is a function of multiple compression that would accompany a demand shock rather than operational distress.
+
+### Gas Is Now a Bigger Part of the Story
+
+Post-Encino, EOG's total 2026E production is 1,397 MBoed, with gas at approximately 3,085 Mbcfd. Gas revenue in the base case is $2.28 billion for 2026E, not dominant relative to oil's $17.5 billion, but still large enough that the Henry Hub path matters at the margin. In the conflict-up scenario, gas is assumed at $3.00 per Mcf versus $2.60 in the base on the rationale that LNG re-routing and energy-security demand add a mild premium. That $0.40 per Mcf uplift is worth roughly $332 million pretax on an annualized basis at current volumes using EOG's disclosed $83 million per $0.10 per Mcf sensitivity. It is a supporting contributor to the conflict-up FCF uplift, not the primary driver.
+
+## Model Parameters
+
+<ResearchTable
+  headers={["Parameter", "Value", "Context"]}
+  rows={[
+    ["WACC", "8.95%", "Discount rate used across the full DCF"],
+    ["Terminal growth", "2.0%", "Long-run growth assumption in terminal value"],
+    ["TV / EV (base)", "62.3%", "Slightly above the 60% target, but still acceptable"],
+    ["FCF yield on EV", "7.0%", "Helpful cross-check against peers"],
+    ["EV (base)", "$87.0B", "Enterprise value implied by the base scenario"],
+    ["Net debt", "$4.54B", "Model uses net debt rather than gross debt"],
+    ["Shares outstanding", "540M", "Used for per-share conversion"],
+  ]}
+  caption="Assumptions reflect the internal March 2026 Whiteprint model."
+  notes="Mid-year discounting | beta 0.90 | ERP 5.5% | risk-free rate 4.5%"
+/>
+
+## 2026E Operating Snapshot
+
+<StatGrid
+  items={[
+    { label: "Total Production", value: "1,397 MBoed", detail: "Includes full-year Encino contribution" },
+    { label: "Total Revenue", value: "$22.2B", detail: "Base-case 2026 estimate" },
+    { label: "EBITDA Margin", value: "70.5%", detail: "Base-case operating model" },
+    { label: "WTI Breakeven", value: "$50/bbl", detail: "Covers capital plan and regular dividend", tone: "positive" },
+  ]}
+/>
+
+<ResearchTable
+  headers={["Sensitivity reference", "Value", "Why it matters"]}
+  rows={[
+    ["OCF impact per $1/bbl WTI", "$223M pretax", "Shows how quickly modest oil moves feed into equity value"],
+    ["After-tax impact", "~$170M", "Approximate after-tax contribution at a 24% rate"],
+    ["Gas impact per $0.10/Mcf", "$83M pretax", "Makes gas a meaningful supporting driver"],
+    ["Conflict-up premium vs. base", "+$5/bbl", "Adds roughly $1.1B pretax OCF in 2026E"],
+  ]}
+  caption="Sensitivity references are drawn from EOG's disclosed 2026 planning assumptions."
+/>
+
+## Risks
+
+- **Oil reverts to strip.** If the Gulf situation de-escalates and WTI falls back toward $68 to $70, the base case compresses materially. The sensitivity matrix shows $130 to $146 at $80 WTI depending on WACC, which is around current market price with limited upside at those levels.
+- **Asymmetric bear downside.** The bear case at $64.58 is a 54% drawdown. At sustained $55 WTI, the multiple would compress aggressively even though the company's balance sheet and dividend are structurally protected. The downside is in the stock, not in the business.
+- **Scenario-weight misjudgment.** The probability-weighted price only stays above market if the weights are calibrated correctly. At 45% base and 20% bear, the weighted price is $146.85. Shifting the bear weight to 30% drops the weighted price below the current market price.
+- **Capital returns are discretionary.** The 100% FCF return policy depends on cash availability. In the bear case, buybacks stop. The regular dividend is more durable given the $50 breakeven, but it is not contractually guaranteed.
+- **Execution risk on 585 wells.** The 2026 capital plan is not small. A miss on volume or well cost, even in a supportive oil environment, would compress the multiple. Management's track record is strong, but it is not guaranteed.
+
+## Conclusion
+
+EOG is a high-quality E&P operator that has delivered on its stated plan. The valuation reflects that. At $140, the base-case DCF of $152.73 offers 9% upside, which is enough to maintain a position but not enough to add aggressively unless the oil path improves. The probability-weighted price of $146.85 is only modestly above the current quote, which means the market is not obviously mispricing this name on a balanced probability view.
+
+The scenario that changes that conclusion is conflict-up. At $172.82 with a WTI path of $95 fading to $85 and 23% upside, there is a reasonable analytical case for a higher weight on this scenario given the current Gulf backdrop. Raising the conflict-up weight from 15% to 30% moves the probability-weighted price toward $155, which begins to look more compelling against current levels.
+
+This is not an undiscovered value situation. The stock needs the oil macro to cooperate, and it is trading as if it will. What EOG provides is a best-in-class operator through which to express that oil view, with $50 WTI downside protection and a management team that has demonstrated consistent capital discipline.
+
+## Sources
+
+1. EOG Resources. (2026, February 24). *Full-Year 2025 Earnings Release, Supplemental Data, and 2026 Capital Plan.*
+2. EOG Resources. (2026). *Commodity Price Sensitivity Disclosure -- 2026 Plan ($223M per barrel of oil and $83M per $0.10 per Mcf gas).*
+3. U.S. Energy Information Administration. (2026, March). *Short-Term Energy Outlook.*
+4. CNBC. (2026, March 17-18). *Oil tops $107 after Iran threatens oil facilities in Saudi Arabia, the UAE, and Qatar; Brent briefly touches $119.*
+5. Whiteprint Research. (2026, March). *EOG Resources DCF Model -- revised with corrected gas and NGL volumes plus a four-scenario engine.*

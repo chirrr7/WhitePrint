@@ -1,40 +1,10 @@
 import Link from "next/link"
-import type { PostMeta } from "@/lib/posts"
-
-function formatDate(dateStr: string) {
-  const date = new Date(dateStr + "T00:00:00")
-  return date.toLocaleDateString("en-US", {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  })
-}
-
-function categoryLabel(category: string) {
-  switch (category) {
-    case "macro":
-      return "Macro"
-    case "equity":
-      return "Equity Research"
-    case "market-notes":
-      return "Market Notes"
-    default:
-      return category
-  }
-}
-
-function categoryHref(category: string) {
-  switch (category) {
-    case "macro":
-      return "/macro"
-    case "equity":
-      return "/equity"
-    case "market-notes":
-      return "/market-notes"
-    default:
-      return "/"
-  }
-}
+import {
+  formatPostDate,
+  getPostCategoryHref,
+  getPostCategoryLabel,
+  type PostMeta,
+} from "@/lib/post-meta"
 
 export function PostCard({ post }: { post: PostMeta }) {
   return (
@@ -42,13 +12,13 @@ export function PostCard({ post }: { post: PostMeta }) {
       <div className="flex flex-col gap-2">
         <div className="flex items-center gap-3 text-xs text-muted-foreground">
           <Link
-            href={categoryHref(post.category)}
+            href={getPostCategoryHref(post.category)}
             className="uppercase tracking-widest font-medium hover:text-foreground transition-colors"
           >
-            {categoryLabel(post.category)}
+            {getPostCategoryLabel(post.category)}
           </Link>
           <span aria-hidden="true">{'/'}</span>
-          <time dateTime={post.date}>{formatDate(post.date)}</time>
+          <time dateTime={post.date}>{formatPostDate(post.date)}</time>
           <span aria-hidden="true">{'/'}</span>
           <span>{post.readTime} min read</span>
         </div>
