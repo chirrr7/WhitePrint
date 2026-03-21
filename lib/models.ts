@@ -3,6 +3,7 @@ export interface FinancialModel {
   title: string
   description: string
   format: string
+  fileSize?: string
   category: string
   downloadUrl: string
 }
@@ -10,31 +11,13 @@ export interface FinancialModel {
 export function getAllModels(): FinancialModel[] {
   return [
     {
-      slug: "dcf-template",
-      title: "DCF Valuation Template",
+      slug: "eog-resources-dcf",
+      title: "EOG Resources DCF Model",
       description:
-        "A comprehensive discounted cash flow model with sensitivity analysis, WACC calculation, and terminal value assumptions. Built for public equity analysis.",
+        "Four-scenario discounted cash flow model for EOG Resources. Covers Base, Conflict-Up, Bull, and Bear cases with WTI sensitivity and WACC analysis. Includes probability-weighted price target and key assumptions dashboard.",
       format: "Excel (.xlsx)",
-      category: "Valuation",
-      downloadUrl: "/models/dcf-template.xlsx",
-    },
-    {
-      slug: "lbo-model",
-      title: "LBO Model",
-      description:
-        "Leveraged buyout model with debt schedule, returns analysis, and operating assumptions. Suitable for private equity transaction modeling.",
-      format: "Excel (.xlsx)",
-      category: "Transaction",
-      downloadUrl: "/models/lbo-model.xlsx",
-    },
-    {
-      slug: "macro-dashboard",
-      title: "Macro Indicators Dashboard",
-      description:
-        "A structured dashboard for tracking key macroeconomic indicators including rates, spreads, and real economy data.",
-      format: "PDF (.pdf)",
-      category: "Macro",
-      downloadUrl: "/models/macro-dashboard.pdf",
+      category: "Equity",
+      downloadUrl: "/models/eog-resources-dcf.xlsx",
     },
   ]
 }

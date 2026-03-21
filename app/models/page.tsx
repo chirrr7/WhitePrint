@@ -1,58 +1,278 @@
 import type { Metadata } from "next"
-import { getAllModels } from "@/lib/models"
-import { Download } from "lucide-react"
+import Link from "next/link"
+import { getAllModels, type FinancialModel } from "@/lib/models"
+import { DownloadButton } from "./download-button"
 
 export const metadata: Metadata = {
   title: "Models Library",
   description:
-    "Downloadable financial models including DCF templates, LBO models, and macro dashboards.",
+    "Downloadable financial models and analytical tools. Built for practitioners, designed for clarity.",
+}
+
+const MONO = '"JetBrains Mono", monospace'
+const DISPLAY = '"Playfair Display", Georgia, serif'
+const SERIF = '"Source Serif 4", Georgia, serif'
+
+const v = {
+  bg: "#f7f6f3",
+  surface: "#fff",
+  ink: "#0a0a0a",
+  accent: "#b83025",
+  muted: "#555",
+  subtle: "#8a8a8a",
+  border: "#dedad4",
+  borderLight: "#eceae5",
+  tagBg: "#edeae4",
 }
 
 export default function ModelsPage() {
   const models = getAllModels()
 
-  return (
-    <div className="mx-auto max-w-5xl px-6 py-12">
-      <header className="mb-10 pb-8 border-b border-border">
-        <h1 className="font-serif text-3xl md:text-4xl font-bold tracking-tight text-foreground">
-          Models Library
-        </h1>
-        <p className="mt-3 text-muted-foreground max-w-lg leading-relaxed">
-          Downloadable financial models and analytical tools. Built for
-          practitioners, designed for clarity.
-        </p>
-      </header>
+  // Group by category, preserving insertion order
+  const grouped = models.reduce<Record<string, FinancialModel[]>>((acc, model) => {
+    if (!acc[model.category]) acc[model.category] = []
+    acc[model.category].push(model)
+    return acc
+  }, {})
 
-      <div className="flex flex-col gap-0 divide-y divide-border">
-        {models.map((model) => (
-          <div key={model.slug} className="py-8 flex flex-col md:flex-row md:items-start gap-6">
-            <div className="flex-1">
-              <div className="flex items-center gap-3 mb-2">
-                <span className="text-xs uppercase tracking-widest text-muted-foreground font-medium">
-                  {model.category}
-                </span>
-                <span className="text-xs text-muted-foreground">
-                  {model.format}
-                </span>
-              </div>
-              <h2 className="font-serif text-xl font-semibold tracking-tight text-foreground">
-                {model.title}
-              </h2>
-              <p className="mt-2 text-sm text-muted-foreground leading-relaxed max-w-xl">
-                {model.description}
-              </p>
-            </div>
-            <a
-              href={model.downloadUrl}
-              className="inline-flex items-center gap-2 border border-foreground bg-foreground text-background px-5 py-2.5 text-sm font-medium hover:bg-background hover:text-foreground transition-colors shrink-0"
-              download
-            >
-              <Download className="h-4 w-4" />
-              Download
-            </a>
+  const categories = Object.keys(grouped)
+
+  return (
+    <div style={{ background: v.bg, minHeight: "100vh" }}>
+
+      {/* Page header */}
+      <div
+        style={{
+          background: v.surface,
+          borderBottom: `1px solid ${v.border}`,
+          padding: "56px 40px 48px",
+        }}
+      >
+        <div style={{ maxWidth: 1100, margin: "0 auto" }}>
+          <div
+            style={{
+              fontFamily: MONO,
+              fontSize: 9,
+              letterSpacing: "0.28em",
+              textTransform: "uppercase",
+              color: v.subtle,
+              marginBottom: 16,
+            }}
+          >
+            Whiteprint Research
           </div>
-        ))}
+          <h1
+            style={{
+              fontFamily: DISPLAY,
+              fontSize: "clamp(28px, 4vw, 44px)",
+              fontWeight: 700,
+              letterSpacing: "-0.025em",
+              color: v.ink,
+              margin: 0,
+              lineHeight: 1.1,
+            }}
+          >
+            Models Library
+          </h1>
+          <p
+            style={{
+              fontFamily: SERIF,
+              fontSize: 16,
+              color: v.muted,
+              marginTop: 14,
+              lineHeight: 1.7,
+              maxWidth: 520,
+              fontStyle: "italic",
+              fontWeight: 300,
+            }}
+          >
+            Downloadable financial models built alongside published research.
+            Each model reflects the assumptions and scenarios from the corresponding analysis.
+          </p>
+        </div>
+      </div>
+
+      {/* Models list */}
+      <div style={{ maxWidth: 1100, margin: "0 auto", padding: "0 40px 80px" }}>
+
+        {models.length === 0 ? (
+          <div
+            style={{
+              padding: "80px 0",
+              textAlign: "center",
+              fontFamily: MONO,
+              fontSize: 11,
+              letterSpacing: "0.16em",
+              textTransform: "uppercase",
+              color: v.subtle,
+            }}
+          >
+            No models published yet.
+          </div>
+        ) : (
+          categories.map((category) => (
+            <section key={category}>
+              {/* Section label */}
+              <div
+                style={{
+                  borderBottom: `1px solid ${v.border}`,
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 16,
+                  padding: "36px 0 0",
+                }}
+              >
+                <span
+                  style={{
+                    fontFamily: MONO,
+                    letterSpacing: "0.28em",
+                    textTransform: "uppercase",
+                    color: v.subtle,
+                    paddingBottom: 14,
+                    fontSize: 9,
+                    fontWeight: 500,
+                    flexShrink: 0,
+                  }}
+                >
+                  {category}
+                </span>
+                <div
+                  style={{
+                    background: v.borderLight,
+                    flex: 1,
+                    height: 1,
+                    marginBottom: 14,
+                  }}
+                />
+              </div>
+
+              {grouped[category].map((model) => (
+                <ModelRow key={model.slug} model={model} />
+              ))}
+            </section>
+          ))
+        )}
+
+        {/* Publishing instructions */}
+        <div
+          style={{
+            marginTop: 60,
+            borderTop: `1px solid ${v.borderLight}`,
+            paddingTop: 24,
+            display: "flex",
+            alignItems: "flex-start",
+            gap: 16,
+          }}
+        >
+          <span
+            style={{
+              fontFamily: MONO,
+              fontSize: 8,
+              letterSpacing: "0.2em",
+              textTransform: "uppercase",
+              color: v.accent,
+              flexShrink: 0,
+              paddingTop: 1,
+            }}
+          >
+            Add a Model
+          </span>
+          <p
+            style={{
+              fontFamily: MONO,
+              fontSize: 10,
+              color: v.subtle,
+              lineHeight: 1.7,
+              margin: 0,
+              letterSpacing: "0.04em",
+            }}
+          >
+            Drop your <strong style={{ color: v.ink }}>.xlsx</strong> into{" "}
+            <strong style={{ color: v.ink }}>public/models/</strong>, add an
+            entry to <strong style={{ color: v.ink }}>lib/models.ts</strong>,
+            push to main → live.
+          </p>
+        </div>
       </div>
     </div>
   )
 }
+
+function ModelRow({ model }: { model: FinancialModel }) {
+  return (
+    <article
+      style={{
+        borderTop: `1px solid ${v.border}`,
+        padding: "32px 0 28px",
+        display: "flex",
+        alignItems: "flex-start",
+        gap: 48,
+      }}
+    >
+      {/* Left: info */}
+      <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 10 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          <span
+            style={{
+              fontFamily: MONO,
+              letterSpacing: "0.16em",
+              textTransform: "uppercase",
+              background: v.ink,
+              color: "#fff",
+              padding: "3px 9px",
+              fontSize: 9,
+              fontWeight: 500,
+            }}
+          >
+            {model.category}
+          </span>
+          <span
+            style={{
+              fontFamily: MONO,
+              fontSize: 9,
+              letterSpacing: "0.1em",
+              color: v.subtle,
+              textTransform: "uppercase",
+            }}
+          >
+            {model.format}
+            {model.fileSize ? ` · ${model.fileSize}` : ""}
+          </span>
+        </div>
+
+        <h2
+          style={{
+            fontFamily: DISPLAY,
+            fontSize: 20,
+            fontWeight: 700,
+            letterSpacing: "-0.02em",
+            color: v.ink,
+            margin: 0,
+            lineHeight: 1.18,
+          }}
+        >
+          {model.title}
+        </h2>
+
+        <p
+          style={{
+            fontFamily: SERIF,
+            fontSize: 14,
+            color: v.muted,
+            margin: 0,
+            lineHeight: 1.7,
+            maxWidth: 560,
+          }}
+        >
+          {model.description}
+        </p>
+      </div>
+
+      {/* Right: download button */}
+      <div style={{ flexShrink: 0, paddingTop: 4 }}>
+        <DownloadButton href={model.downloadUrl} filename={`${model.slug}.xlsx`} />
+      </div>
+    </article>
+  )
+}
+
