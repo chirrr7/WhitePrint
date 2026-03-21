@@ -153,46 +153,7 @@ export default function ModelsPage() {
           ))
         )}
 
-        {/* Publishing instructions */}
-        <div
-          style={{
-            marginTop: 60,
-            borderTop: `1px solid ${v.borderLight}`,
-            paddingTop: 24,
-            display: "flex",
-            alignItems: "flex-start",
-            gap: 16,
-          }}
-        >
-          <span
-            style={{
-              fontFamily: MONO,
-              fontSize: 8,
-              letterSpacing: "0.2em",
-              textTransform: "uppercase",
-              color: v.accent,
-              flexShrink: 0,
-              paddingTop: 1,
-            }}
-          >
-            Add a Model
-          </span>
-          <p
-            style={{
-              fontFamily: MONO,
-              fontSize: 10,
-              color: v.subtle,
-              lineHeight: 1.7,
-              margin: 0,
-              letterSpacing: "0.04em",
-            }}
-          >
-            Drop your <strong style={{ color: v.ink }}>.xlsx</strong> into{" "}
-            <strong style={{ color: v.ink }}>public/models/</strong>, add an
-            entry to <strong style={{ color: v.ink }}>lib/models.ts</strong>,
-            push to main → live.
-          </p>
-        </div>
+
       </div>
     </div>
   )
