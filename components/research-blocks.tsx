@@ -1,4 +1,4 @@
-import type { ReactNode } from "react"
+import { Children, isValidElement, type ReactNode } from "react"
 import { cn } from "@/lib/utils"
 
 type StatTone = "neutral" | "positive" | "warning" | "negative"
@@ -227,13 +227,20 @@ export function StickyTable({
   )
 }
 
-export function StickyLayout({
-  sidebar,
-  children,
-}: {
-  sidebar: ReactNode
-  children: ReactNode
-}) {
+StickyTable.displayName = "StickyTable"
+
+export function StickyLayout({ children }: { children: ReactNode }) {
+  let panel: ReactNode = null
+  const prose: ReactNode[] = []
+
+  Children.forEach(children, (child) => {
+    if (isValidElement(child) && (child.type as any).displayName === "StickyTable") {
+      panel = child
+    } else {
+      prose.push(child)
+    }
+  })
+
   return (
     <div
       style={{
@@ -244,8 +251,8 @@ export function StickyLayout({
         margin: "0 0 32px",
       }}
     >
-      <div>{children}</div>
-      <div>{sidebar}</div>
+      <div>{prose}</div>
+      <div>{panel}</div>
     </div>
   )
 }
