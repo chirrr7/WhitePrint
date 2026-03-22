@@ -196,44 +196,56 @@ export function StickyTable({
   children: ReactNode
 }) {
   return (
-    <div
-      style={{
-        float: "right",
-        clear: "right",
-        width: 300,
-        marginLeft: 28,
-        marginBottom: 24,
-        marginRight: 0,
-      }}
-    >
-      <div style={{ position: "sticky", top: 88 }}>
-        {title ? (
-          <div
-            style={{
-              background: "#0a0a0a",
-              color: "#fff",
-              fontFamily: '"JetBrains Mono", monospace',
-              fontSize: 9,
-              fontWeight: 500,
-              letterSpacing: "0.2em",
-              textTransform: "uppercase",
-              padding: "8px 14px",
-            }}
-          >
-            {title}
-          </div>
-        ) : null}
+    <div style={{ position: "sticky", top: 88 }}>
+      {title ? (
         <div
           style={{
-            border: "1px solid #dedad4",
-            borderTop: title ? "none" : "1px solid #dedad4",
-            background: "#fff",
-            overflowX: "auto",
+            background: "#0a0a0a",
+            color: "#fff",
+            fontFamily: '"JetBrains Mono", monospace',
+            fontSize: 9,
+            fontWeight: 500,
+            letterSpacing: "0.2em",
+            textTransform: "uppercase",
+            padding: "8px 14px",
           }}
         >
-          {children}
+          {title}
         </div>
+      ) : null}
+      <div
+        style={{
+          border: "1px solid #dedad4",
+          borderTop: title ? "none" : "1px solid #dedad4",
+          background: "#fff",
+          overflowX: "auto",
+        }}
+      >
+        {children}
       </div>
+    </div>
+  )
+}
+
+export function StickyLayout({
+  sidebar,
+  children,
+}: {
+  sidebar: ReactNode
+  children: ReactNode
+}) {
+  return (
+    <div
+      style={{
+        display: "grid",
+        gridTemplateColumns: "1fr 260px",
+        gap: "32px",
+        alignItems: "start",
+        margin: "0 0 32px",
+      }}
+    >
+      <div>{children}</div>
+      <div>{sidebar}</div>
     </div>
   )
 }

@@ -416,11 +416,6 @@
   line-height: inherit;
 }
 
-/* ── Clear floats after sticky tables ── */
-.article h2,
-.article h3 {
-  clear: right;
-}
 
 /* ── Sidebar ── */
 .sidebar {

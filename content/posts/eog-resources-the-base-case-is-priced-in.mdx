@@ -153,54 +153,56 @@ All figures are in billions of dollars. The conflict-up FCF path is roughly 14% 
   />
 </ScenarioGrid>
 
+<StickyLayout sidebar={
+  <StickyTable title="Scenario Summary">
+    <table>
+      <thead>
+        <tr>
+          <th>Scenario</th>
+          <th>DCF</th>
+          <th>Upside</th>
+          <th>Weight</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Bear · $55</td>
+          <td>$64.58</td>
+          <td>-53.9%</td>
+          <td>20%</td>
+        </tr>
+        <tr>
+          <td>Base · $90</td>
+          <td>$152.73</td>
+          <td>+9.0%</td>
+          <td>45%</td>
+        </tr>
+        <tr>
+          <td>Conflict-Up · $95</td>
+          <td>$172.82</td>
+          <td>+23.3%</td>
+          <td>15%</td>
+        </tr>
+        <tr>
+          <td>Bull · $100</td>
+          <td>$196.42</td>
+          <td>+40.1%</td>
+          <td>20%</td>
+        </tr>
+        <tr>
+          <td><strong>Prob-Weighted</strong></td>
+          <td><strong>$146.85</strong></td>
+          <td><strong>+4.8%</strong></td>
+          <td>100%</td>
+        </tr>
+      </tbody>
+    </table>
+  </StickyTable>
+}>
+
 ## Triangulation
 
 DCF and EV/EBITDA are within a few dollars of each other across all four scenarios, which is reassuring. It means the model is not leaning on heroic terminal-value assumptions to generate the implied prices. The base-case TV-to-EV ratio is 62.3%, slightly above the 60% target but acceptable for an E&P with a multi-decade reserve life. FCF yield on EV at base is 7.0%, in line with large-cap E&P peers that maintain high capital-return discipline.
-
-<StickyTable title="Scenario Summary">
-  <table>
-    <thead>
-      <tr>
-        <th>Scenario</th>
-        <th>DCF</th>
-        <th>Upside</th>
-        <th>Weight</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td>Bear · $55</td>
-        <td>$64.58</td>
-        <td>-53.9%</td>
-        <td>20%</td>
-      </tr>
-      <tr>
-        <td>Base · $90</td>
-        <td>$152.73</td>
-        <td>+9.0%</td>
-        <td>45%</td>
-      </tr>
-      <tr>
-        <td>Conflict-Up · $95</td>
-        <td>$172.82</td>
-        <td>+23.3%</td>
-        <td>15%</td>
-      </tr>
-      <tr>
-        <td>Bull · $100</td>
-        <td>$196.42</td>
-        <td>+40.1%</td>
-        <td>20%</td>
-      </tr>
-      <tr>
-        <td><strong>Prob-Weighted</strong></td>
-        <td><strong>$146.85</strong></td>
-        <td><strong>+4.8%</strong></td>
-        <td>100%</td>
-      </tr>
-    </tbody>
-  </table>
-</StickyTable>
 
 <PullQuote
   quote="The base case is priced in. The real question is whether the conflict-up weight of 15% should be closer to 30% given current energy-market conditions."
@@ -277,6 +279,8 @@ The matrix below shows implied DCF price at different WTI assumptions and WACC l
 </ResearchTable>
 
 Note that the sensitivity matrix uses a simplified overlay against the base operating model FCF path, which produces higher absolute numbers than the full DCF. The scenario-specific DCF prices in the previous table -- $152.73 for base and $172.82 for conflict-up -- are the more reliable outputs because they run through the full operating model. Use the matrix for directional sensitivity, not absolute price targets.
+
+</StickyLayout>
 
 ## The Conflict Overlay Changes the Probability Weight, Not the Model
 

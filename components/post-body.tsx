@@ -9,6 +9,7 @@ import {
   StatCard,
   StatGrid,
   StickyTable,
+  StickyLayout,
 } from "@/components/research-blocks"
 import { cn } from "@/lib/utils"
 
@@ -89,6 +90,7 @@ export const articleBodyComponents = {
   ScenarioCard,
   DisclaimerBox,
   StickyTable,
+  StickyLayout,
 }
 
 export const postBodyComponents = {
@@ -177,4 +179,5 @@ export const postBodyComponents = {
   ScenarioCard,
   DisclaimerBox,
   StickyTable,
+  StickyLayout,
 }
