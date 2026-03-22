@@ -407,14 +407,10 @@
   background: #faf9f7;
 }
 
-/* ── Pull quote (override research-blocks default) ── */
-.article .pullQuoteBlock {
-  background: var(--ink);
-  color: #fff;
-  max-width: var(--max-content);
-  margin: 44px 0;
-  padding: 28px 32px 28px 28px;
-  position: relative;
+/* ── Clear floats after sticky tables ── */
+.article h2,
+.article h3 {
+  clear: right;
 }
 
 /* ── Sidebar ── */

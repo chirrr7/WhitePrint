@@ -129,19 +129,112 @@ export function PullQuote({
   children?: ReactNode
 }) {
   return (
-    <figure className="relative my-12 overflow-hidden bg-foreground px-7 py-8 text-background">
-      <div className="absolute left-5 top-3 font-serif text-7xl text-amber-700/55">
-        "
+    <figure
+      style={{
+        position: "relative",
+        margin: "44px 0",
+        overflow: "hidden",
+        background: "#0a0a0a",
+        padding: "28px 32px 28px 28px",
+      }}
+    >
+      <div
+        style={{
+          position: "absolute",
+          left: 18,
+          top: 4,
+          fontFamily: '"Playfair Display", Georgia, serif',
+          fontSize: 80,
+          lineHeight: 1,
+          color: "#b83025",
+          opacity: 0.8,
+          userSelect: "none",
+        }}
+        aria-hidden="true"
+      >
+        &ldquo;
       </div>
-      <blockquote className="relative pl-8 font-serif text-2xl italic leading-9 tracking-tight">
+      <blockquote
+        style={{
+          position: "relative",
+          paddingLeft: 36,
+          margin: 0,
+          fontFamily: '"Source Serif 4", Georgia, serif',
+          fontSize: 20,
+          fontStyle: "italic",
+          lineHeight: 1.7,
+          color: "#fff",
+          border: "none",
+        }}
+      >
         {quote ?? children}
       </blockquote>
       {attribution ? (
-        <figcaption className="mt-4 pl-8 font-mono text-[11px] uppercase tracking-[0.18em] text-amber-200">
+        <figcaption
+          style={{
+            marginTop: 16,
+            paddingLeft: 36,
+            fontFamily: '"JetBrains Mono", monospace',
+            fontSize: 10,
+            textTransform: "uppercase",
+            letterSpacing: "0.18em",
+            color: "#b83025",
+          }}
+        >
           {attribution}
         </figcaption>
       ) : null}
     </figure>
+  )
+}
+
+export function StickyTable({
+  title,
+  children,
+}: {
+  title?: ReactNode
+  children: ReactNode
+}) {
+  return (
+    <div
+      style={{
+        float: "right",
+        clear: "right",
+        width: 300,
+        marginLeft: 28,
+        marginBottom: 24,
+        marginRight: 0,
+      }}
+    >
+      <div style={{ position: "sticky", top: 88 }}>
+        {title ? (
+          <div
+            style={{
+              background: "#0a0a0a",
+              color: "#fff",
+              fontFamily: '"JetBrains Mono", monospace',
+              fontSize: 9,
+              fontWeight: 500,
+              letterSpacing: "0.2em",
+              textTransform: "uppercase",
+              padding: "8px 14px",
+            }}
+          >
+            {title}
+          </div>
+        ) : null}
+        <div
+          style={{
+            border: "1px solid #dedad4",
+            borderTop: title ? "none" : "1px solid #dedad4",
+            background: "#fff",
+            overflow: "hidden",
+          }}
+        >
+          {children}
+        </div>
+      </div>
+    </div>
   )
 }
 
