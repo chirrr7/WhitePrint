@@ -407,6 +407,15 @@
   background: #faf9f7;
 }
 
+/* ── Pull quote — override paragraph color inside figure ── */
+.article figure p {
+  color: inherit;
+  max-width: none;
+  margin-bottom: 0;
+  font-size: inherit;
+  line-height: inherit;
+}
+
 /* ── Clear floats after sticky tables ── */
 .article h2,
 .article h3 {
