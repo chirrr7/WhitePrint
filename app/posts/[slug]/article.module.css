@@ -407,6 +407,10 @@
   background: #faf9f7;
 }
 
+.article tbody tr:hover td {
+  background: #f5f2ec;
+}
+
 /* ── Pull quote — override paragraph color inside figure ── */
 .article figure p {
   color: inherit;
@@ -468,6 +472,22 @@
   font-family: var(--display);
   font-size: 15px;
   font-weight: 700;
+  color: var(--ink);
+}
+
+.kvValuePositive {
+  color: var(--positive);
+}
+
+.kvValueWarning {
+  color: var(--accent-2);
+}
+
+.kvValueNegative {
+  color: var(--negative);
+}
+
+.kvValueNeutral {
   color: var(--ink);
 }
 

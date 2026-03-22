@@ -5,6 +5,7 @@ import {
   formatPostDate,
   getPostCategoryHref,
   getPostCategoryLabel,
+  type SidebarValueTone,
 } from "@/lib/post-meta"
 import {
   getAllPosts,
@@ -61,6 +62,21 @@ export default async function PostPage({ params }: Props) {
 
   const categoryHref = getPostCategoryHref(post.category)
   const categoryLabel = getPostCategoryLabel(post.category)
+  const customSidebarCards = post.sidebarCards ?? []
+  const hasCustomSidebarCards = customSidebarCards.length > 0
+
+  function getSidebarValueClass(tone: SidebarValueTone = "neutral") {
+    switch (tone) {
+      case "positive":
+        return `${s.kvValue} ${s.kvValuePositive}`
+      case "warning":
+        return `${s.kvValue} ${s.kvValueWarning}`
+      case "negative":
+        return `${s.kvValue} ${s.kvValueNegative}`
+      default:
+        return `${s.kvValue} ${s.kvValueNeutral}`
+    }
+  }
 
   return (
     <div className={s.wrapper}>
@@ -125,44 +141,63 @@ export default async function PostPage({ params }: Props) {
 
         {/* Sidebar */}
         <aside className={s.sidebar}>
-          {/* Article info card */}
-          <div className={s.sidebarCard}>
-            <div className={s.sidebarHead}>Article Info</div>
-            <div className={s.sidebarBody}>
-              <div className={s.kvRow}>
-                <span className={s.kvLabel}>Category</span>
-                <span className={s.kvValueMono}>{categoryLabel}</span>
+          {hasCustomSidebarCards ? (
+            customSidebarCards.map((card) => (
+              <div key={card.title} className={s.sidebarCard}>
+                <div className={s.sidebarHead}>{card.title}</div>
+                <div className={s.sidebarBody}>
+                  {card.rows.map((row) => (
+                    <div key={`${card.title}-${row.label}`} className={s.kvRow}>
+                      <span className={s.kvLabel}>{row.label}</span>
+                      <span className={getSidebarValueClass(row.tone)}>{row.value}</span>
+                    </div>
+                  ))}
+                </div>
+                {card.note ? (
+                  <div className={s.sidebarNote}>{card.note}</div>
+                ) : null}
               </div>
-              <div className={s.kvRow}>
-                <span className={s.kvLabel}>Published</span>
-                <span className={s.kvValueMono}>{formatPostDate(post.date)}</span>
+            ))
+          ) : (
+            <>
+              <div className={s.sidebarCard}>
+                <div className={s.sidebarHead}>Article Info</div>
+                <div className={s.sidebarBody}>
+                  <div className={s.kvRow}>
+                    <span className={s.kvLabel}>Category</span>
+                    <span className={s.kvValueMono}>{categoryLabel}</span>
+                  </div>
+                  <div className={s.kvRow}>
+                    <span className={s.kvLabel}>Published</span>
+                    <span className={s.kvValueMono}>{formatPostDate(post.date)}</span>
+                  </div>
+                  <div className={s.kvRow}>
+                    <span className={s.kvLabel}>Read Time</span>
+                    <span className={`${s.kvValue} ${s.kvValueNeutral}`}>{post.readTime} min</span>
+                  </div>
+                </div>
+                <div className={s.sidebarNote}>
+                  All content is for informational purposes only and does not constitute investment advice.
+                </div>
               </div>
-              <div className={s.kvRow}>
-                <span className={s.kvLabel}>Read Time</span>
-                <span className={s.kvValue}>{post.readTime} min</span>
-              </div>
-            </div>
-            <div className={s.sidebarNote}>
-              All content is for informational purposes only and does not constitute investment advice.
-            </div>
-          </div>
 
-          {/* Tags card */}
-          {post.tags.length > 0 && (
-            <div className={s.sidebarCard}>
-              <div className={s.sidebarHead}>Topics</div>
-              <div className={s.tagCloud}>
-                {post.tags.map((tag) => (
-                  <Link
-                    key={tag}
-                    href={`/search?tag=${encodeURIComponent(tag)}`}
-                    className={s.sidebarTag}
-                  >
-                    {tag}
-                  </Link>
-                ))}
-              </div>
-            </div>
+              {post.tags.length > 0 && (
+                <div className={s.sidebarCard}>
+                  <div className={s.sidebarHead}>Topics</div>
+                  <div className={s.tagCloud}>
+                    {post.tags.map((tag) => (
+                      <Link
+                        key={tag}
+                        href={`/search?tag=${encodeURIComponent(tag)}`}
+                        className={s.sidebarTag}
+                      >
+                        {tag}
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </>
           )}
 
           {/* Back link */}

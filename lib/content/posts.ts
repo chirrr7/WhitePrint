@@ -6,7 +6,12 @@ import { compileMDX } from "next-mdx-remote/rsc"
 import remarkGfm from "remark-gfm"
 import { z } from "zod"
 import { articleBodyComponents, postBodyComponents } from "@/components/post-body"
-import { postCategories, type PostCategory, type PostMeta } from "@/lib/post-meta"
+import {
+  postCategories,
+  type PostCategory,
+  type PostMeta,
+  type SidebarCard,
+} from "@/lib/post-meta"
 
 const mdxPostsDirectory = path.join(process.cwd(), "content", "posts")
 const legacyPostsDirectory = path.join(process.cwd(), "posts")
@@ -14,6 +19,17 @@ const legacyPostsDirectory = path.join(process.cwd(), "posts")
 export const postCategorySchema = z.enum(postCategories)
 
 const postSlugSchema = z.string().trim().regex(/^[a-z0-9-]+$/)
+const sidebarValueToneSchema = z.enum(["neutral", "positive", "warning", "negative"])
+const sidebarCardRowSchema = z.object({
+  label: z.string().trim().min(1),
+  value: z.string().trim().min(1),
+  tone: sidebarValueToneSchema.optional(),
+})
+const sidebarCardSchema = z.object({
+  title: z.string().trim().min(1),
+  rows: z.array(sidebarCardRowSchema).min(1),
+  note: z.string().trim().min(1).optional(),
+})
 
 const postFrontmatterSchema = z.object({
   title: z.string().trim().min(1),
@@ -26,6 +42,7 @@ const postFrontmatterSchema = z.object({
   // Optional editorial fields
   eyebrow: z.string().trim().optional(),
   stance: z.string().trim().optional(),
+  sidebarCards: z.array(sidebarCardSchema).max(4).optional(),
 })
 
 export interface Post extends PostMeta {
@@ -35,6 +52,11 @@ export interface Post extends PostMeta {
 interface PostSource {
   fullPath: string
   fileName: string
+}
+
+interface PostSourceData {
+  content: string
+  frontmatter: z.infer<typeof postFrontmatterSchema>
 }
 
 function estimateReadTime(content: string): number {
@@ -69,7 +91,7 @@ function getSourcesFromDirectory(
     }))
 }
 
-function buildPostMeta(source: PostSource): PostMeta {
+function readPostSourceData(source: PostSource): PostSourceData {
   const raw = fs.readFileSync(source.fullPath, "utf8")
   const { data, content } = matter(raw)
   const parsed = postFrontmatterSchema.safeParse(data)
@@ -82,19 +104,28 @@ function buildPostMeta(source: PostSource): PostMeta {
     )
   }
 
+  return {
+    content,
+    frontmatter: parsed.data,
+  }
+}
+
+function buildPostMeta(source: PostSource): PostMeta {
+  const { content, frontmatter } = readPostSourceData(source)
   const slugFromFile = source.fileName.replace(/\.(md|mdx)$/, "")
-  const slug = parsed.data.slug ?? slugFromFile
+  const slug = frontmatter.slug ?? slugFromFile
 
   return {
     slug,
-    title: parsed.data.title,
-    date: parsed.data.date,
-    category: parsed.data.category,
-    tags: parsed.data.tags,
-    excerpt: parsed.data.excerpt,
-    readTime: parsed.data.readTime ?? estimateReadTime(content),
-    eyebrow: parsed.data.eyebrow,
-    stance: parsed.data.stance,
+    title: frontmatter.title,
+    date: frontmatter.date,
+    category: frontmatter.category,
+    tags: frontmatter.tags,
+    excerpt: frontmatter.excerpt,
+    readTime: frontmatter.readTime ?? estimateReadTime(content),
+    eyebrow: frontmatter.eyebrow,
+    stance: frontmatter.stance,
+    sidebarCards: frontmatter.sidebarCards as SidebarCard[] | undefined,
   }
 }
 
@@ -162,8 +193,7 @@ export async function getPostBySlug(slug: string): Promise<Post | null> {
   }
 
   const postMeta = buildPostMeta(source)
-  const raw = fs.readFileSync(source.fullPath, "utf8")
-  const { content } = matter(raw)
+  const { content } = readPostSourceData(source)
 
   const compiled = await compileMDX({
     source: content,
@@ -203,8 +233,7 @@ export async function getArticleBySlug(slug: string): Promise<Post | null> {
   if (!source) return null
 
   const postMeta = buildPostMeta(source)
-  const raw = fs.readFileSync(source.fullPath, "utf8")
-  const { content } = matter(raw)
+  const { content } = readPostSourceData(source)
 
   const compiled = await compileMDX({
     source: content,

@@ -11,6 +11,7 @@ Frontmatter fields:
 - `excerpt`: short summary used on cards and SEO
 - `readTime`: optional integer minutes
 - `slug`: optional override; otherwise the filename becomes the slug
+- `sidebarCards`: optional array of right-rail cards for the generic article sidebar
 
 Reusable MDX components are available automatically inside every post. You do not need to import them.
 
@@ -22,6 +23,15 @@ category: "macro"
 tags: ["macro", "rates"]
 excerpt: "One-sentence summary for cards and metadata."
 readTime: 6
+sidebarCards:
+  - title: "Key Indicators"
+    rows:
+      - label: "Current Price"
+        value: "~$140"
+      - label: "Base Case"
+        value: "$152.73"
+        tone: "positive"
+    note: "Optional note shown under the card."
 ---
 
 ## Example Components
@@ -73,3 +83,5 @@ readTime: 6
   </table>
 </ResearchTable>
 ```
+
+`sidebarCards` powers the standardized right-hand cards used by generic article pages. Use it for compact key indicators, scenario weights, dates, or model inputs you want pinned in the sidebar.

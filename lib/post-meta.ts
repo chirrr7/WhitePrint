@@ -1,6 +1,19 @@
 export const postCategories = ["macro", "equity", "market-notes"] as const
 
 export type PostCategory = (typeof postCategories)[number]
+export type SidebarValueTone = "neutral" | "positive" | "warning" | "negative"
+
+export interface SidebarCardRow {
+  label: string
+  value: string
+  tone?: SidebarValueTone
+}
+
+export interface SidebarCard {
+  title: string
+  rows: SidebarCardRow[]
+  note?: string
+}
 
 export interface PostMeta {
   slug: string
@@ -12,6 +25,7 @@ export interface PostMeta {
   readTime: number
   eyebrow?: string
   stance?: string
+  sidebarCards?: SidebarCard[]
 }
 
 export function formatPostDate(date: string): string {
