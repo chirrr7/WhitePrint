@@ -122,9 +122,11 @@ export function ResearchTable({
 export function PullQuote({
   quote,
   attribution,
+  children,
 }: {
-  quote: ReactNode
+  quote?: ReactNode
   attribution?: ReactNode
+  children?: ReactNode
 }) {
   return (
     <figure className="relative my-12 overflow-hidden bg-foreground px-7 py-8 text-background">
@@ -132,7 +134,7 @@ export function PullQuote({
         "
       </div>
       <blockquote className="relative pl-8 font-serif text-2xl italic leading-9 tracking-tight">
-        {quote}
+        {quote ?? children}
       </blockquote>
       {attribution ? (
         <figcaption className="mt-4 pl-8 font-mono text-[11px] uppercase tracking-[0.18em] text-amber-200">
