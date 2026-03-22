@@ -228,7 +228,7 @@ export function StickyTable({
             border: "1px solid #dedad4",
             borderTop: title ? "none" : "1px solid #dedad4",
             background: "#fff",
-            overflow: "hidden",
+            overflowX: "auto",
           }}
         >
           {children}
