@@ -47,7 +47,7 @@ const scenarioToneClasses: Record<ScenarioTone, string> = {
 }
 
 const disclaimerToneClasses: Record<StatTone, string> = {
-  neutral: "border-l-muted-foreground bg-muted/40",
+  neutral: "border-l-foreground bg-background",
   positive: "border-l-emerald-700 bg-emerald-50/60",
   warning: "border-l-amber-700 bg-amber-50/60",
   negative: "border-l-rose-700 bg-rose-50/60",
