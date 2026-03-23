@@ -40,6 +40,7 @@ const postFrontmatterSchema = z.object({
   excerpt: z.string().trim().min(1),
   readTime: z.number().int().positive().optional(),
   // Optional editorial fields
+  displayTitle: z.string().trim().optional(),
   eyebrow: z.string().trim().optional(),
   stance: z.string().trim().optional(),
   sidebarCards: z.array(sidebarCardSchema).max(4).optional(),
@@ -123,6 +124,7 @@ function buildPostMeta(source: PostSource): PostMeta {
     tags: frontmatter.tags,
     excerpt: frontmatter.excerpt,
     readTime: frontmatter.readTime ?? estimateReadTime(content),
+    displayTitle: frontmatter.displayTitle,
     eyebrow: frontmatter.eyebrow,
     stance: frontmatter.stance,
     sidebarCards: frontmatter.sidebarCards as SidebarCard[] | undefined,

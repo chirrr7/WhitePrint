@@ -95,7 +95,11 @@ export default async function PostPage({ params }: Props) {
             <div className={s.heroRule} />
           </div>
 
-          <h1 className={s.title} dangerouslySetInnerHTML={{ __html: post.title }} />
+          {post.displayTitle ? (
+            <h1 className={s.title} dangerouslySetInnerHTML={{ __html: post.displayTitle }} />
+          ) : (
+            <h1 className={s.title}>{post.title}</h1>
+          )}
 
           <p className={s.heroDeck}>{post.excerpt}</p>
 

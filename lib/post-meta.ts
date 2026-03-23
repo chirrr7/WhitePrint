@@ -23,6 +23,7 @@ export interface PostMeta {
   tags: string[]
   excerpt: string
   readTime: number
+  displayTitle?: string
   eyebrow?: string
   stance?: string
   sidebarCards?: SidebarCard[]
