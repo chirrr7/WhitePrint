@@ -250,9 +250,37 @@ export default function AboutPage() {
               >
                 LinkedIn
               </span>
-              <span style={{ fontFamily: SERIF, fontSize: 15, color: v.ink }}>
+              <a
+                href="https://www.linkedin.com/company/whiteprint-research/"
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{ fontFamily: SERIF, fontSize: 15, color: v.ink }}
+              >
                 Whiteprint Research
+              </a>
+            </div>
+            <div>
+              <span
+                style={{
+                  fontFamily: MONO,
+                  fontSize: 9,
+                  letterSpacing: "0.18em",
+                  textTransform: "uppercase",
+                  color: v.subtle,
+                  display: "block",
+                  marginBottom: 4,
+                }}
+              >
+                Instagram
               </span>
+              <a
+                href="https://www.instagram.com/whiteprintresearch"
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{ fontFamily: SERIF, fontSize: 15, color: v.ink }}
+              >
+                @whiteprintresearch
+              </a>
             </div>
           </div>
           <p style={{ marginTop: 20 }}>
