@@ -19,5 +19,14 @@ export function getAllModels(): FinancialModel[] {
       category: "Equity",
       downloadUrl: "/models/eog-resources-dcf.xlsx",
     },
+    {
+      slug: "oracle-forensic-model",
+      title: "Oracle Forensic Financial Model",
+      description:
+        "12-page forensic model for Oracle (ORCL). Covers historical financials, ROIC decomposition, peer comps, off-balance-sheet lease analysis, forward forecast, reverse DCF valuation framework, and financing gap analysis through FY2028.",
+      format: "PDF",
+      category: "Equity",
+      downloadUrl: "/models/oracle-forensic-model-final.pdf",
+    },
   ]
 }
