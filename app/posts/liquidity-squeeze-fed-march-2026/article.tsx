@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from "react"
 import Link from "next/link"
+import { MarketNoteTable } from "@/components/research-blocks"
 import s from "./article.module.css"
 
 export function LiquiditySqueezeArticle() {
@@ -63,6 +64,14 @@ export function LiquiditySqueezeArticle() {
       {/* Main Layout */}
       <div className={s.layout}>
         <article className={s.article}>
+          <MarketNoteTable
+            heading="Macro Summary"
+            stance="Defensive / Quality"
+            confidence="Medium"
+            horizon="1-3 months"
+            quickAnswer="Stay tilted toward Quality, Healthcare, selective AI-linked Technology, and Energy; remain cautious on REITs, Utilities, and high-beta expressions into a tighter-for-longer regime."
+            whatChangesOurMind="Funding stress eases, the energy shock fades, and the Fed signals a softer path that reduces the higher-for-longer and stagflation tail risks."
+          />
 
           <h2>Executive Summary</h2>
 

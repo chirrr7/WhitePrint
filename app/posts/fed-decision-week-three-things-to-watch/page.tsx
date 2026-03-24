@@ -15,6 +15,15 @@ export default function FedDecisionWeekMarketNotePage() {
       date="2026-03-10"
       readTime={3}
       tags={["fed", "macro", "rates", "energy", "inflation"]}
+      summaryTable={{
+        stance: "Cautious / Wait-and-See",
+        confidence: "Medium-High",
+        horizon: "1-4 weeks",
+        quickAnswer:
+          "Expect a hold, but trade the tone: the dot plot, energy inflation risk, and the leadership handover matter more than the rate decision itself.",
+        whatChangesOurMind:
+          "A softer dot plot, cleaner disinflation, and fading energy pressure would make this look more like a routine pause than a regime signal.",
+      }}
       lede="The base case is straightforward: no rate move. The harder question is how restrictive the Fed sounds while inflation remains above target and energy markets stay unstable. This meeting matters because tone, not action, is likely to drive the next leg of cross-asset positioning."
       whyMarketsCare="Markets can absorb a hold. What they struggle with is a policy message that pushes cuts further out while growth data softens. If the Fed emphasizes inflation persistence, risk assets may struggle to extend. If language leaves room for easing later in the year, sentiment can recover quickly."
       signals={[

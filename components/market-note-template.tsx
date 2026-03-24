@@ -1,4 +1,6 @@
 import Link from "next/link"
+import type { MarketNoteTableData } from "@/lib/post-meta"
+import { MarketNoteTable } from "@/components/research-blocks"
 import s from "./market-note-template.module.css"
 
 export interface MarketNoteSignal {
@@ -12,6 +14,7 @@ interface MarketNoteTemplateProps {
   date: string
   readTime: number
   tags: string[]
+  summaryTable: MarketNoteTableData
   lede: string
   whyMarketsCare: string
   signals: MarketNoteSignal[]
@@ -37,6 +40,7 @@ export function MarketNoteTemplate({
   date,
   readTime,
   tags,
+  summaryTable,
   lede,
   whyMarketsCare,
   signals,
@@ -77,6 +81,7 @@ export function MarketNoteTemplate({
 
       <div className={s.layout}>
         <article>
+          <MarketNoteTable heading="Market Note Summary" {...summaryTable} />
           <p className={s.lede}>{lede}</p>
 
           <section className={s.section}>

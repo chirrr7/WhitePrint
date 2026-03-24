@@ -93,4 +93,4 @@ sidebarCards:
 
 `sidebarCards` powers the standardized right-hand cards used by generic article pages. Use it for compact key indicators, scenario weights, dates, or model inputs you want pinned in the sidebar.
 
-`marketNoteTable` powers the standardized summary table rendered automatically at the top of all generic `market-notes` posts. Use it when a note has a clear allocation stance or monitoring framework that should be visible before the body copy.
+`marketNoteTable` powers the standardized summary table rendered automatically at the top of all generic posts. The heading adapts by category, but the box structure stays consistent site-wide.

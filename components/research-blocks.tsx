@@ -121,13 +121,14 @@ export function ResearchTable({
 }
 
 export function MarketNoteTable({
+  heading = "Market Note Summary",
   stance,
   confidence,
   horizon,
   quickAnswer,
   whatChangesOurMind,
   className,
-}: MarketNoteTableData & { className?: string }) {
+}: MarketNoteTableData & { heading?: ReactNode; className?: string }) {
   return (
     <section
       className={cn(
@@ -136,7 +137,7 @@ export function MarketNoteTable({
       )}
     >
       <div className="border-b border-border bg-foreground px-4 py-3 font-mono text-[10px] uppercase tracking-[0.18em] text-background">
-        Market Note Summary
+        {heading}
       </div>
       <div className="overflow-x-auto">
         <table className="w-full border-collapse">

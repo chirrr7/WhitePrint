@@ -5,6 +5,7 @@ import {
   formatPostDate,
   getPostCategoryHref,
   getPostCategoryLabel,
+  type PostCategory,
   type SidebarValueTone,
 } from "@/lib/post-meta"
 import { MarketNoteTable } from "@/components/research-blocks"
@@ -81,6 +82,19 @@ export default async function PostPage({ params }: Props) {
     }
   }
 
+  function getSummaryHeading(category: PostCategory) {
+    switch (category) {
+      case "macro":
+        return "Macro Summary"
+      case "equity":
+        return "Equity Research Summary"
+      case "market-notes":
+        return "Market Note Summary"
+      default:
+        return "Whiteprint Summary"
+    }
+  }
+
   return (
     <div
       className={cn(
@@ -148,8 +162,11 @@ export default async function PostPage({ params }: Props) {
       <div className={s.layout}>
         {/* Main article */}
         <div className={s.article}>
-          {post.category === "market-notes" && post.marketNoteTable ? (
-            <MarketNoteTable {...post.marketNoteTable} />
+          {post.marketNoteTable ? (
+            <MarketNoteTable
+              heading={getSummaryHeading(post.category)}
+              {...post.marketNoteTable}
+            />
           ) : null}
           {post.content}
         </div>
