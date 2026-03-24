@@ -1,11 +1,15 @@
 import type { Metadata } from "next"
 import { getPostsByCategory } from "@/lib/posts"
+import { SEO_CONFIG } from "@/lib/seo.config"
 import { CategoryPage } from "@/components/category-page"
 
 export const metadata: Metadata = {
   title: "Equity Research",
   description:
-    "Deep-dive company analysis, valuation models, and sector overviews.",
+    "Institutional-quality equity research with scenario analysis, DCF frameworks, and valuation cross-checks.",
+  alternates: {
+    canonical: `${SEO_CONFIG.siteUrl}/equity`,
+  },
 }
 
 export default function EquityPage() {

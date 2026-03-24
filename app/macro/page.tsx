@@ -1,11 +1,15 @@
 import type { Metadata } from "next"
 import { getPostsByCategory } from "@/lib/posts"
+import { SEO_CONFIG } from "@/lib/seo.config"
 import { CategoryPage } from "@/components/category-page"
 
 export const metadata: Metadata = {
   title: "Macro Research",
   description:
-    "Macroeconomic analysis covering rates, currencies, commodities, and global monetary policy.",
+    "Macroeconomic analysis covering Fed policy, rates, liquidity, and global macro themes.",
+  alternates: {
+    canonical: `${SEO_CONFIG.siteUrl}/macro`,
+  },
 }
 
 export default function MacroPage() {

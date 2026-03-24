@@ -2,17 +2,31 @@ import type { Metadata } from 'next'
 import { Analytics } from '@vercel/analytics/next'
 import { StancesTicker } from '@/components/StancesTicker'
 import { getStances } from '@/lib/stances'
+import { SEO_CONFIG } from '@/lib/seo.config'
 import { SiteHeader } from '@/components/site-header'
 import { SiteFooter } from '@/components/site-footer'
 import './globals.css'
 
 export const metadata: Metadata = {
+  metadataBase: new URL(SEO_CONFIG.siteUrl),
   title: {
-    default: 'Whiteprint | Independent Macro & Equity Research',
-    template: '%s | Whiteprint',
+    default: 'Whiteprint Research',
+    template: '%s — Whiteprint Research',
   },
-  description:
-    'Independent macroeconomic analysis, equity research, and financial models.',
+  description: SEO_CONFIG.siteDescription,
+  openGraph: {
+    type: 'website',
+    siteName: SEO_CONFIG.siteName,
+    locale: SEO_CONFIG.locale,
+  },
+  twitter: {
+    card: 'summary_large_image',
+    site: SEO_CONFIG.twitterHandle,
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
   icons: {
     icon: [
       { url: '/favicon.ico', sizes: 'any' },

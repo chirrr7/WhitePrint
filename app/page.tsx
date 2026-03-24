@@ -1,7 +1,19 @@
+import type { Metadata } from "next"
 import Link from "next/link"
 import { getAllPosts, getPostsByCategory } from "@/lib/posts"
 import { formatPostDate, getPostCategoryLabel, type PostMeta } from "@/lib/post-meta"
+import { SEO_CONFIG } from "@/lib/seo.config"
 import s from "./home.module.css"
+
+export const metadata: Metadata = {
+  title: {
+    absolute: "Whiteprint Research — Independent Macro & Equity Research",
+  },
+  description: SEO_CONFIG.siteDescription,
+  alternates: {
+    canonical: SEO_CONFIG.siteUrl,
+  },
+}
 
 export default function HomePage() {
   const allPosts = getAllPosts()
@@ -24,8 +36,9 @@ export default function HomePage() {
   const marketNotes = getPostsByCategory("market-notes")
 
   return (
-    <div className={s.wrapper}>
-      <div className={s.pageWrap}>
+    <>
+      <div className={s.wrapper}>
+        <div className={s.pageWrap}>
 
         {/* ── Today's Desk ── */}
         <div className={s.sectionLabel}>
@@ -131,8 +144,20 @@ export default function HomePage() {
           </>
         )}
 
+        </div>
       </div>
-    </div>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "WebSite",
+            name: SEO_CONFIG.siteName,
+            url: SEO_CONFIG.siteUrl,
+          }).replace(/</g, "\\u003c"),
+        }}
+      />
+    </>
   )
 }
 

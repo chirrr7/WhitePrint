@@ -9,6 +9,7 @@ import {
   type SidebarValueTone,
 } from "@/lib/post-meta"
 import { MarketNoteTable } from "@/components/research-blocks"
+import { SEO_CONFIG } from "@/lib/seo.config"
 import {
   getAllPosts,
   getArticleBySlug,
@@ -41,20 +42,28 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const post = getPostMetaBySlug(slug)
   if (!post) return {}
 
+  const url = `${SEO_CONFIG.siteUrl}/posts/${post.slug}`
+
   return {
     title: post.title,
     description: post.excerpt,
     keywords: post.tags,
     alternates: {
-      canonical: `/posts/${post.slug}`,
+      canonical: url,
     },
     openGraph: {
-      type: "article",
       title: post.title,
       description: post.excerpt,
-      url: `/posts/${post.slug}`,
-      publishedTime: `${post.date}T00:00:00.000Z`,
+      url,
+      type: "article",
+      publishedTime: post.date,
       tags: post.tags,
+      siteName: SEO_CONFIG.siteName,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: post.title,
+      description: post.excerpt,
     },
   }
 }
@@ -263,6 +272,33 @@ export default async function PostPage({ params }: Props) {
           </div>
         </aside>
       </div>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "Article",
+            headline: post.title,
+            description: post.excerpt,
+            datePublished: post.date,
+            dateModified: post.date,
+            author: {
+              "@type": "Organization",
+              name: SEO_CONFIG.siteName,
+              url: SEO_CONFIG.siteUrl,
+            },
+            publisher: {
+              "@type": "Organization",
+              name: SEO_CONFIG.siteName,
+              url: SEO_CONFIG.siteUrl,
+            },
+            mainEntityOfPage: {
+              "@type": "WebPage",
+              "@id": `${SEO_CONFIG.siteUrl}/posts/${post.slug}`,
+            },
+          }).replace(/</g, "\\u003c"),
+        }}
+      />
     </div>
   )
 }

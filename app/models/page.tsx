@@ -1,12 +1,16 @@
 import type { Metadata } from "next"
 import Link from "next/link"
 import { getAllModels, type FinancialModel } from "@/lib/models"
+import { SEO_CONFIG } from "@/lib/seo.config"
 import { DownloadButton } from "./download-button"
 
 export const metadata: Metadata = {
-  title: "Models Library",
+  title: "Financial Models",
   description:
-    "Downloadable financial models and analytical tools. Built for practitioners, designed for clarity.",
+    "Downloadable financial models including DCF frameworks and scenario analysis.",
+  alternates: {
+    canonical: `${SEO_CONFIG.siteUrl}/models`,
+  },
 }
 
 const MONO = '"JetBrains Mono", monospace'
@@ -236,4 +240,3 @@ function ModelRow({ model }: { model: FinancialModel }) {
     </article>
   )
 }
-

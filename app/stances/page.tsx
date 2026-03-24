@@ -1,12 +1,16 @@
 import type { Metadata } from "next"
 import Link from "next/link"
 import { getStances } from "@/lib/stances"
+import { SEO_CONFIG } from "@/lib/seo.config"
 import s from "./page.module.css"
 
 export const metadata: Metadata = {
-  title: "Coverage",
+  title: "Current Stances",
   description:
-    "Latest Whiteprint coverage, conviction levels, and scenario framing sourced directly from published posts.",
+    "Whiteprint's live analytical view across covered names and themes.",
+  alternates: {
+    canonical: `${SEO_CONFIG.siteUrl}/stances`,
+  },
 }
 
 function formatStanceLabel(stance: "cautious" | "neutral" | "constructive") {

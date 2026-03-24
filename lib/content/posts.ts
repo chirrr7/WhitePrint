@@ -202,6 +202,18 @@ function getAllPostMeta(): PostMeta[] {
   })
 }
 
+export function getMdxPosts(): PostMeta[] {
+  return getSourcesFromDirectory(mdxPostsDirectory, ".mdx")
+    .map(buildPostMeta)
+    .sort((left, right) => {
+      if (left.date === right.date) {
+        return left.title.localeCompare(right.title)
+      }
+
+      return left.date > right.date ? -1 : 1
+    })
+}
+
 function getPostSourceBySlug(slug: string): PostSource | null {
   const mdxPath = path.join(mdxPostsDirectory, `${slug}.mdx`)
   if (fs.existsSync(mdxPath)) {

@@ -1,9 +1,13 @@
 import type { Metadata } from "next"
+import { SEO_CONFIG } from "@/lib/seo.config"
 
 export const metadata: Metadata = {
   title: "About",
   description:
-    "Whiteprint Research is an independent publication producing macro, equity, and sector research at institutional quality.",
+    "About Whiteprint Research — independent macro and equity research.",
+  alternates: {
+    canonical: `${SEO_CONFIG.siteUrl}/about`,
+  },
 }
 
 const MONO = '"JetBrains Mono", monospace'
