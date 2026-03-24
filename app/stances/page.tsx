@@ -75,6 +75,30 @@ function getStatusClassName(status: "monitoring" | "expired" | "active") {
   }
 }
 
+function formatScenarioLabel(kind: "bear" | "base" | "bull") {
+  switch (kind) {
+    case "base":
+      return "Neutral"
+    case "bull":
+      return "Bull"
+    default:
+      return "Bear"
+  }
+}
+
+function formatScenarioValue(value: number | null) {
+  if (value === null) {
+    return "--"
+  }
+
+  if (Number.isInteger(value)) {
+    return value.toLocaleString("en-US")
+  }
+
+  const fixed = value.toFixed(2)
+  return fixed.replace(/\.00$/, "").replace(/(\.\d)0$/, "$1")
+}
+
 export default async function StancesPage() {
   const stances = getStances()
 
@@ -99,7 +123,7 @@ export default async function StancesPage() {
                 <th>Stance</th>
                 <th>Conviction</th>
                 <th>Thesis</th>
-                <th>Bear / Base / Bull</th>
+                <th>Bear / Neutral / Bull</th>
                 <th>Status</th>
                 <th>Date</th>
                 <th>Post</th>
@@ -131,26 +155,32 @@ export default async function StancesPage() {
                     {stance.bear === null && stance.base === null && stance.bull === null ? (
                       <span className={s.targetEmpty}>No scenario frame</span>
                     ) : (
-                      <>
-                        <div className={s.targetRow}>
-                          <span className={s.targetLabel}>Bear</span>
+                      <div className={s.targetGrid}>
+                        <div className={`${s.targetCard} ${s.targetCardBear}`}>
                           <span className={s.targetValue}>
-                            {stance.bear === null ? "--" : stance.bear}
+                            {formatScenarioValue(stance.bear)}
+                          </span>
+                          <span className={s.targetLabel}>
+                            {formatScenarioLabel("bear")}
                           </span>
                         </div>
-                        <div className={s.targetRow}>
-                          <span className={s.targetLabel}>Base</span>
+                        <div className={`${s.targetCard} ${s.targetCardBase}`}>
                           <span className={s.targetValue}>
-                            {stance.base === null ? "--" : stance.base}
+                            {formatScenarioValue(stance.base)}
+                          </span>
+                          <span className={s.targetLabel}>
+                            {formatScenarioLabel("base")}
                           </span>
                         </div>
-                        <div className={s.targetRow}>
-                          <span className={s.targetLabel}>Bull</span>
+                        <div className={`${s.targetCard} ${s.targetCardBull}`}>
                           <span className={s.targetValue}>
-                            {stance.bull === null ? "--" : stance.bull}
+                            {formatScenarioValue(stance.bull)}
+                          </span>
+                          <span className={s.targetLabel}>
+                            {formatScenarioLabel("bull")}
                           </span>
                         </div>
-                      </>
+                      </div>
                     )}
                   </td>
                   <td className={s.cell}>
