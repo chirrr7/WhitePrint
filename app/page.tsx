@@ -86,20 +86,6 @@ export default function HomePage() {
                     <span className={s.briefItemLabel}>
                       {post.eyebrow ?? post.tags[0] ?? getPostCategoryLabel(post.category)}
                     </span>
-                    {post.stance ? (
-                      <>
-                        <div className={s.briefItemSep} />
-                        <span
-                          className={
-                            post.stance.toLowerCase() === "hold"
-                              ? s.badgeHold
-                              : s.badgeCaution
-                          }
-                        >
-                          {post.stance}
-                        </span>
-                      </>
-                    ) : null}
                   </div>
                   <p className={s.briefItemBody}>{post.excerpt}</p>
                   <span className={s.briefItemLink}>

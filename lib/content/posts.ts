@@ -8,9 +8,11 @@ import { z } from "zod"
 import { articleBodyComponents, postBodyComponents } from "@/components/post-body"
 import {
   type MarketNoteTableData,
+  type PostConviction,
   postCategories,
   type PostCategory,
   type PostMeta,
+  type PostStance,
   type ReportDownloadData,
   type SidebarCard,
 } from "@/lib/post-meta"
@@ -21,6 +23,8 @@ const legacyPostsDirectory = path.join(process.cwd(), "posts")
 export const postCategorySchema = z.enum(postCategories)
 
 const postSlugSchema = z.string().trim().regex(/^[a-z0-9-]+$/)
+const postStanceSchema = z.enum(["cautious", "neutral", "constructive"])
+const postConvictionSchema = z.enum(["high", "medium", "low"])
 const sidebarValueToneSchema = z.enum(["neutral", "positive", "warning", "negative"])
 const sidebarCardRowSchema = z.object({
   label: z.string().trim().min(1),
@@ -53,10 +57,18 @@ const postFrontmatterSchema = z.object({
   tags: z.array(z.string().trim().min(1)).default([]),
   excerpt: z.string().trim().min(1),
   readTime: z.number().int().positive().optional(),
+  ticker: z.string().trim().min(1).optional(),
+  name: z.string().trim().min(1).optional(),
+  stance: postStanceSchema.optional(),
+  conviction: postConvictionSchema.optional(),
+  stanceThesis: z.string().trim().min(1).optional(),
+  stanceMetric: z.string().trim().min(1).optional(),
+  bear: z.number().finite().optional(),
+  base: z.number().finite().optional(),
+  bull: z.number().finite().optional(),
   // Optional editorial fields
   displayTitle: z.string().trim().optional(),
   eyebrow: z.string().trim().optional(),
-  stance: z.string().trim().optional(),
   marketNoteTable: marketNoteTableSchema.optional(),
   reportDownload: reportDownloadSchema.optional(),
   sidebarCards: z.array(sidebarCardSchema).max(4).optional(),
@@ -140,9 +152,17 @@ function buildPostMeta(source: PostSource): PostMeta {
     tags: frontmatter.tags,
     excerpt: frontmatter.excerpt,
     readTime: frontmatter.readTime ?? estimateReadTime(content),
+    ticker: frontmatter.ticker,
+    name: frontmatter.name,
+    stance: frontmatter.stance as PostStance | undefined,
+    conviction: frontmatter.conviction as PostConviction | undefined,
+    stanceThesis: frontmatter.stanceThesis,
+    stanceMetric: frontmatter.stanceMetric,
+    bear: frontmatter.bear,
+    base: frontmatter.base,
+    bull: frontmatter.bull,
     displayTitle: frontmatter.displayTitle,
     eyebrow: frontmatter.eyebrow,
-    stance: frontmatter.stance,
     marketNoteTable: frontmatter.marketNoteTable as MarketNoteTableData | undefined,
     reportDownload: frontmatter.reportDownload as ReportDownloadData | undefined,
     sidebarCards: frontmatter.sidebarCards as SidebarCard[] | undefined,

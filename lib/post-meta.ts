@@ -2,6 +2,8 @@ export const postCategories = ["macro", "equity", "market-notes"] as const
 
 export type PostCategory = (typeof postCategories)[number]
 export type SidebarValueTone = "neutral" | "positive" | "warning" | "negative"
+export type PostStance = "cautious" | "neutral" | "constructive"
+export type PostConviction = "high" | "medium" | "low"
 
 export interface MarketNoteTableData {
   stance: string
@@ -37,9 +39,17 @@ export interface PostMeta {
   tags: string[]
   excerpt: string
   readTime: number
+  ticker?: string
+  name?: string
+  stance?: PostStance
+  conviction?: PostConviction
+  stanceThesis?: string
+  stanceMetric?: string
+  bear?: number
+  base?: number
+  bull?: number
   displayTitle?: string
   eyebrow?: string
-  stance?: string
   marketNoteTable?: MarketNoteTableData
   reportDownload?: ReportDownloadData
   sidebarCards?: SidebarCard[]

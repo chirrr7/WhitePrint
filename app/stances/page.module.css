@@ -1,0 +1,234 @@
+.page {
+  min-height: 100vh;
+  background: var(--background);
+}
+
+.hero {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+}
+
+.heroInner {
+  max-width: 1160px;
+  margin: 0 auto;
+  padding: 56px 40px 44px;
+}
+
+.eyebrow {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 14px;
+}
+
+.title {
+  font-family: "Playfair Display", Georgia, serif;
+  font-size: clamp(32px, 4vw, 46px);
+  line-height: 1.05;
+  letter-spacing: -0.03em;
+  margin: 0;
+}
+
+.deck {
+  max-width: 700px;
+  margin-top: 16px;
+  color: var(--muted-foreground);
+  font-size: 17px;
+  line-height: 1.75;
+}
+
+.body {
+  max-width: 1160px;
+  margin: 0 auto;
+  padding: 36px 40px 88px;
+}
+
+.tableWrap {
+  overflow-x: auto;
+  border: 1px solid var(--border);
+  background: var(--surface);
+}
+
+.table {
+  width: 100%;
+  min-width: 1120px;
+  border-collapse: collapse;
+}
+
+.thead {
+  background: var(--foreground);
+}
+
+.thead th {
+  padding: 13px 16px;
+  text-align: left;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--background);
+}
+
+.row {
+  border-bottom: 1px solid var(--border);
+}
+
+.row:last-child {
+  border-bottom: none;
+}
+
+.row:nth-child(even) td {
+  background: #fbfaf7;
+}
+
+.cell {
+  padding: 16px;
+  vertical-align: top;
+  font-size: 14px;
+  line-height: 1.65;
+}
+
+.ticker {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.name {
+  display: block;
+  font-family: "Playfair Display", Georgia, serif;
+  font-size: 19px;
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+}
+
+.category {
+  display: block;
+  margin-top: 6px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted-foreground);
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 5px 9px;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  border: 1px solid var(--border);
+}
+
+.pillCautious {
+  color: var(--accent);
+  border-color: color-mix(in srgb, var(--accent) 35%, var(--border));
+  background: color-mix(in srgb, var(--accent) 8%, white);
+}
+
+.pillNeutral {
+  color: #8e6d26;
+  border-color: #d8c89f;
+  background: #fcf7ea;
+}
+
+.pillConstructive {
+  color: #1b6a47;
+  border-color: #bdd8cb;
+  background: #eff7f2;
+}
+
+.conviction {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.thesis {
+  max-width: 360px;
+  color: var(--foreground);
+}
+
+.metric {
+  white-space: pre-line;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  line-height: 1.75;
+  color: var(--muted-foreground);
+}
+
+.targets {
+  min-width: 160px;
+}
+
+.targetRow {
+  display: grid;
+  grid-template-columns: 44px 1fr;
+  gap: 12px;
+  padding: 4px 0;
+}
+
+.targetLabel {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted-foreground);
+}
+
+.targetValue {
+  font-family: "Playfair Display", Georgia, serif;
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.targetEmpty {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--muted-foreground);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.date {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted-foreground);
+  white-space: nowrap;
+}
+
+.link {
+  display: inline-flex;
+  align-items: center;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--foreground);
+  text-decoration: none;
+}
+
+.link:hover {
+  color: var(--accent);
+}
+
+@media (max-width: 768px) {
+  .heroInner,
+  .body {
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+}

@@ -1,5 +1,7 @@
 import type { Metadata } from 'next'
 import { Analytics } from '@vercel/analytics/next'
+import { StancesTicker } from '@/components/StancesTicker'
+import { getStances } from '@/lib/stances'
 import { SiteHeader } from '@/components/site-header'
 import { SiteFooter } from '@/components/site-footer'
 import './globals.css'
@@ -26,6 +28,8 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode
 }>) {
+  const stances = getStances()
+
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
@@ -38,6 +42,7 @@ export default function RootLayout({
       </head>
       <body style={{ margin: 0, padding: 0, background: '#f7f6f3' }}>
         <SiteHeader />
+        <StancesTicker stances={stances} />
         <main>{children}</main>
         <SiteFooter />
         <Analytics />

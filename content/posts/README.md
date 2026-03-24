@@ -11,6 +11,13 @@ Frontmatter fields:
 - `excerpt`: short summary used on cards and SEO
 - `readTime`: optional integer minutes
 - `slug`: optional override; otherwise the filename becomes the slug
+- `ticker`: optional stance ticker / shorthand used by `/stances` and the ticker
+- `name`: optional display name for the stance item
+- `stance`: optional `cautious`, `neutral`, or `constructive`
+- `conviction`: optional `high`, `medium`, or `low`
+- `stanceThesis`: optional thesis text for `/stances`
+- `stanceMetric`: optional metric text for `/stances`
+- `bear` / `base` / `bull`: optional numeric scenario levels
 - `marketNoteTable`: optional summary table for market notes (stance, confidence, horizon, quick answer, what changes our mind)
 - `sidebarCards`: optional array of right-rail cards for the generic article sidebar
 
@@ -24,6 +31,15 @@ category: "market-notes"
 tags: ["macro", "rates"]
 excerpt: "One-sentence summary for cards and metadata."
 readTime: 6
+ticker: "ORCL"
+name: "Oracle"
+stance: "cautious"
+conviction: "high"
+stanceThesis: "Condensed analytical view shown on /stances."
+stanceMetric: "ROIC 12.6% vs WACC 9.2%\nEV/Rev 8.7x"
+bear: 105
+base: 140
+bull: 175
 marketNoteTable:
   stance: "Constructive but selective"
   confidence: "Medium"
