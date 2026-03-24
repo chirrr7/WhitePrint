@@ -104,13 +104,23 @@ export default async function StancesPage() {
       <div className={s.body}>
         <div className={s.tableWrap}>
           <table className={s.table}>
+            <colgroup>
+              <col className={s.colCoverage} />
+              <col className={s.colStance} />
+              <col className={s.colConviction} />
+              <col className={s.colThesis} />
+              <col className={s.colTargets} />
+              <col className={s.colStatus} />
+              <col className={s.colDate} />
+              <col className={s.colPost} />
+            </colgroup>
             <thead className={s.thead}>
               <tr>
                 <th>Coverage</th>
                 <th>Stance</th>
                 <th>Conviction</th>
                 <th>Thesis</th>
-                <th>Bear / Neutral / Bull</th>
+                <th>Bearish / Neutral / Bullish</th>
                 <th>Status</th>
                 <th>Date</th>
                 <th>Post</th>
@@ -165,14 +175,14 @@ export default async function StancesPage() {
                       </div>
                     )}
                   </td>
-                  <td className={s.cell}>
+                  <td className={`${s.cell} ${s.statusCell}`}>
                     <span className={getStatusClassName(stance.status)}>
                       <span className={s.statusDot} />
                       {formatStatusLabel(stance.status)}
                     </span>
                   </td>
-                  <td className={`${s.cell} ${s.date}`}>{stance.date}</td>
-                  <td className={s.cell}>
+                  <td className={`${s.cell} ${s.date} ${s.dateCell}`}>{stance.date}</td>
+                  <td className={`${s.cell} ${s.postCell}`}>
                     <Link href={`/posts/${stance.slug}`} className={s.link}>
                       Open
                     </Link>
