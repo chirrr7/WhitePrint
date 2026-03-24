@@ -5,6 +5,7 @@ export type SidebarValueTone = "neutral" | "positive" | "warning" | "negative"
 export type PostStance = "cautious" | "neutral" | "constructive"
 export type PostConviction = "high" | "medium" | "low"
 export type PostStatus = "monitoring" | "expired" | "active"
+export type PostScenarioType = "price" | "fcf"
 
 export interface MarketNoteTableData {
   stance: string
@@ -46,6 +47,7 @@ export interface PostMeta {
   conviction?: PostConviction
   stanceThesis?: string
   status?: PostStatus
+  scenarioType?: PostScenarioType
   stanceMetric?: string
   bear?: number
   base?: number

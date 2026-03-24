@@ -17,6 +17,7 @@ Frontmatter fields:
 - `conviction`: optional `high`, `medium`, or `low`
 - `stanceThesis`: optional thesis text for `/stances`
 - `status`: optional `active`, `monitoring`, or `expired`
+- `scenarioType`: optional `price` or `fcf` for the scenario cards on `/stances`
 - `bear` / `base` / `bull`: optional numeric scenario levels
 - `marketNoteTable`: optional summary table for market notes (stance, confidence, horizon, quick answer, what changes our mind)
 - `sidebarCards`: optional array of right-rail cards for the generic article sidebar
@@ -37,6 +38,7 @@ stance: "cautious"
 conviction: "high"
 stanceThesis: "Condensed analytical view shown on /stances."
 status: "active"
+scenarioType: "fcf"
 bear: 105
 base: 140
 bull: 175

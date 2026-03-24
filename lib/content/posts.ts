@@ -12,6 +12,7 @@ import {
   postCategories,
   type PostCategory,
   type PostMeta,
+  type PostScenarioType,
   type PostStatus,
   type PostStance,
   type ReportDownloadData,
@@ -27,6 +28,7 @@ const postSlugSchema = z.string().trim().regex(/^[a-z0-9-]+$/)
 const postStanceSchema = z.enum(["cautious", "neutral", "constructive"])
 const postConvictionSchema = z.enum(["high", "medium", "low"])
 const postStatusSchema = z.enum(["monitoring", "expired", "active"])
+const postScenarioTypeSchema = z.enum(["price", "fcf"])
 const sidebarValueToneSchema = z.enum(["neutral", "positive", "warning", "negative"])
 const sidebarCardRowSchema = z.object({
   label: z.string().trim().min(1),
@@ -65,6 +67,7 @@ const postFrontmatterSchema = z.object({
   conviction: postConvictionSchema.optional(),
   stanceThesis: z.string().trim().min(1).optional(),
   status: postStatusSchema.optional(),
+  scenarioType: postScenarioTypeSchema.optional(),
   stanceMetric: z.string().trim().min(1).optional(),
   bear: z.number().finite().optional(),
   base: z.number().finite().optional(),
@@ -161,6 +164,7 @@ function buildPostMeta(source: PostSource): PostMeta {
     conviction: frontmatter.conviction as PostConviction | undefined,
     stanceThesis: frontmatter.stanceThesis,
     status: frontmatter.status as PostStatus | undefined,
+    scenarioType: frontmatter.scenarioType as PostScenarioType | undefined,
     stanceMetric: frontmatter.stanceMetric,
     bear: frontmatter.bear,
     base: frontmatter.base,

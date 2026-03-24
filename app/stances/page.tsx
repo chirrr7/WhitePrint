@@ -31,28 +31,6 @@ function getStancePillClassName(stance: "cautious" | "neutral" | "constructive")
   }
 }
 
-function formatDirectionalLabel(stance: "cautious" | "neutral" | "constructive") {
-  switch (stance) {
-    case "cautious":
-      return "Bearish"
-    case "constructive":
-      return "Bullish"
-    default:
-      return "Neutral"
-  }
-}
-
-function getDirectionalClassName(stance: "cautious" | "neutral" | "constructive") {
-  switch (stance) {
-    case "cautious":
-      return `${s.direction} ${s.directionBearish}`
-    case "constructive":
-      return `${s.direction} ${s.directionBullish}`
-    default:
-      return `${s.direction} ${s.directionNeutral}`
-  }
-}
-
 function formatStatusLabel(status: "monitoring" | "expired" | "active") {
   switch (status) {
     case "monitoring":
@@ -75,28 +53,37 @@ function getStatusClassName(status: "monitoring" | "expired" | "active") {
   }
 }
 
-function formatScenarioLabel(kind: "bear" | "base" | "bull") {
-  switch (kind) {
-    case "base":
-      return "Neutral"
-    case "bull":
-      return "Bull"
-    default:
-      return "Bear"
-  }
+function formatScenarioLabel(
+  kind: "bear" | "base" | "bull",
+  scenarioType: "price" | "fcf",
+) {
+  const directional =
+    kind === "base" ? "Neutral" : kind === "bull" ? "Bullish" : "Bearish"
+
+  return scenarioType === "fcf" ? `${directional} FCF` : directional
 }
 
-function formatScenarioValue(value: number | null) {
+function formatScenarioValue(value: number | null, scenarioType: "price" | "fcf") {
   if (value === null) {
     return "--"
   }
 
-  if (Number.isInteger(value)) {
-    return value.toLocaleString("en-US")
+  if (scenarioType === "fcf") {
+    return `$${value.toFixed(1).replace(/\.0$/, "")}B`
   }
 
-  const fixed = value.toFixed(2)
-  return fixed.replace(/\.00$/, "").replace(/(\.\d)0$/, "$1")
+  return `$${value.toFixed(2).replace(/\.00$/, "").replace(/(\.\d)0$/, "$1")}`
+}
+
+function getScenarioCardClassName(kind: "bear" | "base" | "bull") {
+  switch (kind) {
+    case "base":
+      return `${s.targetCard} ${s.targetCardBase}`
+    case "bull":
+      return `${s.targetCard} ${s.targetCardBull}`
+    default:
+      return `${s.targetCard} ${s.targetCardBear}`
+  }
 }
 
 export default async function StancesPage() {
@@ -138,14 +125,9 @@ export default async function StancesPage() {
                     <span className={s.category}>{stance.category}</span>
                   </td>
                   <td className={s.cell}>
-                    <div className={s.stanceStack}>
-                      <span className={getStancePillClassName(stance.stance)}>
-                        {formatStanceLabel(stance.stance)}
-                      </span>
-                      <span className={getDirectionalClassName(stance.stance)}>
-                        {formatDirectionalLabel(stance.stance)}
-                      </span>
-                    </div>
+                    <span className={getStancePillClassName(stance.stance)}>
+                      {formatStanceLabel(stance.stance)}
+                    </span>
                   </td>
                   <td className={s.cell}>
                     <span className={s.conviction}>{stance.conviction}</span>
@@ -156,28 +138,28 @@ export default async function StancesPage() {
                       <span className={s.targetEmpty}>No scenario frame</span>
                     ) : (
                       <div className={s.targetGrid}>
-                        <div className={`${s.targetCard} ${s.targetCardBear}`}>
+                        <div className={getScenarioCardClassName("bear")}>
                           <span className={s.targetValue}>
-                            {formatScenarioValue(stance.bear)}
+                            {formatScenarioValue(stance.bear, stance.scenarioType)}
                           </span>
                           <span className={s.targetLabel}>
-                            {formatScenarioLabel("bear")}
+                            {formatScenarioLabel("bear", stance.scenarioType)}
                           </span>
                         </div>
-                        <div className={`${s.targetCard} ${s.targetCardBase}`}>
+                        <div className={getScenarioCardClassName("base")}>
                           <span className={s.targetValue}>
-                            {formatScenarioValue(stance.base)}
+                            {formatScenarioValue(stance.base, stance.scenarioType)}
                           </span>
                           <span className={s.targetLabel}>
-                            {formatScenarioLabel("base")}
+                            {formatScenarioLabel("base", stance.scenarioType)}
                           </span>
                         </div>
-                        <div className={`${s.targetCard} ${s.targetCardBull}`}>
+                        <div className={getScenarioCardClassName("bull")}>
                           <span className={s.targetValue}>
-                            {formatScenarioValue(stance.bull)}
+                            {formatScenarioValue(stance.bull, stance.scenarioType)}
                           </span>
                           <span className={s.targetLabel}>
-                            {formatScenarioLabel("bull")}
+                            {formatScenarioLabel("bull", stance.scenarioType)}
                           </span>
                         </div>
                       </div>
