@@ -8,7 +8,7 @@ export interface Stance {
   stance: PostStance
   conviction: PostConviction
   thesis: string
-  metric: string
+  status: string
   bear: number | null
   base: number | null
   bull: number | null
@@ -43,7 +43,7 @@ export function getStances(): Stance[] {
       stance: post.stance!,
       conviction: post.conviction ?? "medium",
       thesis: post.stanceThesis ?? post.excerpt,
-      metric: post.stanceMetric ?? "",
+      status: post.status ?? post.stanceMetric ?? "",
       bear: post.bear ?? null,
       base: post.base ?? null,
       bull: post.bull ?? null,

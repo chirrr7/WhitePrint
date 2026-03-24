@@ -159,11 +159,11 @@
   color: var(--foreground);
 }
 
-.metric {
+.status {
   white-space: pre-line;
-  font-family: var(--font-mono);
-  font-size: 12px;
-  line-height: 1.75;
+  max-width: 240px;
+  font-size: 14px;
+  line-height: 1.7;
   color: var(--muted-foreground);
 }
 

@@ -10,5 +10,5 @@ name: "Fed Policy"
 stance: "cautious"
 conviction: "high"
 stanceThesis: "March hold fully priced. Tension between energy-driven inflation and structural reserve scarcity. Leadership transition adds policy uncertainty beyond the Warsh confirmation window."
-stanceMetric: "Fed Funds: 4.25-4.50%\nFirst cut implied: Q3 2026"
+status: "March hold is priced; reserve scarcity remains unresolved."
 ---

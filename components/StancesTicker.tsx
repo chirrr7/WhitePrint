@@ -35,7 +35,7 @@ export function StancesTicker({ stances }: { stances: Stance[] }) {
     <div className={s.wrapper}>
       <div className={s.inner}>
         <Link href="/stances" className={s.label}>
-          Latest Stances
+          Latest Coverage
         </Link>
         <div className={s.track}>
           <div className={s.marquee}>

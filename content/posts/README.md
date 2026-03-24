@@ -16,7 +16,8 @@ Frontmatter fields:
 - `stance`: optional `cautious`, `neutral`, or `constructive`
 - `conviction`: optional `high`, `medium`, or `low`
 - `stanceThesis`: optional thesis text for `/stances`
-- `stanceMetric`: optional metric text for `/stances`
+- `status`: optional current-status text for `/stances`
+- `stanceMetric`: optional legacy fallback text for `/stances` if `status` is omitted
 - `bear` / `base` / `bull`: optional numeric scenario levels
 - `marketNoteTable`: optional summary table for market notes (stance, confidence, horizon, quick answer, what changes our mind)
 - `sidebarCards`: optional array of right-rail cards for the generic article sidebar
@@ -36,7 +37,7 @@ name: "Oracle"
 stance: "cautious"
 conviction: "high"
 stanceThesis: "Condensed analytical view shown on /stances."
-stanceMetric: "ROIC 12.6% vs WACC 9.2%\nEV/Rev 8.7x"
+status: "Bull case already in the price."
 bear: 105
 base: 140
 bull: 175

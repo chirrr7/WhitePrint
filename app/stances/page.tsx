@@ -4,9 +4,9 @@ import { getStances } from "@/lib/stances"
 import s from "./page.module.css"
 
 export const metadata: Metadata = {
-  title: "Stances",
+  title: "Coverage",
   description:
-    "Latest Whiteprint research stances, conviction levels, and scenario framing sourced directly from published posts.",
+    "Latest Whiteprint coverage, conviction levels, and scenario framing sourced directly from published posts.",
 }
 
 function formatStanceLabel(stance: "cautious" | "neutral" | "constructive") {
@@ -39,10 +39,10 @@ export default async function StancesPage() {
       <header className={s.hero}>
         <div className={s.heroInner}>
           <div className={s.eyebrow}>Whiteprint Research</div>
-          <h1 className={s.title}>Stances</h1>
+          <h1 className={s.title}>Coverage</h1>
           <p className={s.deck}>
-            Published analytical positions, conviction levels, and scenario framing.
-            This page auto-populates from post frontmatter on build.
+            Published coverage, stance, conviction, and scenario framing. This page
+            auto-populates from post frontmatter on build.
           </p>
         </div>
       </header>
@@ -56,8 +56,8 @@ export default async function StancesPage() {
                 <th>Stance</th>
                 <th>Conviction</th>
                 <th>Thesis</th>
-                <th>Metric</th>
                 <th>Bear / Base / Bull</th>
+                <th>Status</th>
                 <th>Date</th>
                 <th>Post</th>
               </tr>
@@ -79,7 +79,6 @@ export default async function StancesPage() {
                     <span className={s.conviction}>{stance.conviction}</span>
                   </td>
                   <td className={`${s.cell} ${s.thesis}`}>{stance.thesis}</td>
-                  <td className={`${s.cell} ${s.metric}`}>{stance.metric || "--"}</td>
                   <td className={`${s.cell} ${s.targets}`}>
                     {stance.bear === null && stance.base === null && stance.bull === null ? (
                       <span className={s.targetEmpty}>No scenario frame</span>
@@ -106,6 +105,7 @@ export default async function StancesPage() {
                       </>
                     )}
                   </td>
+                  <td className={`${s.cell} ${s.status}`}>{stance.status || "--"}</td>
                   <td className={`${s.cell} ${s.date}`}>{stance.date}</td>
                   <td className={s.cell}>
                     <Link href={`/posts/${stance.slug}`} className={s.link}>

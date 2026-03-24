@@ -44,6 +44,7 @@ export interface PostMeta {
   stance?: PostStance
   conviction?: PostConviction
   stanceThesis?: string
+  status?: string
   stanceMetric?: string
   bear?: number
   base?: number
