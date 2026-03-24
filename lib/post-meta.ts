@@ -4,6 +4,7 @@ export type PostCategory = (typeof postCategories)[number]
 export type SidebarValueTone = "neutral" | "positive" | "warning" | "negative"
 export type PostStance = "cautious" | "neutral" | "constructive"
 export type PostConviction = "high" | "medium" | "low"
+export type PostStatus = "monitoring" | "expired" | "active"
 
 export interface MarketNoteTableData {
   stance: string
@@ -44,7 +45,7 @@ export interface PostMeta {
   stance?: PostStance
   conviction?: PostConviction
   stanceThesis?: string
-  status?: string
+  status?: PostStatus
   stanceMetric?: string
   bear?: number
   base?: number

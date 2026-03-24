@@ -1,5 +1,10 @@
 import { getAllPosts } from "@/lib/posts"
-import { getPostCategoryLabel, type PostConviction, type PostStance } from "@/lib/post-meta"
+import {
+  getPostCategoryLabel,
+  type PostConviction,
+  type PostStance,
+  type PostStatus,
+} from "@/lib/post-meta"
 
 export interface Stance {
   ticker: string
@@ -8,7 +13,7 @@ export interface Stance {
   stance: PostStance
   conviction: PostConviction
   thesis: string
-  status: string
+  status: PostStatus
   bear: number | null
   base: number | null
   bull: number | null
@@ -43,7 +48,7 @@ export function getStances(): Stance[] {
       stance: post.stance!,
       conviction: post.conviction ?? "medium",
       thesis: post.stanceThesis ?? post.excerpt,
-      status: post.status ?? post.stanceMetric ?? "",
+      status: post.status ?? "active",
       bear: post.bear ?? null,
       base: post.base ?? null,
       bull: post.bull ?? null,

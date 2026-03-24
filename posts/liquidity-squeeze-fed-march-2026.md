@@ -10,5 +10,5 @@ name: "Fed Policy"
 stance: "cautious"
 conviction: "high"
 stanceThesis: "March hold fully priced. Tension between energy-driven inflation and structural reserve scarcity. Leadership transition adds policy uncertainty beyond the Warsh confirmation window."
-status: "March hold is priced; reserve scarcity remains unresolved."
+status: "expired"
 ---

@@ -31,6 +31,50 @@ function getStancePillClassName(stance: "cautious" | "neutral" | "constructive")
   }
 }
 
+function formatDirectionalLabel(stance: "cautious" | "neutral" | "constructive") {
+  switch (stance) {
+    case "cautious":
+      return "Bearish"
+    case "constructive":
+      return "Bullish"
+    default:
+      return "Neutral"
+  }
+}
+
+function getDirectionalClassName(stance: "cautious" | "neutral" | "constructive") {
+  switch (stance) {
+    case "cautious":
+      return `${s.direction} ${s.directionBearish}`
+    case "constructive":
+      return `${s.direction} ${s.directionBullish}`
+    default:
+      return `${s.direction} ${s.directionNeutral}`
+  }
+}
+
+function formatStatusLabel(status: "monitoring" | "expired" | "active") {
+  switch (status) {
+    case "monitoring":
+      return "Monitoring"
+    case "expired":
+      return "Expired"
+    default:
+      return "Active"
+  }
+}
+
+function getStatusClassName(status: "monitoring" | "expired" | "active") {
+  switch (status) {
+    case "monitoring":
+      return `${s.statusPill} ${s.statusMonitoring}`
+    case "expired":
+      return `${s.statusPill} ${s.statusExpired}`
+    default:
+      return `${s.statusPill} ${s.statusActive}`
+  }
+}
+
 export default async function StancesPage() {
   const stances = getStances()
 
@@ -41,8 +85,7 @@ export default async function StancesPage() {
           <div className={s.eyebrow}>Whiteprint Research</div>
           <h1 className={s.title}>Coverage</h1>
           <p className={s.deck}>
-            Published coverage, stance, conviction, and scenario framing. This page
-            auto-populates from post frontmatter on build.
+            Current Whiteprint coverage across macro, equities, and market notes.
           </p>
         </div>
       </header>
@@ -71,9 +114,14 @@ export default async function StancesPage() {
                     <span className={s.category}>{stance.category}</span>
                   </td>
                   <td className={s.cell}>
-                    <span className={getStancePillClassName(stance.stance)}>
-                      {formatStanceLabel(stance.stance)}
-                    </span>
+                    <div className={s.stanceStack}>
+                      <span className={getStancePillClassName(stance.stance)}>
+                        {formatStanceLabel(stance.stance)}
+                      </span>
+                      <span className={getDirectionalClassName(stance.stance)}>
+                        {formatDirectionalLabel(stance.stance)}
+                      </span>
+                    </div>
                   </td>
                   <td className={s.cell}>
                     <span className={s.conviction}>{stance.conviction}</span>
@@ -105,7 +153,12 @@ export default async function StancesPage() {
                       </>
                     )}
                   </td>
-                  <td className={`${s.cell} ${s.status}`}>{stance.status || "--"}</td>
+                  <td className={s.cell}>
+                    <span className={getStatusClassName(stance.status)}>
+                      <span className={s.statusDot} />
+                      {formatStatusLabel(stance.status)}
+                    </span>
+                  </td>
                   <td className={`${s.cell} ${s.date}`}>{stance.date}</td>
                   <td className={s.cell}>
                     <Link href={`/posts/${stance.slug}`} className={s.link}>
