@@ -4,7 +4,15 @@ const MONO = '"JetBrains Mono", monospace'
 const INK = "#0a0a0a"
 const ACCENT = "#b83025"
 
-export function DownloadButton({ href, filename }: { href: string; filename: string }) {
+export function DownloadButton({
+  href,
+  filename,
+  label = "Download",
+}: {
+  href: string
+  filename: string
+  label?: string
+}) {
   return (
     <a
       href={href}
@@ -47,7 +55,7 @@ export function DownloadButton({ href, filename }: { href: string; filename: str
         <polyline points="7 10 12 15 17 10" />
         <line x1="12" y1="15" x2="12" y2="3" />
       </svg>
-      Download
+      {label}
     </a>
   )
 }
