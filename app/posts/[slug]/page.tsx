@@ -215,6 +215,16 @@ export default async function PostPage({ params }: Props) {
             </>
           )}
 
+          {post.reportDownload ? (
+            <a
+              href={post.reportDownload.href}
+              download={post.reportDownload.filename}
+              className={s.sidebarReportButton}
+            >
+              {post.reportDownload.label ?? "Report"}
+            </a>
+          ) : null}
+
           {/* Back link */}
           <div style={{ marginTop: 8 }}>
             <Link

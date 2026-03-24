@@ -11,6 +11,7 @@ import {
   postCategories,
   type PostCategory,
   type PostMeta,
+  type ReportDownloadData,
   type SidebarCard,
 } from "@/lib/post-meta"
 
@@ -38,6 +39,11 @@ const marketNoteTableSchema = z.object({
   quickAnswer: z.string().trim().min(1),
   whatChangesOurMind: z.string().trim().min(1),
 })
+const reportDownloadSchema = z.object({
+  href: z.string().trim().min(1),
+  filename: z.string().trim().min(1),
+  label: z.string().trim().min(1).optional(),
+})
 
 const postFrontmatterSchema = z.object({
   title: z.string().trim().min(1),
@@ -52,6 +58,7 @@ const postFrontmatterSchema = z.object({
   eyebrow: z.string().trim().optional(),
   stance: z.string().trim().optional(),
   marketNoteTable: marketNoteTableSchema.optional(),
+  reportDownload: reportDownloadSchema.optional(),
   sidebarCards: z.array(sidebarCardSchema).max(4).optional(),
 })
 
@@ -137,6 +144,7 @@ function buildPostMeta(source: PostSource): PostMeta {
     eyebrow: frontmatter.eyebrow,
     stance: frontmatter.stance,
     marketNoteTable: frontmatter.marketNoteTable as MarketNoteTableData | undefined,
+    reportDownload: frontmatter.reportDownload as ReportDownloadData | undefined,
     sidebarCards: frontmatter.sidebarCards as SidebarCard[] | undefined,
   }
 }

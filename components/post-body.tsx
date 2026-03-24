@@ -1,6 +1,5 @@
 import Link from "next/link"
 import type { ComponentPropsWithoutRef, ReactNode } from "react"
-import { DownloadButton } from "@/app/models/download-button"
 import {
   DisclaimerBox,
   PullQuote,
@@ -92,7 +91,6 @@ export const articleBodyComponents = {
   DisclaimerBox,
   StickyTable,
   StickyLayout,
-  DownloadButton,
 }
 
 export const postBodyComponents = {
@@ -182,5 +180,4 @@ export const postBodyComponents = {
   DisclaimerBox,
   StickyTable,
   StickyLayout,
-  DownloadButton,
 }

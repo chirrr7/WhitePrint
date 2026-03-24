@@ -11,6 +11,12 @@ export interface MarketNoteTableData {
   whatChangesOurMind: string
 }
 
+export interface ReportDownloadData {
+  href: string
+  filename: string
+  label?: string
+}
+
 export interface SidebarCardRow {
   label: string
   value: string
@@ -35,6 +41,7 @@ export interface PostMeta {
   eyebrow?: string
   stance?: string
   marketNoteTable?: MarketNoteTableData
+  reportDownload?: ReportDownloadData
   sidebarCards?: SidebarCard[]
 }
 
