@@ -1,0 +1,17 @@
+.wrapper {
+  --bg: #f7f2ea;
+  --surface: #fffcf8;
+  --ink: #111111;
+  --ink-2: #23201c;
+  --muted: #5e554d;
+  --subtle: #8f8176;
+  --border: #ddd1c4;
+  --border-light: #ebe1d7;
+  --accent: #b33b2e;
+  --accent-2: #c96a1f;
+  --gold: #8e6d26;
+  --positive: #1b6a47;
+  --negative: #b12c2c;
+  --tag-bg: #f3e9dd;
+  --max-content: 700px;
+}

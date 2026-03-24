@@ -1,5 +1,6 @@
 import { Children, isValidElement, type ReactNode } from "react"
 import { cn } from "@/lib/utils"
+import type { MarketNoteTableData } from "@/lib/post-meta"
 
 type StatTone = "neutral" | "positive" | "warning" | "negative"
 type ScenarioTone =
@@ -116,6 +117,74 @@ export function ResearchTable({
         </p>
       ) : null}
     </div>
+  )
+}
+
+export function MarketNoteTable({
+  stance,
+  confidence,
+  horizon,
+  quickAnswer,
+  whatChangesOurMind,
+  className,
+}: MarketNoteTableData & { className?: string }) {
+  return (
+    <section
+      className={cn(
+        "my-10 overflow-hidden border border-border bg-background",
+        className,
+      )}
+    >
+      <div className="border-b border-border bg-foreground px-4 py-3 font-mono text-[10px] uppercase tracking-[0.18em] text-background">
+        Market Note Summary
+      </div>
+      <div className="overflow-x-auto">
+        <table className="w-full border-collapse">
+          <tbody>
+            <tr className="border-b border-border">
+              <th className="w-[36%] bg-muted/25 px-4 py-4 text-left align-top font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground sm:w-48">
+                Whiteprint Stance
+              </th>
+              <td className="border-l-4 border-l-[#c0392b] px-5 py-4 font-serif text-2xl font-semibold tracking-tight text-foreground sm:text-[1.9rem]">
+                {stance}
+              </td>
+            </tr>
+            <tr className="border-b border-border">
+              <th className="bg-muted/25 px-4 py-4 text-left align-top font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+                Confidence
+              </th>
+              <td className="px-5 py-4 font-serif text-lg font-semibold text-foreground">
+                {confidence}
+              </td>
+            </tr>
+            <tr className="border-b border-border">
+              <th className="bg-muted/25 px-4 py-4 text-left align-top font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+                Horizon
+              </th>
+              <td className="px-5 py-4 font-mono text-sm uppercase tracking-[0.14em] text-foreground">
+                {horizon}
+              </td>
+            </tr>
+            <tr className="border-b border-border">
+              <th className="bg-muted/25 px-4 py-4 text-left align-top font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+                Quick Answer
+              </th>
+              <td className="px-5 py-4 text-sm leading-6 text-foreground">
+                {quickAnswer}
+              </td>
+            </tr>
+            <tr>
+              <th className="bg-muted/25 px-4 py-4 text-left align-top font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+                What Changes Our Mind
+              </th>
+              <td className="px-5 py-4 text-sm leading-6 text-foreground">
+                {whatChangesOurMind}
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
   )
 }
 

@@ -7,13 +7,16 @@ import {
   getPostCategoryLabel,
   type SidebarValueTone,
 } from "@/lib/post-meta"
+import { MarketNoteTable } from "@/components/research-blocks"
 import {
   getAllPosts,
   getArticleBySlug,
   getPostMetaBySlug,
 } from "@/lib/posts"
+import { cn } from "@/lib/utils"
 import { ArticleProgressBar } from "./progress-bar"
 import s from "./article.module.css"
+import marketNoteStyles from "./market-note.module.css"
 
 interface Props {
   params: Promise<{ slug: string }>
@@ -79,7 +82,12 @@ export default async function PostPage({ params }: Props) {
   }
 
   return (
-    <div className={s.wrapper}>
+    <div
+      className={cn(
+        s.wrapper,
+        post.category === "market-notes" && marketNoteStyles.wrapper,
+      )}
+    >
       <ArticleProgressBar />
 
       {/* Hero */}
@@ -140,6 +148,9 @@ export default async function PostPage({ params }: Props) {
       <div className={s.layout}>
         {/* Main article */}
         <div className={s.article}>
+          {post.category === "market-notes" && post.marketNoteTable ? (
+            <MarketNoteTable {...post.marketNoteTable} />
+          ) : null}
           {post.content}
         </div>
 

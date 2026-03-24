@@ -7,6 +7,7 @@ import remarkGfm from "remark-gfm"
 import { z } from "zod"
 import { articleBodyComponents, postBodyComponents } from "@/components/post-body"
 import {
+  type MarketNoteTableData,
   postCategories,
   type PostCategory,
   type PostMeta,
@@ -30,6 +31,13 @@ const sidebarCardSchema = z.object({
   rows: z.array(sidebarCardRowSchema).min(1),
   note: z.string().trim().min(1).optional(),
 })
+const marketNoteTableSchema = z.object({
+  stance: z.string().trim().min(1),
+  confidence: z.string().trim().min(1),
+  horizon: z.string().trim().min(1),
+  quickAnswer: z.string().trim().min(1),
+  whatChangesOurMind: z.string().trim().min(1),
+})
 
 const postFrontmatterSchema = z.object({
   title: z.string().trim().min(1),
@@ -43,6 +51,7 @@ const postFrontmatterSchema = z.object({
   displayTitle: z.string().trim().optional(),
   eyebrow: z.string().trim().optional(),
   stance: z.string().trim().optional(),
+  marketNoteTable: marketNoteTableSchema.optional(),
   sidebarCards: z.array(sidebarCardSchema).max(4).optional(),
 })
 
@@ -127,6 +136,7 @@ function buildPostMeta(source: PostSource): PostMeta {
     displayTitle: frontmatter.displayTitle,
     eyebrow: frontmatter.eyebrow,
     stance: frontmatter.stance,
+    marketNoteTable: frontmatter.marketNoteTable as MarketNoteTableData | undefined,
     sidebarCards: frontmatter.sidebarCards as SidebarCard[] | undefined,
   }
 }

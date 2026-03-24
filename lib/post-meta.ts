@@ -3,6 +3,14 @@ export const postCategories = ["macro", "equity", "market-notes"] as const
 export type PostCategory = (typeof postCategories)[number]
 export type SidebarValueTone = "neutral" | "positive" | "warning" | "negative"
 
+export interface MarketNoteTableData {
+  stance: string
+  confidence: string
+  horizon: string
+  quickAnswer: string
+  whatChangesOurMind: string
+}
+
 export interface SidebarCardRow {
   label: string
   value: string
@@ -26,6 +34,7 @@ export interface PostMeta {
   displayTitle?: string
   eyebrow?: string
   stance?: string
+  marketNoteTable?: MarketNoteTableData
   sidebarCards?: SidebarCard[]
 }
 
