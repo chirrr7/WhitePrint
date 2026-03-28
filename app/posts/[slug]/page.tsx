@@ -105,9 +105,9 @@ export default async function PostPage({ params }: Props) {
     }
   }
 
-  // Build mobile tables/sidebar content
+  // Build mobile tables/sidebar content — wrap in s.wrapper so CSS variables are available
   const mobileTablesContent = (
-    <div>
+    <div className={s.wrapper}>
       {post.marketNoteTable ? (
         <MarketNoteTable
           heading={getSummaryHeading(post.category)}
@@ -202,7 +202,7 @@ export default async function PostPage({ params }: Props) {
         date={formatPostDate(post.date)}
         articleClassName={s.article}
         articleContent={
-          <>
+          <div className={s.wrapper}>
             {post.marketNoteTable ? (
               <MarketNoteTable
                 heading={getSummaryHeading(post.category)}
@@ -210,7 +210,7 @@ export default async function PostPage({ params }: Props) {
               />
             ) : null}
             {post.content}
-          </>
+          </div>
         }
         tablesContent={mobileTablesContent}
       />
