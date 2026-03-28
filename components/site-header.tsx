@@ -117,9 +117,9 @@ export function SiteHeader() {
           </nav>
         </div>
 
-        {/* Mobile menu button */}
+        {/* Mobile menu button — hidden when bottom nav is active */}
         <button
-          className="md:hidden"
+          className="hidden"
           style={{ color: "#fff", background: "none", border: "none", cursor: "pointer" }}
           onClick={() => setMobileOpen(!mobileOpen)}
           aria-label={mobileOpen ? "Close menu" : "Open menu"}

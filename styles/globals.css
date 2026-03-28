@@ -133,28 +133,165 @@
   margin: 0 0 32px;
 }
 
-/* ── Mobile-only overrides (does NOT affect desktop) ── */
-@media (max-width: 640px) {
-  /* Header padding */
+/* ══════════════════════════════════════════════════════
+   MOBILE BOTTOM NAV — hidden on desktop
+   ══════════════════════════════════════════════════════ */
+.mobile-bottom-nav {
+  display: none;
+}
+
+/* ══════════════════════════════════════════════════════
+   MOBILE-ONLY STYLES (max-width: 768px)
+   Everything below is inside media queries.
+   Desktop rendering is completely untouched.
+   ══════════════════════════════════════════════════════ */
+
+@media (max-width: 768px) {
+  /* ── Prevent horizontal overflow globally ── */
+  html {
+    overflow-x: hidden;
+  }
+
+  body {
+    overflow-x: hidden;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  /* ── Bottom nav bar — app-style ── */
+  .mobile-bottom-nav {
+    display: flex;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 100;
+    background: #0a0a0a;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    padding: 6px 0 calc(6px + env(safe-area-inset-bottom));
+    justify-content: space-around;
+    align-items: center;
+  }
+
+  .mobile-bottom-tab {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    padding: 6px 12px;
+    text-decoration: none;
+    color: rgba(255, 255, 255, 0.35);
+    transition: color 0.15s;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .mobile-bottom-tab--active {
+    color: #fff;
+  }
+
+  .mobile-bottom-icon {
+    width: 20px;
+    height: 20px;
+  }
+
+  .mobile-bottom-label {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 9px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  /* ── Add bottom padding to main so content isn't hidden behind nav ── */
+  .mobile-main-content {
+    padding-bottom: 64px;
+  }
+
+  /* ── Header padding ── */
   .header-inner {
     padding-left: 16px !important;
     padding-right: 16px !important;
   }
 
-  /* Mobile nav padding */
   .mobile-nav {
     padding-left: 16px !important;
     padding-right: 16px !important;
   }
 
-  /* StickyLayout stacks on mobile */
+  /* ── StickyLayout stacks on mobile ── */
   .sticky-layout-grid {
     grid-template-columns: 1fr;
     gap: 20px;
   }
 
-  /* PullQuote breathing room */
+  /* ── PullQuote smaller text ── */
   figure[style] blockquote {
     font-size: 16px !important;
+    padding-left: 24px !important;
+  }
+
+  figure[style] {
+    padding: 20px 16px 20px 14px !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+  }
+
+  /* ── All max-width containers respect viewport ── */
+  [style*="max-width"] {
+    max-width: 100% !important;
+  }
+
+  /* ── Inline padding overrides for pages using style={{padding: "X 40px"}} ── */
+  [style*="padding"][style*="40px"] {
+    padding-left: 16px !important;
+    padding-right: 16px !important;
+  }
+
+  /* ── Tables: horizontal scroll ── */
+  table {
+    display: block;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  thead, tbody, tr {
+    display: table;
+    width: 100%;
+    table-layout: auto;
+  }
+
+  /* ── Code blocks respect viewport ── */
+  pre {
+    max-width: 100% !important;
+    overflow-x: auto;
+  }
+
+  /* ── Images respect viewport ── */
+  img {
+    max-width: 100%;
+    height: auto;
+  }
+
+  /* ── Tappable nav links — minimum touch target ── */
+  nav a,
+  footer a {
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+  }
+
+  /* ── Category pages ── */
+  .divide-y > article {
+    padding-left: 0;
+    padding-right: 0;
+  }
+}
+
+/* ── Small phone refinements (iPhone SE etc.) ── */
+@media (max-width: 480px) {
+  .mobile-bottom-label {
+    font-size: 8px;
+  }
+
+  .mobile-bottom-tab {
+    padding: 6px 8px;
   }
 }

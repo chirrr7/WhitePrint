@@ -615,10 +615,14 @@
 @media (max-width: 860px) {
   .layout {
     grid-template-columns: 1fr;
-    gap: 40px;
+    gap: 32px;
   }
   .sidebar {
     position: static;
+    order: -1;
+  }
+  .article {
+    order: 1;
   }
   .bylineStats {
     display: none;

@@ -111,15 +111,39 @@
 @media (max-width: 768px) {
   .inner {
     grid-template-columns: 1fr;
-    gap: 8px;
-    padding: 10px 20px;
+    gap: 6px;
+    padding: 8px 16px;
+  }
+
+  .label {
+    font-size: 8px;
   }
 
   .track {
     overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+
+  .track::-webkit-scrollbar {
+    display: none;
   }
 
   .marquee {
-    animation: none;
+    animation: ticker-scroll 30s linear infinite;
+  }
+
+  .item {
+    gap: 8px;
+    padding-right: 16px;
+    margin-right: 16px;
+  }
+
+  .name {
+    font-size: 12px;
+  }
+
+  .ticker {
+    font-size: 9px;
   }
 }

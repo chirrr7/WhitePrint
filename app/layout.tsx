@@ -5,6 +5,7 @@ import { getStances } from '@/lib/stances'
 import { SEO_CONFIG } from '@/lib/seo.config'
 import { SiteHeader } from '@/components/site-header'
 import { SiteFooter } from '@/components/site-footer'
+import { MobileNav } from '@/components/mobile-nav'
 import './globals.css'
 
 export const metadata: Metadata = {
@@ -48,6 +49,10 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <head>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <link rel="manifest" href="/manifest.json" />
+        <meta name="theme-color" content="#0a0a0a" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link
@@ -58,8 +63,9 @@ export default function RootLayout({
       <body style={{ margin: 0, padding: 0, background: '#f7f6f3' }}>
         <SiteHeader />
         <StancesTicker stances={stances} />
-        <main>{children}</main>
+        <main className="mobile-main-content">{children}</main>
         <SiteFooter />
+        <MobileNav />
         <Analytics />
       </body>
     </html>
