@@ -24,7 +24,9 @@ function formatStanceLabel(stance: "cautious" | "neutral" | "constructive") {
   }
 }
 
-function getStancePillClassName(stance: "cautious" | "neutral" | "constructive") {
+function getStancePillClassName(
+  stance: "cautious" | "neutral" | "constructive",
+) {
   switch (stance) {
     case "cautious":
       return `${s.pill} ${s.pillCautious}`
@@ -67,7 +69,10 @@ function formatScenarioLabel(
   return scenarioType === "fcf" ? `${directional} FCF` : directional
 }
 
-function formatScenarioValue(value: number | null, scenarioType: "price" | "fcf") {
+function formatScenarioValue(
+  value: number | null,
+  scenarioType: "price" | "fcf",
+) {
   if (value === null) {
     return "--"
   }
@@ -90,8 +95,41 @@ function getScenarioCardClassName(kind: "bear" | "base" | "bull") {
   }
 }
 
+function getMobileCardClassName(
+  stance: "cautious" | "neutral" | "constructive",
+) {
+  switch (stance) {
+    case "cautious":
+      return `${s.mobileCard} ${s.mobileCardCautious}`
+    case "constructive":
+      return `${s.mobileCard} ${s.mobileCardConstructive}`
+    default:
+      return `${s.mobileCard} ${s.mobileCardNeutral}`
+  }
+}
+
+function formatConvictionLabel(conviction: "high" | "medium" | "low") {
+  switch (conviction) {
+    case "high":
+      return "High conviction"
+    case "low":
+      return "Low conviction"
+    default:
+      return "Medium conviction"
+  }
+}
+
 export default async function StancesPage() {
   const stances = getStances()
+  const activeCount = stances.filter((stance) => stance.status === "active").length
+  const monitoringCount = stances.filter(
+    (stance) => stance.status === "monitoring",
+  ).length
+  const scenarioCount = stances.filter(
+    (stance) =>
+      stance.bear !== null || stance.base !== null || stance.bull !== null,
+  ).length
+  const latestDate = stances[0]?.date ?? "Live"
 
   return (
     <div className={s.page}>
@@ -102,10 +140,35 @@ export default async function StancesPage() {
           <p className={s.deck}>
             Current Whiteprint coverage across macro, equities, and market notes.
           </p>
+
+          <div className={`${s.mobileHeroPanel} mobile-only`}>
+            <div className={s.mobileHeroStats}>
+              <div className={s.mobileHeroStat}>
+                <span className={s.mobileHeroStatLabel}>Tracked</span>
+                <span className={s.mobileHeroStatValue}>{stances.length}</span>
+              </div>
+              <div className={s.mobileHeroStat}>
+                <span className={s.mobileHeroStatLabel}>Active</span>
+                <span className={s.mobileHeroStatValue}>{activeCount}</span>
+              </div>
+              <div className={s.mobileHeroStat}>
+                <span className={s.mobileHeroStatLabel}>Scenario</span>
+                <span className={s.mobileHeroStatValue}>{scenarioCount}</span>
+              </div>
+            </div>
+            <div className={s.mobileHeroNote}>
+              <span className={s.mobileHeroNoteLabel}>Latest refresh</span>
+              <span className={s.mobileHeroNoteValue}>{latestDate}</span>
+              <span className={s.mobileHeroNoteDivider} />
+              <span className={s.mobileHeroNoteValue}>
+                {monitoringCount} monitoring
+              </span>
+            </div>
+          </div>
         </div>
       </header>
 
-      <div className={s.body}>
+      <div className={`${s.body} desktop-only`}>
         <div className={s.tableWrap}>
           <table className={s.table}>
             <colgroup>
@@ -148,7 +211,9 @@ export default async function StancesPage() {
                   </td>
                   <td className={`${s.cell} ${s.thesis}`}>{stance.thesis}</td>
                   <td className={`${s.cell} ${s.targets}`}>
-                    {stance.bear === null && stance.base === null && stance.bull === null ? (
+                    {stance.bear === null &&
+                    stance.base === null &&
+                    stance.bull === null ? (
                       <span className={s.targetEmpty}>No scenario frame</span>
                     ) : (
                       <div className={s.targetGrid}>
@@ -185,7 +250,9 @@ export default async function StancesPage() {
                       {formatStatusLabel(stance.status)}
                     </span>
                   </td>
-                  <td className={`${s.cell} ${s.date} ${s.dateCell}`}>{stance.date}</td>
+                  <td className={`${s.cell} ${s.date} ${s.dateCell}`}>
+                    {stance.date}
+                  </td>
                   <td className={`${s.cell} ${s.postCell}`}>
                     <Link href={`/posts/${stance.slug}`} className={s.link}>
                       Open
@@ -195,6 +262,101 @@ export default async function StancesPage() {
               ))}
             </tbody>
           </table>
+        </div>
+      </div>
+
+      <div className={`${s.mobileBody} mobile-only`}>
+        <div className={s.mobileIntro}>
+          <span className={s.mobileIntroEyebrow}>Live coverage feed</span>
+          <p className={s.mobileIntroText}>
+            No sideways scrolling. Every stance is readable as a card with the
+            thesis, status, conviction, and scenario frame in one pass.
+          </p>
+        </div>
+
+        <div className={s.mobileCardStack}>
+          {stances.map((stance) => {
+            const hasScenarioFrame =
+              stance.bear !== null || stance.base !== null || stance.bull !== null
+
+            return (
+              <article
+                key={stance.slug}
+                className={getMobileCardClassName(stance.stance)}
+              >
+                <div className={s.mobileCardTop}>
+                  <div className={s.mobileCoverageMeta}>
+                    <span className={s.mobileTicker}>{stance.ticker}</span>
+                    <span className={s.mobileCategory}>{stance.category}</span>
+                  </div>
+                  <span className={s.mobileDate}>{stance.date}</span>
+                </div>
+
+                <div className={s.mobileCardHeader}>
+                  <h2 className={s.mobileName}>{stance.name}</h2>
+                  <div className={s.mobilePillRow}>
+                    <span className={getStancePillClassName(stance.stance)}>
+                      {formatStanceLabel(stance.stance)}
+                    </span>
+                    <span className={getStatusClassName(stance.status)}>
+                      <span className={s.statusDot} />
+                      {formatStatusLabel(stance.status)}
+                    </span>
+                  </div>
+                </div>
+
+                <p className={s.mobileThesis}>{stance.thesis}</p>
+
+                <div className={s.mobileMetaRow}>
+                  <span className={s.mobileConviction}>
+                    {formatConvictionLabel(stance.conviction)}
+                  </span>
+                  <span className={s.mobileScenarioType}>
+                    {stance.scenarioType === "fcf"
+                      ? "FCF scenario frame"
+                      : "Price scenario frame"}
+                  </span>
+                </div>
+
+                {hasScenarioFrame ? (
+                  <div className={s.mobileScenarioWrap}>
+                    <div className={s.targetGrid}>
+                      <div className={getScenarioCardClassName("bear")}>
+                        <span className={s.targetValue}>
+                          {formatScenarioValue(stance.bear, stance.scenarioType)}
+                        </span>
+                        <span className={s.targetLabel}>
+                          {formatScenarioLabel("bear", stance.scenarioType)}
+                        </span>
+                      </div>
+                      <div className={getScenarioCardClassName("base")}>
+                        <span className={s.targetValue}>
+                          {formatScenarioValue(stance.base, stance.scenarioType)}
+                        </span>
+                        <span className={s.targetLabel}>
+                          {formatScenarioLabel("base", stance.scenarioType)}
+                        </span>
+                      </div>
+                      <div className={getScenarioCardClassName("bull")}>
+                        <span className={s.targetValue}>
+                          {formatScenarioValue(stance.bull, stance.scenarioType)}
+                        </span>
+                        <span className={s.targetLabel}>
+                          {formatScenarioLabel("bull", stance.scenarioType)}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className={s.mobileNoFrame}>No scenario frame published yet.</div>
+                )}
+
+                <Link href={`/posts/${stance.slug}`} className={s.mobileLink}>
+                  Open analysis
+                </Link>
+              </article>
+            )
+          })}
         </div>
       </div>
     </div>

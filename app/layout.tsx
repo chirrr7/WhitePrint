@@ -52,7 +52,17 @@ export default function RootLayout({
       <head>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="manifest" href="/manifest.json" />
-        <meta name="theme-color" content="#0a0a0a" />
+        <meta
+          name="theme-color"
+          media="(prefers-color-scheme: light)"
+          content="#f7f6f3"
+        />
+        <meta
+          name="theme-color"
+          media="(prefers-color-scheme: dark)"
+          content="#0c0c0d"
+        />
+        <meta name="color-scheme" content="light dark" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -62,7 +72,7 @@ export default function RootLayout({
           rel="stylesheet"
         />
       </head>
-      <body style={{ margin: 0, padding: 0, background: '#f7f6f3' }}>
+      <body>
         <div className="desktop-only">
           <SiteHeader />
           <StancesTicker stances={stances} />

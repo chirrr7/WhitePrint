@@ -30,8 +30,8 @@ export function MobileNav() {
           left: 0,
           right: 0,
           zIndex: 9999,
-          background: "#0a0a0a",
-          borderTop: "1px solid rgba(255,255,255,0.1)",
+          background: "var(--mobile-chrome-bg)",
+          borderTop: "1px solid var(--mobile-chrome-border)",
           padding:
             "8px 0 calc(8px + env(safe-area-inset-bottom, 0px))",
           justifyContent: "space-around",
@@ -46,7 +46,9 @@ export function MobileNav() {
               : pathname === tab.href ||
                 pathname.startsWith(tab.href + "/")
           const Icon = tab.icon
-          const color = isActive ? "#fff" : "rgba(255,255,255,0.35)"
+          const color = isActive
+            ? "var(--mobile-chrome-fg)"
+            : "var(--mobile-chrome-muted)"
           return (
             <Link
               key={tab.href}

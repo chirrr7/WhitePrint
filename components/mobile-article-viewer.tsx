@@ -112,7 +112,7 @@ export function MobileArticleViewer({
         right: 0,
         bottom: "calc(72px + env(safe-area-inset-bottom, 0px))",
         overflow: "hidden",
-        background: "#0a0a0a",
+        background: "var(--mobile-overlay-bg)",
         zIndex: 100,
         overscrollBehavior: "contain",
       }}
@@ -143,7 +143,7 @@ export function MobileArticleViewer({
             height: "100%",
             overflowY: "auto",
             WebkitOverflowScrolling: "touch",
-            background: "#faf9f7",
+            background: "var(--mobile-panel-bg)",
             position: "relative",
             overscrollBehaviorY: "contain",
           }}
@@ -163,12 +163,12 @@ export function MobileArticleViewer({
               onClick={goBack}
               style={{
                 background: "none",
-                border: "1px solid #e2e0db",
+                border: "1px solid var(--mobile-panel-border)",
                 fontFamily: MONO,
                 fontSize: 9,
                 letterSpacing: "0.12em",
                 textTransform: "uppercase",
-                color: "#909090",
+                color: "var(--mobile-panel-muted)",
                 padding: "6px 12px",
                 cursor: "pointer",
                 marginBottom: 20,
@@ -185,7 +185,7 @@ export function MobileArticleViewer({
                 fontWeight: 700,
                 lineHeight: 1.12,
                 letterSpacing: "-0.02em",
-                color: "#0f0f0f",
+                color: "var(--mobile-panel-fg)",
                 margin: "0 0 4px",
               }}
             >
@@ -234,7 +234,7 @@ export function MobileArticleViewer({
             height: "100%",
             display: "flex",
             flexDirection: "column",
-            background: "#0a0a0a",
+            background: "var(--mobile-landing-bg)",
             overflowY: "auto",
             WebkitOverflowScrolling: "touch",
             overscrollBehaviorY: "contain",
@@ -259,10 +259,10 @@ export function MobileArticleViewer({
                   fontSize: 9,
                   letterSpacing: "0.2em",
                   textTransform: "uppercase",
-                  color: "#c0392b",
+                  color: "var(--accent)",
                   display: "inline-block",
                   padding: "3px 8px",
-                  border: "1px solid rgba(192,57,43,0.3)",
+                  border: "1px solid color-mix(in srgb, var(--accent) 30%, var(--mobile-landing-border))",
                   marginRight: 12,
                 }}
               >
@@ -274,7 +274,7 @@ export function MobileArticleViewer({
                   fontSize: 9,
                   letterSpacing: "0.12em",
                   textTransform: "uppercase",
-                  color: "rgba(255,255,255,0.25)",
+                  color: "var(--mobile-landing-muted)",
                 }}
               >
                 {date}
@@ -292,7 +292,7 @@ export function MobileArticleViewer({
                     fontWeight: 700,
                     lineHeight: 1.05,
                     letterSpacing: "-0.03em",
-                    color: "#fff",
+                    color: "var(--mobile-landing-fg)",
                     margin: "0 0 14px",
                   }}
                 />
@@ -304,7 +304,7 @@ export function MobileArticleViewer({
                     fontWeight: 700,
                     lineHeight: 1.05,
                     letterSpacing: "-0.03em",
-                    color: "#fff",
+                    color: "var(--mobile-landing-fg)",
                     margin: "0 0 14px",
                   }}
                 >
@@ -334,7 +334,7 @@ export function MobileArticleViewer({
                   lineHeight: 1.65,
                   fontStyle: "italic",
                   fontWeight: 300,
-                  color: "rgba(255,255,255,0.35)",
+                  color: "var(--mobile-landing-muted)",
                   margin: "0 0 18px",
                   maxWidth: 320,
                 }}
@@ -352,7 +352,7 @@ export function MobileArticleViewer({
                   gap: 20,
                   marginBottom: 18,
                   paddingBottom: 16,
-                  borderBottom: "1px solid rgba(255,255,255,0.06)",
+                  borderBottom: "1px solid var(--mobile-landing-border)",
                 }}
               >
                 {readTime && (
@@ -362,7 +362,7 @@ export function MobileArticleViewer({
                         fontFamily: DISPLAY,
                         fontSize: 20,
                         fontWeight: 700,
-                        color: "#fff",
+                        color: "var(--mobile-landing-fg)",
                         lineHeight: 1,
                       }}
                     >
@@ -374,7 +374,7 @@ export function MobileArticleViewer({
                         fontSize: 8,
                         letterSpacing: "0.18em",
                         textTransform: "uppercase",
-                        color: "rgba(255,255,255,0.2)",
+                        color: "var(--mobile-landing-soft)",
                         marginTop: 4,
                       }}
                     >
@@ -389,7 +389,7 @@ export function MobileArticleViewer({
                         fontFamily: DISPLAY,
                         fontSize: 20,
                         fontWeight: 700,
-                        color: "#fff",
+                        color: "var(--mobile-landing-fg)",
                         lineHeight: 1,
                       }}
                     >
@@ -401,7 +401,7 @@ export function MobileArticleViewer({
                         fontSize: 8,
                         letterSpacing: "0.18em",
                         textTransform: "uppercase",
-                        color: "rgba(255,255,255,0.2)",
+                        color: "var(--mobile-landing-soft)",
                         marginTop: 4,
                       }}
                     >
@@ -425,7 +425,7 @@ export function MobileArticleViewer({
                 className="mav-card-pulse"
                 style={{
                   background: "none",
-                  border: "1px solid rgba(255,255,255,0.08)",
+                  border: "1px solid var(--mobile-landing-border)",
                   padding: "18px 16px 16px",
                   cursor: "pointer",
                   textAlign: "left",
@@ -447,7 +447,7 @@ export function MobileArticleViewer({
                     style={{
                       height: 2,
                       width: "85%",
-                      background: "rgba(255,255,255,0.1)",
+                      background: "var(--mobile-card-line-strong)",
                       borderRadius: 1,
                     }}
                   />
@@ -455,7 +455,7 @@ export function MobileArticleViewer({
                     style={{
                       height: 2,
                       width: "60%",
-                      background: "rgba(255,255,255,0.07)",
+                      background: "var(--mobile-card-line-medium)",
                       borderRadius: 1,
                     }}
                   />
@@ -463,7 +463,7 @@ export function MobileArticleViewer({
                     style={{
                       height: 2,
                       width: "92%",
-                      background: "rgba(255,255,255,0.1)",
+                      background: "var(--mobile-card-line-strong)",
                       borderRadius: 1,
                     }}
                   />
@@ -471,7 +471,7 @@ export function MobileArticleViewer({
                     style={{
                       height: 2,
                       width: "40%",
-                      background: "rgba(255,255,255,0.05)",
+                      background: "var(--mobile-card-line-soft)",
                       borderRadius: 1,
                     }}
                   />
@@ -490,7 +490,7 @@ export function MobileArticleViewer({
                       fontSize: 11,
                       letterSpacing: "0.18em",
                       textTransform: "uppercase",
-                      color: "rgba(255,255,255,0.72)",
+                      color: "var(--mobile-landing-fg)",
                       fontWeight: 500,
                     }}
                   >
@@ -514,7 +514,7 @@ export function MobileArticleViewer({
                 className="mav-card-pulse"
                 style={{
                   background: "none",
-                  border: "1px solid rgba(255,255,255,0.08)",
+                  border: "1px solid var(--mobile-landing-border)",
                   padding: "18px 16px 16px",
                   cursor: "pointer",
                   textAlign: "left",
@@ -537,7 +537,12 @@ export function MobileArticleViewer({
                       key={i}
                       style={{
                         height: h,
-                        background: `rgba(255,255,255,${0.04 + (i % 3) * 0.025})`,
+                        background:
+                          i % 3 === 0
+                            ? "var(--mobile-card-line-soft)"
+                            : i % 3 === 1
+                              ? "var(--mobile-card-line-medium)"
+                              : "var(--mobile-card-line-strong)",
                         borderRadius: 1,
                       }}
                     />
@@ -557,7 +562,7 @@ export function MobileArticleViewer({
                       fontSize: 11,
                       letterSpacing: "0.18em",
                       textTransform: "uppercase",
-                      color: "rgba(255,255,255,0.72)",
+                      color: "var(--mobile-landing-fg)",
                       fontWeight: 500,
                     }}
                   >
@@ -586,7 +591,7 @@ export function MobileArticleViewer({
                 fontSize: 8,
                 letterSpacing: "0.18em",
                 textTransform: "uppercase",
-                color: "rgba(255,255,255,0.1)",
+                color: "var(--mobile-landing-soft)",
               }}
             >
               Tap to navigate
@@ -603,7 +608,7 @@ export function MobileArticleViewer({
             height: "100%",
             overflowY: "auto",
             WebkitOverflowScrolling: "touch",
-            background: "#f5f3ee",
+            background: "var(--mobile-panel-alt-bg)",
             position: "relative",
             overscrollBehaviorY: "contain",
           }}
@@ -623,12 +628,12 @@ export function MobileArticleViewer({
               onClick={goBack}
               style={{
                 background: "none",
-                border: "1px solid #dedad4",
+                border: "1px solid var(--mobile-panel-border-alt)",
                 fontFamily: MONO,
                 fontSize: 9,
                 letterSpacing: "0.12em",
                 textTransform: "uppercase",
-                color: "#909090",
+                color: "var(--mobile-panel-muted)",
                 padding: "6px 12px",
                 cursor: "pointer",
                 marginBottom: 20,
@@ -653,7 +658,7 @@ export function MobileArticleViewer({
                   fontSize: 9,
                   letterSpacing: "0.24em",
                   textTransform: "uppercase",
-                  color: "#909090",
+                  color: "var(--mobile-panel-muted)",
                 }}
               >
                 Data &amp; Analysis
@@ -662,7 +667,7 @@ export function MobileArticleViewer({
                 style={{
                   flex: 1,
                   height: 1,
-                  background: "#dedad4",
+                  background: "var(--mobile-panel-border-alt)",
                 }}
               />
             </div>

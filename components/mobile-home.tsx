@@ -21,8 +21,8 @@ export function MobileHome({
     <div
       className="mobile-only"
       style={{
-        background: "#0a0a0a",
-        color: "#fff",
+        background: "var(--mobile-page-bg)",
+        color: "var(--mobile-page-fg)",
         minHeight: "calc(100dvh - 44px - 72px)",
       }}
     >
@@ -34,7 +34,7 @@ export function MobileHome({
             fontSize: 9,
             letterSpacing: "0.24em",
             textTransform: "uppercase",
-            color: "rgba(255,255,255,0.3)",
+            color: "var(--mobile-page-muted)",
             marginBottom: 14,
           }}
         >
@@ -51,7 +51,7 @@ export function MobileHome({
             fontWeight: 700,
             lineHeight: 1.08,
             letterSpacing: "-0.03em",
-            color: "#fff",
+            color: "var(--mobile-page-fg)",
             textDecoration: "none",
             display: "block",
             marginBottom: 14,
@@ -65,7 +65,7 @@ export function MobileHome({
             fontFamily: SERIF,
             fontSize: 14,
             lineHeight: 1.65,
-            color: "rgba(255,255,255,0.4)",
+            color: "var(--mobile-page-muted)",
             fontStyle: "italic",
             margin: "0 0 20px",
           }}
@@ -76,17 +76,17 @@ export function MobileHome({
         <Link
           href={`/posts/${featured.slug}`}
           className="mobile-tap-red"
-          style={{
-            fontFamily: MONO,
-            fontSize: 10,
-            letterSpacing: "0.16em",
-            textTransform: "uppercase",
-            color: "#b83025",
-            textDecoration: "none",
-            padding: "10px 20px",
-            border: "1px solid rgba(184,48,37,0.35)",
-            display: "inline-block",
-          }}
+        style={{
+          fontFamily: MONO,
+          fontSize: 10,
+          letterSpacing: "0.16em",
+          textTransform: "uppercase",
+          color: "var(--accent)",
+          textDecoration: "none",
+          padding: "10px 20px",
+          border: "1px solid color-mix(in srgb, var(--accent) 35%, transparent)",
+          display: "inline-block",
+        }}
         >
           Read Analysis →
         </Link>
@@ -102,7 +102,7 @@ export function MobileHome({
             fontSize: 8,
             letterSpacing: "0.32em",
             textTransform: "uppercase",
-            color: "rgba(255,255,255,0.18)",
+            color: "var(--mobile-page-subtle)",
             marginBottom: 14,
           }}
         >
@@ -117,7 +117,7 @@ export function MobileHome({
             style={{
               display: "block",
               padding: "14px 0",
-              borderBottom: "1px solid rgba(255,255,255,0.04)",
+              borderBottom: "1px solid var(--mobile-page-line)",
               textDecoration: "none",
             }}
           >
@@ -127,7 +127,7 @@ export function MobileHome({
                 fontSize: 8,
                 letterSpacing: "0.2em",
                 textTransform: "uppercase",
-                color: "#b83025",
+                color: "var(--accent)",
                 display: "block",
                 marginBottom: 5,
               }}
@@ -141,7 +141,7 @@ export function MobileHome({
                 fontFamily: SERIF,
                 fontSize: 13,
                 lineHeight: 1.5,
-                color: "rgba(255,255,255,0.45)",
+                color: "var(--mobile-page-muted)",
                 display: "block",
               }}
             >

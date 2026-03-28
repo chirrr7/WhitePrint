@@ -25,8 +25,8 @@ export function MobileHeader() {
           left: 0,
           right: 0,
           zIndex: 9998,
-          background: "#0a0a0a",
-          borderBottom: "1px solid rgba(255,255,255,0.08)",
+          background: "var(--mobile-chrome-bg)",
+          borderBottom: "1px solid var(--mobile-chrome-border)",
           display: "flex",
           alignItems: "center",
           padding: "0 16px",
@@ -48,12 +48,14 @@ export function MobileHeader() {
               fontFamily: DISPLAY,
               fontSize: 15,
               fontWeight: 700,
-              color: "#fff",
+              color: "var(--mobile-chrome-fg)",
               lineHeight: 1,
             }}
           >
             Whiteprint{" "}
-            <em style={{ color: "#b83025", fontStyle: "italic" }}>Research</em>
+            <em style={{ color: "var(--accent)", fontStyle: "italic" }}>
+              Research
+            </em>
           </span>
         </button>
       </header>
@@ -68,7 +70,7 @@ export function MobileHeader() {
             right: 0,
             bottom: 0,
             zIndex: 10000,
-            background: "#0a0a0a",
+            background: "var(--mobile-chrome-bg)",
             display: "flex",
             flexDirection: "column",
             padding: 16,
@@ -87,11 +89,11 @@ export function MobileHeader() {
                 fontFamily: DISPLAY,
                 fontSize: 15,
                 fontWeight: 700,
-                color: "#fff",
+                color: "var(--mobile-chrome-fg)",
               }}
             >
               Whiteprint{" "}
-              <em style={{ color: "#b83025", fontStyle: "italic" }}>
+              <em style={{ color: "var(--accent)", fontStyle: "italic" }}>
                 Research
               </em>
             </span>
@@ -101,7 +103,7 @@ export function MobileHeader() {
                 background: "none",
                 border: "none",
                 cursor: "pointer",
-                color: "rgba(255,255,255,0.5)",
+                color: "var(--mobile-chrome-muted)",
                 padding: 8,
               }}
               aria-label="Close menu"
@@ -128,8 +130,8 @@ export function MobileHeader() {
                   textTransform: "uppercase",
                   color:
                     pathname === link.href
-                      ? "#fff"
-                      : "rgba(255,255,255,0.4)",
+                      ? "var(--mobile-chrome-fg)"
+                      : "var(--mobile-chrome-muted)",
                   textDecoration: "none",
                 }}
               >
@@ -145,7 +147,7 @@ export function MobileHeader() {
               fontSize: 9,
               letterSpacing: "0.16em",
               textTransform: "uppercase",
-              color: "rgba(255,255,255,0.12)",
+              color: "var(--mobile-chrome-subtle)",
             }}
           >
             Independent Macro &amp; Equity Research
