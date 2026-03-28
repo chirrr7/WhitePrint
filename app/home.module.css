@@ -554,3 +554,32 @@
     gap: 16px;
   }
 }
+
+@media (max-width: 480px) {
+  .pageWrap {
+    padding: 0 14px;
+  }
+  .featured {
+    padding: 22px 16px;
+  }
+  .rCard {
+    padding: 24px 16px 20px;
+  }
+  .nCard {
+    padding: 22px 16px 18px;
+  }
+  .featuredTitle {
+    font-size: 24px;
+  }
+  .featuredDeck {
+    font-size: 14px;
+  }
+  .featuredCta {
+    width: 100%;
+    text-align: center;
+    justify-content: center;
+  }
+  .sectionLabel {
+    padding: 24px 0 0;
+  }
+}

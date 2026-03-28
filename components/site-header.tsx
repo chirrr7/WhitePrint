@@ -39,6 +39,7 @@ export function SiteHeader() {
       }}
     >
       <div
+        className="header-inner"
         style={{
           maxWidth: 1160,
           margin: "0 auto",
@@ -130,6 +131,7 @@ export function SiteHeader() {
       {/* Mobile nav */}
       {mobileOpen && (
         <nav
+          className="mobile-nav"
           style={{
             borderTop: "1px solid rgba(255,255,255,0.08)",
             background: "#0a0a0a",

@@ -630,9 +630,24 @@
     font-size: 28px;
   }
   .hero {
-    padding: 40px 20px 36px;
+    padding: 40px 16px 36px;
   }
   .layout {
-    padding: 32px 20px 64px;
+    padding: 32px 16px 64px;
+  }
+  .article table {
+    display: block;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .article pre {
+    max-width: 100%;
+  }
+  .heroMeta {
+    flex-wrap: wrap;
+  }
+  .byline {
+    flex-wrap: wrap;
+    gap: 12px;
   }
 }

@@ -123,3 +123,38 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* ── StickyLayout: desktop 2-col, mobile stacked ── */
+.sticky-layout-grid {
+  display: grid;
+  grid-template-columns: 1fr 260px;
+  gap: 32px;
+  align-items: start;
+  margin: 0 0 32px;
+}
+
+/* ── Mobile-only overrides (does NOT affect desktop) ── */
+@media (max-width: 640px) {
+  /* Header padding */
+  .header-inner {
+    padding-left: 16px !important;
+    padding-right: 16px !important;
+  }
+
+  /* Mobile nav padding */
+  .mobile-nav {
+    padding-left: 16px !important;
+    padding-right: 16px !important;
+  }
+
+  /* StickyLayout stacks on mobile */
+  .sticky-layout-grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  /* PullQuote breathing room */
+  figure[style] blockquote {
+    font-size: 16px !important;
+  }
+}

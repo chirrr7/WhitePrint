@@ -312,15 +312,7 @@ export function StickyLayout({ children }: { children: ReactNode }) {
   })
 
   return (
-    <div
-      style={{
-        display: "grid",
-        gridTemplateColumns: "1fr 260px",
-        gap: "32px",
-        alignItems: "start",
-        margin: "0 0 32px",
-      }}
-    >
+    <div className="sticky-layout-grid">
       <div>{prose}</div>
       <div>{panel}</div>
     </div>
