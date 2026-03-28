@@ -206,12 +206,6 @@ export default async function PostPage({ params }: Props) {
         articleClassName={s.article}
         articleContent={
           <div className={s.wrapper}>
-            {post.marketNoteTable ? (
-              <MarketNoteTable
-                heading={getSummaryHeading(post.category)}
-                {...post.marketNoteTable}
-              />
-            ) : null}
             {post.content}
           </div>
         }
