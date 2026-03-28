@@ -3,6 +3,8 @@ import Link from "next/link"
 import { getAllPosts, getPostsByCategory } from "@/lib/posts"
 import { formatPostDate, getPostCategoryLabel, type PostMeta } from "@/lib/post-meta"
 import { SEO_CONFIG } from "@/lib/seo.config"
+import { getStances } from "@/lib/stances"
+import { MobileHome } from "@/components/mobile-home"
 import s from "./home.module.css"
 
 export const metadata: Metadata = {
@@ -35,9 +37,18 @@ export default function HomePage() {
   // Market notes: all market-notes posts
   const marketNotes = getPostsByCategory("market-notes")
 
+  const stances = getStances()
+
   return (
     <>
-      <div className={s.wrapper}>
+      {featuredPost && (
+        <MobileHome
+          featured={featuredPost}
+          briefs={deskBriefPosts}
+          stances={stances}
+        />
+      )}
+      <div className={`${s.wrapper} hidden md:block`}>
         <div className={s.pageWrap}>
 
         {/* ── Today's Desk ── */}

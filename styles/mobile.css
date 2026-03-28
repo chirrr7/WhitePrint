@@ -1,8 +1,26 @@
 /* ══════════════════════════════════════════════════════════
    MOBILE APP LAYER
-   Everything here is inside @media (max-width: 768px).
    Desktop rendering is completely untouched.
    ══════════════════════════════════════════════════════════ */
+
+/* ── Global: ticker animation + tap effect ── */
+@keyframes mobile-ticker-scroll {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.mobile-ticker-track {
+  animation: mobile-ticker-scroll 30s linear infinite;
+}
+
+.mobile-tap-red:active {
+  color: #b83025 !important;
+  transition: none !important;
+}
 
 @media (max-width: 768px) {
   /* ── Nuclear: prevent ANY horizontal overflow ── */
@@ -92,5 +110,23 @@
   figure[style*="background"] blockquote {
     font-size: 16px !important;
     padding-left: 20px !important;
+  }
+
+  /* ── Mobile article viewer: content overrides ── */
+  .mobile-article-content p,
+  .mobile-tables-content p {
+    max-width: 100% !important;
+  }
+
+  .mobile-article-content table,
+  .mobile-tables-content table {
+    font-size: 12px !important;
+    min-width: 0 !important;
+  }
+
+  .mobile-article-content pre,
+  .mobile-tables-content pre {
+    max-width: 100% !important;
+    font-size: 11px !important;
   }
 }

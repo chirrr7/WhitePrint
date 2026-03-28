@@ -6,6 +6,7 @@ import { SEO_CONFIG } from '@/lib/seo.config'
 import { SiteHeader } from '@/components/site-header'
 import { SiteFooter } from '@/components/site-footer'
 import { MobileNav } from '@/components/mobile-nav'
+import { MobileHeader } from '@/components/mobile-header'
 import './globals.css'
 import '@/styles/mobile.css'
 
@@ -62,10 +63,15 @@ export default function RootLayout({
         />
       </head>
       <body style={{ margin: 0, padding: 0, background: '#f7f6f3' }}>
-        <SiteHeader />
-        <StancesTicker stances={stances} />
+        <div className="hidden md:block">
+          <SiteHeader />
+          <StancesTicker stances={stances} />
+        </div>
+        <MobileHeader />
         <main>{children}</main>
-        <SiteFooter />
+        <div className="hidden md:block">
+          <SiteFooter />
+        </div>
         <MobileNav />
         <Analytics />
       </body>
