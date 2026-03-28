@@ -13,7 +13,7 @@ export function MobileHeader() {
   const [open, setOpen] = useState(false)
 
   return (
-    <div className="md:hidden">
+    <div className="mobile-only">
       {/* Spacer for fixed header */}
       <div style={{ height: 44 }} />
 

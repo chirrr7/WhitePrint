@@ -99,7 +99,7 @@ export function MobileArticleViewer({
 
   return (
     <div
-      className="md:hidden"
+      className="mobile-only"
       style={{
         position: "fixed",
         top: 44,
@@ -113,6 +113,7 @@ export function MobileArticleViewer({
     >
       {/* Three-panel slider */}
       <div
+        className="mobile-slider"
         style={{
           display: "flex",
           width: "300vw",

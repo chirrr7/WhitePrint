@@ -31,7 +31,7 @@ export function MobileHome({
 
   return (
     <div
-      className="md:hidden"
+      className="mobile-only"
       style={{
         background: "#0a0a0a",
         color: "#fff",

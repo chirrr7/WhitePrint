@@ -48,7 +48,7 @@ export default function HomePage() {
           stances={stances}
         />
       )}
-      <div className={`${s.wrapper} hidden md:block`}>
+      <div className={`${s.wrapper} desktop-only`}>
         <div className={s.pageWrap}>
 
         {/* ── Today's Desk ── */}

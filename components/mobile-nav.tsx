@@ -20,10 +20,10 @@ export function MobileNav() {
   return (
     <>
       {/* Spacer so content isn't hidden behind the fixed nav */}
-      <div className="md:hidden" style={{ height: 72 }} />
+      <div className="mobile-only" style={{ height: 72 }} />
       {/* The actual nav — only visible on mobile */}
       <nav
-        className="md:hidden"
+        className="mobile-only"
         style={{
           position: "fixed",
           bottom: 0,

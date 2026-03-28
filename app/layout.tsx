@@ -63,13 +63,13 @@ export default function RootLayout({
         />
       </head>
       <body style={{ margin: 0, padding: 0, background: '#f7f6f3' }}>
-        <div className="hidden md:block">
+        <div className="desktop-only">
           <SiteHeader />
           <StancesTicker stances={stances} />
         </div>
         <MobileHeader />
         <main>{children}</main>
-        <div className="hidden md:block">
+        <div className="desktop-only">
           <SiteFooter />
         </div>
         <MobileNav />

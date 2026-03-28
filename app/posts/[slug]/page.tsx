@@ -218,7 +218,7 @@ export default async function PostPage({ params }: Props) {
       {/* ── Desktop Layout ── */}
       <div
         className={cn(
-          "hidden md:block",
+          "desktop-only",
           s.wrapper,
           post.category === "market-notes" && marketNoteStyles.wrapper,
         )}
