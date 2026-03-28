@@ -110,10 +110,11 @@ export function MobileArticleViewer({
         top: 44,
         left: 0,
         right: 0,
-        bottom: 72,
+        bottom: "calc(72px + env(safe-area-inset-bottom, 0px))",
         overflow: "hidden",
         background: "#0a0a0a",
         zIndex: 100,
+        overscrollBehavior: "contain",
       }}
     >
       <div
@@ -144,6 +145,7 @@ export function MobileArticleViewer({
             WebkitOverflowScrolling: "touch",
             background: "#faf9f7",
             position: "relative",
+            overscrollBehaviorY: "contain",
           }}
         >
           {/* Top accent line */}
@@ -198,7 +200,13 @@ export function MobileArticleViewer({
               }}
             />
 
-            <div className={articleClassName}>{articleContent}</div>
+            <div
+              className={["mobile-article-content", articleClassName]
+                .filter(Boolean)
+                .join(" ")}
+            >
+              {articleContent}
+            </div>
           </div>
 
           {/* Right-edge swipe hint */}
@@ -227,7 +235,9 @@ export function MobileArticleViewer({
             display: "flex",
             flexDirection: "column",
             background: "#0a0a0a",
-            overflow: "hidden",
+            overflowY: "auto",
+            WebkitOverflowScrolling: "touch",
+            overscrollBehaviorY: "contain",
           }}
         >
           {/* Full-width red separator */}
@@ -235,15 +245,14 @@ export function MobileArticleViewer({
 
           <div
             style={{
-              flex: 1,
               display: "flex",
               flexDirection: "column",
-              padding: "24px 20px 16px",
-              overflow: "hidden",
+              minHeight: "100%",
+              padding: "20px 18px 24px",
             }}
           >
             {/* Category + Date */}
-            <div className="mav-stagger-1" style={{ marginBottom: 20 }}>
+            <div className="mav-stagger-1" style={{ marginBottom: 16 }}>
               <span
                 style={{
                   fontFamily: MONO,
@@ -279,24 +288,24 @@ export function MobileArticleViewer({
                   dangerouslySetInnerHTML={{ __html: displayTitle }}
                   style={{
                     fontFamily: DISPLAY,
-                    fontSize: 30,
+                    fontSize: 28,
                     fontWeight: 700,
                     lineHeight: 1.05,
                     letterSpacing: "-0.03em",
                     color: "#fff",
-                    margin: "0 0 16px",
+                    margin: "0 0 14px",
                   }}
                 />
               ) : (
                 <h1
                   style={{
                     fontFamily: DISPLAY,
-                    fontSize: 30,
+                    fontSize: 28,
                     fontWeight: 700,
                     lineHeight: 1.05,
                     letterSpacing: "-0.03em",
                     color: "#fff",
-                    margin: "0 0 16px",
+                    margin: "0 0 14px",
                   }}
                 >
                   {title}
@@ -310,7 +319,7 @@ export function MobileArticleViewer({
               style={{
                 height: 3,
                 background: "#c0392b",
-                marginBottom: 18,
+                marginBottom: 16,
                 borderRadius: 1,
               }}
             />
@@ -326,7 +335,7 @@ export function MobileArticleViewer({
                   fontStyle: "italic",
                   fontWeight: 300,
                   color: "rgba(255,255,255,0.35)",
-                  margin: "0 0 20px",
+                  margin: "0 0 18px",
                   maxWidth: 320,
                 }}
               >
@@ -341,8 +350,8 @@ export function MobileArticleViewer({
                 style={{
                   display: "flex",
                   gap: 20,
-                  marginBottom: 24,
-                  paddingBottom: 20,
+                  marginBottom: 18,
+                  paddingBottom: 16,
                   borderBottom: "1px solid rgba(255,255,255,0.06)",
                 }}
               >
@@ -403,16 +412,11 @@ export function MobileArticleViewer({
               </div>
             )}
 
-            {/* Spacer */}
-            <div style={{ flex: 1 }} />
-
             {/* Navigation cards */}
             <div
-              className="mav-stagger-4"
+              className="mav-nav-grid mav-stagger-4"
               style={{
-                display: "grid",
-                gridTemplateColumns: "1fr 1fr",
-                gap: 12,
+                marginTop: "auto",
               }}
             >
               {/* ARTICLE card */}
@@ -422,13 +426,13 @@ export function MobileArticleViewer({
                 style={{
                   background: "none",
                   border: "1px solid rgba(255,255,255,0.08)",
-                  padding: "16px 14px 14px",
+                  padding: "18px 16px 16px",
                   cursor: "pointer",
                   textAlign: "left",
                   WebkitTapHighlightColor: "transparent",
                   display: "flex",
                   flexDirection: "column",
-                  gap: 10,
+                  gap: 12,
                 }}
               >
                 {/* Abstract text lines */}
@@ -483,10 +487,11 @@ export function MobileArticleViewer({
                   <span
                     style={{
                       fontFamily: MONO,
-                      fontSize: 10,
-                      letterSpacing: "0.16em",
+                      fontSize: 11,
+                      letterSpacing: "0.18em",
                       textTransform: "uppercase",
-                      color: "rgba(255,255,255,0.5)",
+                      color: "rgba(255,255,255,0.72)",
+                      fontWeight: 500,
                     }}
                   >
                     ← Analysis
@@ -510,13 +515,13 @@ export function MobileArticleViewer({
                 style={{
                   background: "none",
                   border: "1px solid rgba(255,255,255,0.08)",
-                  padding: "16px 14px 14px",
+                  padding: "18px 16px 16px",
                   cursor: "pointer",
                   textAlign: "left",
                   WebkitTapHighlightColor: "transparent",
                   display: "flex",
                   flexDirection: "column",
-                  gap: 10,
+                  gap: 12,
                 }}
               >
                 {/* Abstract data grid */}
@@ -549,10 +554,11 @@ export function MobileArticleViewer({
                   <span
                     style={{
                       fontFamily: MONO,
-                      fontSize: 10,
-                      letterSpacing: "0.16em",
+                      fontSize: 11,
+                      letterSpacing: "0.18em",
                       textTransform: "uppercase",
-                      color: "rgba(255,255,255,0.5)",
+                      color: "rgba(255,255,255,0.72)",
+                      fontWeight: 500,
                     }}
                   >
                     Data →
@@ -599,6 +605,7 @@ export function MobileArticleViewer({
             WebkitOverflowScrolling: "touch",
             background: "#f5f3ee",
             position: "relative",
+            overscrollBehaviorY: "contain",
           }}
         >
           {/* Top accent line */}
@@ -660,7 +667,7 @@ export function MobileArticleViewer({
               />
             </div>
 
-            {tablesContent}
+            <div className="mobile-tables-content">{tablesContent}</div>
           </div>
 
           {/* Left-edge swipe hint */}

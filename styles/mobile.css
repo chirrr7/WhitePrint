@@ -55,6 +55,12 @@
   animation: mav-dot-pulse 2.4s infinite ease-in-out;
 }
 
+.mav-nav-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
 .mav-card-pulse {
   transition: border-color 0.2s, background 0.2s;
 }
