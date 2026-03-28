@@ -5,11 +5,13 @@
 
 /* ── Visibility: desktop-only / mobile-only ── */
 .desktop-only { display: block; }
-.mobile-only { display: none; }
+.mobile-only { display: none !important; }
+.mobile-only-flex { display: none !important; }
 
 @media (max-width: 767px) {
   .desktop-only { display: none !important; }
   .mobile-only { display: block !important; }
+  .mobile-only-flex { display: flex !important; }
 }
 
 /* ── Global: ticker animation + tap effect ── */

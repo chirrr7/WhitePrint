@@ -23,7 +23,7 @@ export function MobileNav() {
       <div className="mobile-only" style={{ height: 72 }} />
       {/* The actual nav — only visible on mobile */}
       <nav
-        className="mobile-only"
+        className="mobile-only-flex"
         style={{
           position: "fixed",
           bottom: 0,
@@ -32,11 +32,10 @@ export function MobileNav() {
           zIndex: 9999,
           background: "#0a0a0a",
           borderTop: "1px solid rgba(255,255,255,0.1)",
-          display: "flex",
-          justifyContent: "space-around",
-          alignItems: "center",
           padding:
             "8px 0 calc(8px + env(safe-area-inset-bottom, 0px))",
+          justifyContent: "space-around",
+          alignItems: "center",
         }}
         aria-label="Mobile navigation"
       >
