@@ -7,6 +7,7 @@ import { SiteHeader } from '@/components/site-header'
 import { SiteFooter } from '@/components/site-footer'
 import { MobileNav } from '@/components/mobile-nav'
 import './globals.css'
+import '@/styles/mobile.css'
 
 export const metadata: Metadata = {
   metadataBase: new URL(SEO_CONFIG.siteUrl),
@@ -63,7 +64,7 @@ export default function RootLayout({
       <body style={{ margin: 0, padding: 0, background: '#f7f6f3' }}>
         <SiteHeader />
         <StancesTicker stances={stances} />
-        <main className="mobile-main-content">{children}</main>
+        <main>{children}</main>
         <SiteFooter />
         <MobileNav />
         <Analytics />

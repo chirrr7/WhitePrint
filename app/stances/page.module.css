@@ -329,15 +329,18 @@
 @media (max-width: 768px) {
   .heroInner,
   .body {
-    padding-left: 20px;
-    padding-right: 20px;
+    padding-left: 16px;
+    padding-right: 16px;
   }
 
   .tableWrap {
     overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    border-left: none;
+    border-right: none;
   }
 
   .table {
-    min-width: 1080px;
+    min-width: 900px;
   }
 }
