@@ -28,6 +28,42 @@
   animation: mobile-ticker-scroll 30s linear infinite;
 }
 
+/* ── Article viewer: staggered entry animations ── */
+@keyframes mav-fade-up {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes mav-grow-right {
+  from { width: 0; }
+  to   { width: 40px; }
+}
+
+@keyframes mav-dot-pulse {
+  0%, 100% { opacity: 0.35; }
+  50%      { opacity: 1; }
+}
+
+.mav-stagger-1 { animation: mav-fade-up 0.5s 0.08s both ease-out; }
+.mav-stagger-2 { animation: mav-fade-up 0.55s 0.18s both ease-out; }
+.mav-stagger-3 { animation: mav-fade-up 0.5s 0.32s both ease-out; }
+.mav-stagger-4 { animation: mav-fade-up 0.5s 0.46s both ease-out; }
+.mav-stagger-5 { animation: mav-fade-up 0.4s 0.65s both ease-out; }
+.mav-accent-grow { animation: mav-grow-right 0.45s 0.25s both ease-out; }
+
+.mav-dot-pulse {
+  animation: mav-dot-pulse 2.4s infinite ease-in-out;
+}
+
+.mav-card-pulse {
+  transition: border-color 0.2s, background 0.2s;
+}
+
+.mav-card-pulse:active {
+  border-color: rgba(192, 57, 43, 0.5) !important;
+  background: rgba(192, 57, 43, 0.06) !important;
+}
+
 .mobile-tap-red:active {
   color: #b83025 !important;
   transition: none !important;

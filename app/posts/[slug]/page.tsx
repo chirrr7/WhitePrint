@@ -200,6 +200,9 @@ export default async function PostPage({ params }: Props) {
         displayTitle={post.displayTitle}
         category={categoryLabel}
         date={formatPostDate(post.date)}
+        excerpt={post.excerpt}
+        readTime={post.readTime}
+        tagCount={post.tags.length}
         articleClassName={s.article}
         articleContent={
           <div className={s.wrapper}>
