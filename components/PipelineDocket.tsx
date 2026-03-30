@@ -51,19 +51,12 @@ export async function PipelineDocket() {
                 <div className={s.codename}>{item.codename}</div>
 
                 <div className={s.titleBlock}>
-                  {item.redacted ? (
-                    <>
-                      <div className={s.titleRedacted}>
-                        <span className={s.titleRedactedText}>█████████████████████████</span>
-                      </div>
-                      <div className={s.subtitleRedacted}>[SUBJECT UNDER RESEARCH]</div>
-                    </>
-                  ) : (
+                  {!item.redacted ? (
                     <>
                       <h3 className={s.titleRevealed}>{item.codename}</h3>
                       {item.subtitle ? <div className={s.subtitleRevealed}>{item.subtitle}</div> : null}
                     </>
-                  )}
+                  ) : null}
                 </div>
 
                 {item.format ? <div className={s.format}>{item.format}</div> : null}

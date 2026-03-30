@@ -15,16 +15,16 @@ export function Footer() {
           <h4>Research</h4>
           <ul>
             <li>
+              <Link href="/research">Archive</Link>
+            </li>
+            <li>
               <Link href="/equity">Equity</Link>
             </li>
             <li>
               <Link href="/macro">Macro</Link>
             </li>
             <li>
-              <Link href="/market-notes">Market Notes</Link>
-            </li>
-            <li>
-              <Link href="/stances">Stances</Link>
+              <Link href="/stances">Coverage</Link>
             </li>
           </ul>
         </div>
@@ -33,10 +33,10 @@ export function Footer() {
           <h4>Platform</h4>
           <ul>
             <li>
-              <Link href="/models">Models</Link>
+              <Link href="/about">About</Link>
             </li>
             <li>
-              <Link href="/about">About</Link>
+              <Link href="/models">Models</Link>
             </li>
             <li>
               <Link href="/rss.xml">RSS Feed</Link>
@@ -53,7 +53,7 @@ export function Footer() {
       <style jsx>{`
         .wp-footer {
           padding: 52px 48px 32px;
-          background: var(--ink);
+          background: var(--bg);
           border-top: 2px solid var(--accent);
         }
 
@@ -64,12 +64,12 @@ export function Footer() {
           max-width: 1120px;
           margin: 0 auto 24px;
           padding-bottom: 40px;
-          border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+          border-bottom: 1px solid var(--border);
         }
 
         .wp-footer-brand {
           margin-bottom: 10px;
-          color: rgba(255, 255, 255, 0.9);
+          color: var(--ink);
           font-family: var(--font-display-family), Georgia, serif;
           font-size: 22px;
           font-weight: 700;
@@ -78,7 +78,7 @@ export function Footer() {
 
         .wp-footer-tagline {
           margin: 0;
-          color: rgba(255, 255, 255, 0.22);
+          color: var(--muted);
           font-family: var(--font-serif-family), Georgia, serif;
           font-size: 12px;
           font-weight: 300;
@@ -87,7 +87,7 @@ export function Footer() {
 
         .wp-footer-col h4 {
           margin: 0 0 16px;
-          color: rgba(255, 255, 255, 0.2);
+          color: var(--subtle);
           font-family: var(--font-mono-family), monospace;
           font-size: 8px;
           letter-spacing: 0.24em;
@@ -105,7 +105,7 @@ export function Footer() {
         }
 
         .wp-footer-col a {
-          color: rgba(255, 255, 255, 0.35);
+          color: var(--muted);
           font-family: var(--font-serif-family), Georgia, serif;
           font-size: 13px;
           font-weight: 300;
@@ -114,13 +114,13 @@ export function Footer() {
         }
 
         .wp-footer-col a:hover {
-          color: rgba(255, 255, 255, 0.7);
+          color: var(--ink);
         }
 
         .wp-footer-bottom {
           max-width: 1120px;
           margin: 0 auto;
-          color: rgba(255, 255, 255, 0.12);
+          color: var(--subtle);
           font-family: var(--font-mono-family), monospace;
           font-size: 8px;
           letter-spacing: 0.08em;

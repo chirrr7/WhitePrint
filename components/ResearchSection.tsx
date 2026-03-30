@@ -42,7 +42,7 @@ export async function ResearchSection() {
 
         {featured ? (
           <div className={`${s.featuredCard} fade-in-up`}>
-            <div className={s.featuredBody}>
+            <Link href={`/posts/${featured.slug}`} className={s.featuredBody}>
               <div className={s.featuredKicker}>
                 <span className={`${s.pill} ${s.pillDark}`}>{featured.primaryLabel}</span>
                 {featured.secondaryLabel ? (
@@ -72,10 +72,8 @@ export async function ResearchSection() {
                 </div>
               </div>
 
-              <Link href={`/posts/${featured.slug}`} className={s.featuredCta}>
-                Read Full Analysis →
-              </Link>
-            </div>
+              <span className={s.featuredCta}>Read Full Analysis →</span>
+            </Link>
 
             <div className={s.deskBrief}>
               <div className={s.briefHead}>
@@ -109,7 +107,7 @@ export async function ResearchSection() {
 
         <div className={s.rgWrap}>
           {latest.map((post) => (
-            <article key={post.slug} className={`${s.rCard} fade-in-up`}>
+            <Link key={post.slug} href={`/posts/${post.slug}`} className={`${s.rCard} fade-in-up`}>
               <div>
                 <div className={s.rCardKicker}>
                   <span className={`${s.pill} ${s.pillDark}`}>{post.primaryLabel}</span>
@@ -131,11 +129,9 @@ export async function ResearchSection() {
                   {post.readTime} min
                   {post.secondaryLabel ? ` · ${post.secondaryLabel}` : ` · ${post.primaryLabel}`}
                 </div>
-                <Link href={`/posts/${post.slug}`} className={s.rCardCta}>
-                  Read Full Note →
-                </Link>
+                <span className={s.rCardCta}>Read Full Note →</span>
               </div>
-            </article>
+            </Link>
           ))}
         </div>
       </div>

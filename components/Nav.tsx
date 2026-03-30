@@ -161,8 +161,8 @@ export function Nav() {
         }
 
         .wp-nav.over-light {
-          background: rgba(10, 10, 10, 0.94);
-          border-bottom-color: rgba(255, 255, 255, 0.05);
+          background: rgba(250, 249, 247, 0.96);
+          border-bottom-color: var(--border);
           backdrop-filter: blur(14px);
           -webkit-backdrop-filter: blur(14px);
         }
@@ -179,6 +179,10 @@ export function Nav() {
         }
 
         .wp-nav.scrolled .wp-nav-logo {
+          color: var(--ink);
+        }
+
+        .wp-nav.over-light .wp-nav-logo {
           color: var(--ink);
         }
 
@@ -213,6 +217,15 @@ export function Nav() {
           color: var(--ink);
         }
 
+        .wp-nav.over-light .wp-nav-link {
+          color: var(--subtle);
+        }
+
+        .wp-nav.over-light .wp-nav-link:hover,
+        .wp-nav.over-light .wp-nav-link.is-active {
+          color: var(--ink);
+        }
+
         .wp-nav-right {
           margin-left: auto;
           color: rgba(255, 255, 255, 0.18);
@@ -225,6 +238,10 @@ export function Nav() {
         }
 
         .wp-nav.scrolled .wp-nav-right {
+          color: var(--subtle);
+        }
+
+        .wp-nav.over-light .wp-nav-right {
           color: var(--subtle);
         }
 

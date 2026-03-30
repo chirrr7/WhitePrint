@@ -7,14 +7,12 @@ import { MobileHeader } from '@/components/mobile-header'
 import { MobileNav } from '@/components/mobile-nav'
 import { Nav } from '@/components/Nav'
 import { ScrollReveal } from '@/components/ScrollReveal'
-import type { Stance } from '@/lib/stances'
 
 interface RootShellProps {
   children: React.ReactNode
-  stances: Stance[]
 }
 
-export function RootShell({ children, stances }: RootShellProps) {
+export function RootShell({ children }: RootShellProps) {
   const pathname = usePathname()
   const isAdminRoute = pathname.startsWith('/admin')
 

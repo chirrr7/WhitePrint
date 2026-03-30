@@ -1,7 +1,6 @@
 import type { Metadata } from 'next'
 import { JetBrains_Mono, Playfair_Display, Source_Serif_4 } from 'next/font/google'
 import { RootShell } from '@/components/root-shell'
-import { getStances } from '@/lib/stances'
 import { SEO_CONFIG } from '@/lib/seo.config'
 import './globals.css'
 import '@/styles/mobile.css'
@@ -61,8 +60,6 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode
 }>) {
-  const stances = getStances()
-
   return (
     <html
       lang="en"
@@ -87,7 +84,7 @@ export default function RootLayout({
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
       </head>
       <body>
-        <RootShell stances={stances}>{children}</RootShell>
+        <RootShell>{children}</RootShell>
       </body>
     </html>
   )

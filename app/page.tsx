@@ -1,4 +1,5 @@
 import type { Metadata } from "next"
+import { headers } from "next/headers"
 import { HeroSection } from "@/components/HeroSection"
 import { MobileHome } from "@/components/mobile-home"
 import { PipelineDocket } from "@/components/PipelineDocket"
@@ -21,14 +22,25 @@ export const metadata: Metadata = {
 }
 
 export default async function HomePage() {
-  const [allPosts, stances] = await Promise.all([getAllPosts(), getStances()])
+  const userAgent = (await headers()).get("user-agent") ?? ""
+  const isMobileRequest = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Mobile/i.test(
+    userAgent,
+  )
 
-  const featuredPost = allPosts.find((post) => post.category !== "market-notes") ?? allPosts[0]
-  const deskBriefPosts = allPosts.filter((post) => post.category !== "market-notes").slice(0, 3)
+  let featuredPost = null
+  let deskBriefPosts: Awaited<ReturnType<typeof getAllPosts>> = []
+  let stances: ReturnType<typeof getStances> = []
+
+  if (isMobileRequest) {
+    const [allPosts, mobileStances] = await Promise.all([getAllPosts(), getStances()])
+    featuredPost = allPosts.find((post) => post.category !== "market-notes") ?? allPosts[0] ?? null
+    deskBriefPosts = allPosts.filter((post) => post.category !== "market-notes").slice(0, 3)
+    stances = mobileStances
+  }
 
   return (
     <>
-      {featuredPost ? (
+      {isMobileRequest && featuredPost ? (
         <MobileHome featured={featuredPost} briefs={deskBriefPosts} stances={stances} />
       ) : null}
 

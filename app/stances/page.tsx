@@ -192,7 +192,7 @@ export default async function StancesPage({ searchParams }: StancesPageProps) {
                   href={`/stances?tag=${encodeURIComponent(tag)}`}
                   className={`${s.filterChip} ${activeTag === tag ? s.filterChipActive : ""}`}
                 >
-                  #{tag}
+                  {humanizeTag(tag)}
                   <span className={s.filterChipCount}>{count}</span>
                 </Link>
               ))}
@@ -201,7 +201,7 @@ export default async function StancesPage({ searchParams }: StancesPageProps) {
 
           {activeTag ? (
             <div className={s.filterSummary}>
-              <span>Showing Whiteprint opinions tagged #{activeTag}.</span>
+              <span>Showing Whiteprint opinions tagged {humanizeTag(activeTag)}.</span>
               <Link
                 href={`/search?tag=${encodeURIComponent(activeTag)}`}
                 className={s.filterSummaryLink}
@@ -278,7 +278,7 @@ export default async function StancesPage({ searchParams }: StancesPageProps) {
                             href={`/search?tag=${encodeURIComponent(tag)}`}
                             className={s.coverageTag}
                           >
-                            #{tag}
+                            {humanizeTag(tag)}
                           </Link>
                         ))}
                       </div>
@@ -409,7 +409,7 @@ export default async function StancesPage({ searchParams }: StancesPageProps) {
                         href={`/search?tag=${encodeURIComponent(tag)}`}
                         className={s.coverageTag}
                       >
-                        #{tag}
+                        {humanizeTag(tag)}
                       </Link>
                     ))}
                   </div>
@@ -458,4 +458,8 @@ export default async function StancesPage({ searchParams }: StancesPageProps) {
       </div>
     </div>
   )
+}
+
+function humanizeTag(value: string) {
+  return value.replace(/[-_]/g, " ").replace(/\b\w/g, (char) => char.toUpperCase())
 }
