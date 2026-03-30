@@ -16,6 +16,11 @@ import { createClient } from '@/lib/supabase/server'
 const postStatusSchema = z.enum(['draft', 'published', 'archived'])
 const stanceStatusSchema = z.enum(['draft', 'published', 'archived'])
 const inProgressStatusSchema = z.enum(['backlog', 'active', 'blocked', 'done'])
+const coverageCategorySchema = z.enum(['macro', 'equity', 'market-notes'])
+const stanceOpinionSchema = z.enum(['cautious', 'neutral', 'constructive'])
+const convictionSchema = z.enum(['high', 'medium', 'low'])
+const coverageStatusSchema = z.enum(['active', 'monitoring', 'expired'])
+const scenarioTypeSchema = z.enum(['price', 'fcf'])
 const uploadSchema = z.object({
   title: z.string().trim().min(1),
   version: z.string().trim().min(1),
@@ -23,6 +28,10 @@ const uploadSchema = z.object({
 
 function isMissingBodyMdxColumn(error: { code?: string; message?: string } | null | undefined) {
   return error?.code === '42703' && error.message?.includes('body_mdx')
+}
+
+function isMissingColumn(error: { code?: string; message?: string } | null | undefined, column: string) {
+  return error?.code === '42703' && error.message?.includes(column)
 }
 
 function withMessage(path: string, kind: 'error' | 'success', message: string) {
@@ -185,6 +194,17 @@ function readList(value: string) {
     new Set(
       value
         .split(/\r?\n/)
+        .map((entry) => slugify(entry))
+        .filter(Boolean),
+    ),
+  )
+}
+
+function readTagList(value: string) {
+  return Array.from(
+    new Set(
+      value
+        .split(/[\r\n,]+/)
         .map((entry) => slugify(entry))
         .filter(Boolean),
     ),
@@ -645,19 +665,44 @@ export async function deletePostAction(formData: FormData) {
   redirect(withMessage('/admin/posts', 'success', 'Post deleted.'))
 }
 
-export async function createStanceAction(formData: FormData) {
+export async function saveStanceAction(formData: FormData) {
   await requireAdminIdentity()
 
+  const id = readOptionalNumber(formData, 'id')
   const title = readString(formData, 'title')
   const slug = slugify(readString(formData, 'slug') || title)
+  const ticker = readString(formData, 'ticker').toUpperCase()
+  const name = readString(formData, 'name')
   const summary = readString(formData, 'summary')
+  const thesis = readString(formData, 'thesis')
   const body = readString(formData, 'body')
+  const tags = readTagList(readString(formData, 'tags'))
   const topicId = readOptionalNumber(formData, 'topic_id')
   const status = stanceStatusSchema.safeParse(readString(formData, 'status'))
+  const coverageCategory = coverageCategorySchema.safeParse(readString(formData, 'coverage_category'))
+  const opinion = stanceOpinionSchema.safeParse(readString(formData, 'opinion'))
+  const conviction = convictionSchema.safeParse(readString(formData, 'conviction'))
+  const coverageStatus = coverageStatusSchema.safeParse(readString(formData, 'coverage_status'))
+  const scenarioType = scenarioTypeSchema.safeParse(readString(formData, 'scenario_type'))
+  const bear = readOptionalNumber(formData, 'bear')
+  const base = readOptionalNumber(formData, 'base')
+  const bull = readOptionalNumber(formData, 'bull')
   const publishedAtInput = readString(formData, 'published_at')
+  const returnPath = id ? `/admin/stances/${id}` : '/admin/stances/new'
 
-  if (!title || !slug || !status.success) {
-    redirect(withMessage('/admin/stances', 'error', 'Title, slug, and status are required.'))
+  if (
+    !title ||
+    !slug ||
+    !ticker ||
+    !name ||
+    !status.success ||
+    !coverageCategory.success ||
+    !opinion.success ||
+    !conviction.success ||
+    !coverageStatus.success ||
+    !scenarioType.success
+  ) {
+    redirect(withMessage(returnPath, 'error', 'Fill in the required coverage fields before saving.'))
   }
 
   const publishedAt =
@@ -668,23 +713,85 @@ export async function createStanceAction(formData: FormData) {
         : null
 
   const supabase = await createClient()
-  const { error } = await supabase.from('stances').insert({
+  const payload = {
     body,
+    bull,
+    conviction: conviction.data,
+    coverage_category: coverageCategory.data,
+    coverage_status: coverageStatus.data,
+    name,
+    opinion: opinion.data,
     published_at: publishedAt,
+    scenario_type: scenarioType.data,
     slug,
     status: status.data,
     summary,
+    tags,
+    thesis: thesis || summary,
+    ticker,
     title,
     topic_id: topicId,
-  })
+    bear,
+    base,
+  }
+
+  const query = id
+    ? supabase.from('stances').update(payload).eq('id', id)
+    : supabase.from('stances').insert(payload)
+
+  const { error } = await query
 
   if (error) {
-    redirect(withMessage('/admin/stances', 'error', error.message || 'Unable to save this stance.'))
+    if (
+      isMissingColumn(error, 'ticker') ||
+      isMissingColumn(error, 'coverage_category') ||
+      isMissingColumn(error, 'coverage_status') ||
+      isMissingColumn(error, 'scenario_type') ||
+      isMissingColumn(error, 'opinion')
+    ) {
+      redirect(
+        withMessage(
+          returnPath,
+          'error',
+          'The database is missing the latest stance coverage columns. Run the newest Supabase migration first.',
+        ),
+      )
+    }
+
+    redirect(withMessage(returnPath, 'error', error.message || 'Unable to save this stance.'))
   }
 
   revalidatePath('/admin')
   revalidatePath('/admin/stances')
-  redirect(withMessage('/admin/stances', 'success', 'Stance saved.'))
+  if (id) {
+    revalidatePath(`/admin/stances/${id}`)
+  }
+  revalidatePath('/')
+  revalidatePath('/stances')
+  redirect(withMessage('/admin/stances', 'success', 'Coverage record saved.'))
+}
+
+export async function deleteStanceAction(formData: FormData) {
+  await requireAdminIdentity()
+
+  const id = readOptionalNumber(formData, 'id')
+  if (!id) {
+    redirect(withMessage('/admin/stances', 'error', 'Missing stance id.'))
+  }
+
+  const supabase = await createClient()
+  const { error } = await supabase.from('stances').delete().eq('id', id)
+
+  if (error) {
+    redirect(withMessage(`/admin/stances/${id}`, 'error', error.message || 'Unable to delete this stance.'))
+  }
+
+  revalidatePath('/admin')
+  revalidatePath('/admin/stances')
+  revalidatePath(`/admin/stances/${id}`)
+  revalidatePath('/')
+  revalidatePath('/stances')
+  redirect(withMessage('/admin/stances', 'success', 'Coverage record deleted.'))
 }
 
 export async function createInProgressItemAction(formData: FormData) {

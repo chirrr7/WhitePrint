@@ -5,20 +5,23 @@ import { MobileHome } from "@/components/mobile-home"
 import { PipelineDocket } from "@/components/PipelineDocket"
 import { ResearchSection } from "@/components/ResearchSection"
 import { StancesTicker } from "@/components/StancesTicker"
-import { getAllPosts } from "@/lib/posts"
+import { getPublicGeneralSettings, getHomepageContentData } from "@/lib/public-site"
 import { SEO_CONFIG } from "@/lib/seo.config"
-import { getStances } from "@/lib/stances"
 
 export const dynamic = "force-dynamic"
 
-export const metadata: Metadata = {
-  title: {
-    absolute: "Whiteprint Research — Independent Macro & Equity Research",
-  },
-  description: SEO_CONFIG.siteDescription,
-  alternates: {
-    canonical: SEO_CONFIG.siteUrl,
-  },
+export async function generateMetadata(): Promise<Metadata> {
+  const settings = await getPublicGeneralSettings()
+
+  return {
+    title: {
+      absolute: `${settings.siteTitle} - Independent Macro & Equity Research`,
+    },
+    description: settings.siteDescription,
+    alternates: {
+      canonical: SEO_CONFIG.siteUrl,
+    },
+  }
 }
 
 export default async function HomePage() {
@@ -26,29 +29,33 @@ export default async function HomePage() {
   const isMobileRequest = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Mobile/i.test(
     userAgent,
   )
-
-  let featuredPost = null
-  let deskBriefPosts: Awaited<ReturnType<typeof getAllPosts>> = []
-  let stances: ReturnType<typeof getStances> = []
-
-  if (isMobileRequest) {
-    const [allPosts, mobileStances] = await Promise.all([getAllPosts(), getStances()])
-    featuredPost = allPosts.find((post) => post.category !== "market-notes") ?? allPosts[0] ?? null
-    deskBriefPosts = allPosts.filter((post) => post.category !== "market-notes").slice(0, 3)
-    stances = mobileStances
-  }
+  const [generalSettings, homepageData] = await Promise.all([
+    getPublicGeneralSettings(),
+    getHomepageContentData(),
+  ])
 
   return (
     <>
-      {isMobileRequest && featuredPost ? (
-        <MobileHome featured={featuredPost} briefs={deskBriefPosts} stances={stances} />
+      {isMobileRequest && homepageData.leadPost ? (
+        <MobileHome
+          briefs={homepageData.mobileBriefPosts}
+          featured={homepageData.leadPost}
+          heroLabel={homepageData.settings.heroLabel}
+          showDeskBriefs={homepageData.settings.showDeskBriefs}
+          showStances={homepageData.settings.showStances}
+          stances={homepageData.stances}
+        />
       ) : null}
 
       <div className="desktop-only">
         <HeroSection />
-        <StancesTicker stances={stances} />
+        {homepageData.settings.showStances ? <StancesTicker stances={homepageData.stances} /> : null}
         <PipelineDocket />
-        <ResearchSection />
+        <ResearchSection
+          deskBriefs={homepageData.deskBriefItems}
+          featured={homepageData.featuredPost}
+          latest={homepageData.latestPosts}
+        />
       </div>
 
       <script
@@ -57,7 +64,7 @@ export default async function HomePage() {
           __html: JSON.stringify({
             "@context": "https://schema.org",
             "@type": "WebSite",
-            name: SEO_CONFIG.siteName,
+            name: generalSettings.siteTitle,
             url: SEO_CONFIG.siteUrl,
           }).replace(/</g, "\\u003c"),
         }}

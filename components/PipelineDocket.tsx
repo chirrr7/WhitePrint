@@ -1,17 +1,7 @@
-import { createClient as createSupabaseClient } from "@supabase/supabase-js"
-import { supabasePublishableKey, supabaseUrl } from "@/lib/supabase/config"
-import type { Database } from "@/lib/supabase/database.types"
+import { getPublicDocketItems } from "@/lib/public-site"
 import s from "./PipelineDocket.module.css"
 
-type PipelineCategory = "GEO" | "EQ" | "MACRO" | "FOR" | "CRED"
-type PipelineStatusType = "active" | "drafting" | "research"
-
-type PipelineItem = Database["public"]["Tables"]["pipeline"]["Row"] & {
-  category: PipelineCategory[]
-  status_type: PipelineStatusType | null
-}
-
-const categoryClassMap: Record<PipelineCategory, string> = {
+const categoryClassMap: Record<string, string> = {
   GEO: s.catGeo,
   EQ: s.catEq,
   MACRO: s.catMacro,
@@ -20,8 +10,12 @@ const categoryClassMap: Record<PipelineCategory, string> = {
 }
 
 export async function PipelineDocket() {
-  const items = await getPipelineItems()
-  const updatedLabel = items.find((item) => item.last_updated)?.last_updated ?? null
+  const items = await getPublicDocketItems()
+  const updatedLabel = items.find((item) => item.updatedLabel)?.updatedLabel ?? null
+
+  if (items.length === 0) {
+    return null
+  }
 
   return (
     <section className={s.section} id="pipeline">
@@ -40,23 +34,24 @@ export async function PipelineDocket() {
           {items.map((item) => (
             <article key={item.id} className={`${s.item} fade-in-up`}>
               <div>
-                <div className={s.cats}>
-                  {((item.category ?? []) as PipelineCategory[]).map((category) => (
-                    <span key={category} className={`${s.cat} ${categoryClassMap[category]}`}>
-                      {category}
-                    </span>
-                  ))}
-                </div>
+                {item.categoryLabels.length ? (
+                  <div className={s.cats}>
+                    {item.categoryLabels.map((category) => (
+                      <span
+                        key={category}
+                        className={`${s.cat} ${categoryClassMap[category] ?? s.catMacro}`}
+                      >
+                        {category}
+                      </span>
+                    ))}
+                  </div>
+                ) : null}
 
                 <div className={s.codename}>{item.codename}</div>
 
                 <div className={s.titleBlock}>
-                  {!item.redacted ? (
-                    <>
-                      <h3 className={s.titleRevealed}>{item.codename}</h3>
-                      {item.subtitle ? <div className={s.subtitleRevealed}>{item.subtitle}</div> : null}
-                    </>
-                  ) : null}
+                  <h3 className={s.titleRevealed}>{item.title}</h3>
+                  {item.subtitle ? <div className={s.subtitleRevealed}>{item.subtitle}</div> : null}
                 </div>
 
                 {item.format ? <div className={s.format}>{item.format}</div> : null}
@@ -66,8 +61,12 @@ export async function PipelineDocket() {
                 {item.hook ? <p className={s.hook}>{item.hook}</p> : null}
 
                 <div className={s.footer}>
-                  {item.status ? <span className={`${s.status} ${getStatusClassName(item.status_type)}`}>{item.status}</span> : null}
-                  {item.last_updated ? <span className={s.updated}>{item.last_updated}</span> : null}
+                  {item.statusLabel ? (
+                    <span className={`${s.status} ${getStatusClassName(item.statusTone)}`}>
+                      {item.statusLabel}
+                    </span>
+                  ) : null}
+                  {item.updatedLabel ? <span className={s.updated}>{item.updatedLabel}</span> : null}
                 </div>
               </div>
             </article>
@@ -78,7 +77,7 @@ export async function PipelineDocket() {
   )
 }
 
-function getStatusClassName(statusType: PipelineStatusType | null) {
+function getStatusClassName(statusType: "active" | "drafting" | "research") {
   switch (statusType) {
     case "active":
       return s.statusActive
@@ -87,23 +86,4 @@ function getStatusClassName(statusType: PipelineStatusType | null) {
     default:
       return s.statusResearch
   }
-}
-
-async function getPipelineItems(): Promise<PipelineItem[]> {
-  const supabase = createSupabaseClient<Database>(supabaseUrl, supabasePublishableKey)
-  const { data, error } = await supabase
-    .from("pipeline")
-    .select(
-      "id, codename, subtitle, redacted, category, hook, format, status, status_type, last_updated, sort_order, visible",
-    )
-    .eq("visible", true)
-    .order("sort_order", { ascending: true, nullsFirst: false })
-    .order("codename", { ascending: true })
-
-  if (error) {
-    console.error("Failed to load pipeline items.", error)
-    return []
-  }
-
-  return ((data ?? []) as PipelineItem[]).filter((item) => item.visible !== false)
 }

@@ -1,4 +1,5 @@
 import type { Metadata } from "next"
+import { getPublicGeneralSettings } from "@/lib/public-site"
 import { SEO_CONFIG } from "@/lib/seo.config"
 
 export const metadata: Metadata = {
@@ -25,7 +26,10 @@ const v = {
   borderLight: "#eceae5",
 }
 
-export default function AboutPage() {
+export default async function AboutPage() {
+  const settings = await getPublicGeneralSettings()
+  const contactEmail = settings.contactEmail || "contact@whiteprintresearch.xyz"
+
   return (
     <div style={{ background: v.bg, minHeight: "100vh" }}>
 
@@ -63,6 +67,18 @@ export default function AboutPage() {
           >
             What we do
           </h1>
+          <p
+            style={{
+              margin: "14px 0 0",
+              fontFamily: MONO,
+              fontSize: 9,
+              letterSpacing: "0.22em",
+              textTransform: "uppercase",
+              color: v.accent,
+            }}
+          >
+            {settings.brandTagline}
+          </p>
         </div>
       </div>
 
@@ -237,8 +253,23 @@ export default function AboutPage() {
                 Email
               </span>
               <span style={{ fontFamily: SERIF, fontSize: 15, color: v.ink }}>
-                contact@whiteprintresearch.xyz
+                {contactEmail}
               </span>
+              <div style={{ marginTop: 10 }}>
+                <a
+                  href={`mailto:${contactEmail}`}
+                  style={{
+                    fontFamily: MONO,
+                    fontSize: 9,
+                    letterSpacing: "0.16em",
+                    textTransform: "uppercase",
+                    color: v.accent,
+                    textDecoration: "none",
+                  }}
+                >
+                  {settings.navCtaLabel}
+                </a>
+              </div>
             </div>
             <div>
               <span

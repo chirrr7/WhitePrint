@@ -42,7 +42,7 @@ export function StancesTicker({ stances }: { stances: Stance[] }) {
             {items.map((stance, index) => (
               <Link
                 key={`${stance.slug}-${index}`}
-                href={`/posts/${stance.slug}`}
+                href={stance.postSlug ? `/posts/${stance.postSlug}` : "/stances"}
                 className={s.item}
               >
                 <span className={s.ticker}>{stance.ticker}</span>

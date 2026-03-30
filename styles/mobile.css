@@ -28,6 +28,11 @@
   animation: mobile-ticker-scroll 30s linear infinite;
 }
 
+.mobile-display-title em {
+  color: #c0392b;
+  font-style: italic;
+}
+
 /* ── Article viewer: staggered entry animations ── */
 @keyframes mav-fade-up {
   from { opacity: 0; transform: translateY(14px); }

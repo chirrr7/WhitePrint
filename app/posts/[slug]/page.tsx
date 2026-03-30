@@ -247,7 +247,7 @@ export default async function PostPage({ params }: Props) {
                     href={`/search?tag=${encodeURIComponent(tag)}`}
                     className={s.tag}
                   >
-                    #{tag}
+                    {formatTagLabel(tag)}
                   </Link>
                 ))}
               </div>
@@ -418,4 +418,23 @@ export default async function PostPage({ params }: Props) {
       />
     </>
   )
+}
+
+function formatTagLabel(value: string) {
+  const normalized = value.trim().toLowerCase()
+
+  switch (normalized) {
+    case "orcl":
+      return "Oracle"
+    case "eog":
+      return "EOG"
+    case "e-and-p":
+      return "E&P"
+    case "roic":
+      return "ROIC"
+    case "dcf":
+      return "DCF"
+    default:
+      return normalized.replace(/[-_]/g, " ").replace(/\b\w/g, (char) => char.toUpperCase())
+  }
 }

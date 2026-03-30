@@ -5,9 +5,8 @@ import { SEO_CONFIG } from "@/lib/seo.config"
 import s from "./page.module.css"
 
 export const metadata: Metadata = {
-  title: "Current Stances",
-  description:
-    "Whiteprint's live analytical view across covered names and themes.",
+  title: "Coverage",
+  description: "Whiteprint coverage across covered names and themes.",
   alternates: {
     canonical: `${SEO_CONFIG.siteUrl}/stances`,
   },
@@ -184,16 +183,15 @@ export default async function StancesPage({ searchParams }: StancesPageProps) {
                 href="/stances"
                 className={`${s.filterChip} ${!activeTag ? s.filterChipActive : ""}`}
               >
-                All coverage
+                All
               </Link>
-              {coverageTags.map(({ tag, count }) => (
+              {coverageTags.map(({ tag }) => (
                 <Link
                   key={tag}
                   href={`/stances?tag=${encodeURIComponent(tag)}`}
                   className={`${s.filterChip} ${activeTag === tag ? s.filterChipActive : ""}`}
                 >
                   {humanizeTag(tag)}
-                  <span className={s.filterChipCount}>{count}</span>
                 </Link>
               ))}
             </div>
@@ -337,9 +335,13 @@ export default async function StancesPage({ searchParams }: StancesPageProps) {
                     {stance.date}
                   </td>
                   <td className={`${s.cell} ${s.postCell}`}>
-                    <Link href={`/posts/${stance.slug}`} className={s.link}>
-                      Open
-                    </Link>
+                    {stance.postSlug ? (
+                      <Link href={`/posts/${stance.postSlug}`} className={s.link}>
+                        Open
+                      </Link>
+                    ) : (
+                      <span className={s.targetEmpty}>No linked post</span>
+                    )}
                   </td>
                 </tr>
               ))}
@@ -448,9 +450,13 @@ export default async function StancesPage({ searchParams }: StancesPageProps) {
                   <div className={s.mobileNoFrame}>No scenario frame published yet.</div>
                 )}
 
-                <Link href={`/posts/${stance.slug}`} className={s.mobileLink}>
-                  Open analysis
-                </Link>
+                {stance.postSlug ? (
+                  <Link href={`/posts/${stance.postSlug}`} className={s.mobileLink}>
+                    Open analysis
+                  </Link>
+                ) : (
+                  <span className={s.mobileNoFrame}>No linked post yet.</span>
+                )}
               </article>
             )
           })}
@@ -461,5 +467,20 @@ export default async function StancesPage({ searchParams }: StancesPageProps) {
 }
 
 function humanizeTag(value: string) {
-  return value.replace(/[-_]/g, " ").replace(/\b\w/g, (char) => char.toUpperCase())
+  const normalized = value.trim().toLowerCase()
+
+  switch (normalized) {
+    case "orcl":
+      return "Oracle"
+    case "eog":
+      return "EOG"
+    case "e-and-p":
+      return "E&P"
+    case "roic":
+      return "ROIC"
+    case "dcf":
+      return "DCF"
+    default:
+      return normalized.replace(/[-_]/g, " ").replace(/\b\w/g, (char) => char.toUpperCase())
+  }
 }

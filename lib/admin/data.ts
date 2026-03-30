@@ -61,14 +61,54 @@ export interface PostEditorData {
 }
 
 export interface StanceListItem {
+  conviction: string
+  coverageCategory: string
+  coverageStatus: string
   id: number
+  linkedPostLabels: string[]
+  name: string
+  opinion: string
   publishedAt: string | null
   slug: string
   status: string
   summary: string
+  tags: string[]
+  thesis: string
+  ticker: string
   title: string
   topicLabel: string | null
   updatedAt: string
+}
+
+export interface StanceEditorData {
+  linkedPosts: Array<{
+    id: number
+    slug: string
+    title: string
+  }>
+  stance: {
+    base: number | null
+    bear: number | null
+    body: string
+    bull: number | null
+    conviction: string
+    coverage_category: string
+    coverage_status: string
+    id: number
+    name: string
+    opinion: string
+    published_at: string | null
+    scenario_type: string
+    slug: string
+    status: string
+    summary: string
+    tags: string[]
+    thesis: string
+    ticker: string
+    title: string
+    topic_id: number | null
+  } | null
+  topics: SelectOption[]
 }
 
 export interface InProgressListItem {
@@ -367,21 +407,47 @@ export async function getPostEditorData(id?: number): Promise<PostEditorData> {
 
 export async function getStancesPageData() {
   const supabase = await createClient()
-  const [stancesResult, topics] = await Promise.all([
+  const [stancesResult, topics, linkedPostsResult] = await Promise.all([
     supabase
       .from('stances')
-      .select('id, title, slug, summary, status, topic_id, published_at, updated_at')
+      .select('*')
       .order('updated_at', { ascending: false }),
     getSelectOptions('topics'),
+    supabase
+      .from('posts')
+      .select('id, title, slug, stance_id, updated_at')
+      .not('stance_id', 'is', null)
+      .order('updated_at', { ascending: false }),
   ])
 
   const topicMap = new Map(topics.map((item) => [item.id, item.label]))
+  const linkedPostsByStance = new Map<number, string[]>()
+
+  for (const post of linkedPostsResult.data ?? []) {
+    if (!post.stance_id) {
+      continue
+    }
+
+    const current = linkedPostsByStance.get(post.stance_id) ?? []
+    current.push(`${post.title} (${post.slug})`)
+    linkedPostsByStance.set(post.stance_id, current)
+  }
+
   const stances: StanceListItem[] = (stancesResult.data ?? []).map((stance) => ({
+    conviction: stance.conviction ?? 'medium',
+    coverageCategory: stance.coverage_category ?? 'equity',
+    coverageStatus: stance.coverage_status ?? 'active',
     id: stance.id,
+    linkedPostLabels: linkedPostsByStance.get(stance.id) ?? [],
+    name: stance.name ?? stance.title,
+    opinion: stance.opinion ?? 'neutral',
     publishedAt: stance.published_at,
     slug: stance.slug,
     status: stance.status,
     summary: stance.summary,
+    tags: Array.isArray(stance.tags) ? stance.tags : [],
+    thesis: stance.thesis ?? stance.summary,
+    ticker: stance.ticker ?? '',
     title: stance.title,
     topicLabel: stance.topic_id ? topicMap.get(stance.topic_id) ?? null : null,
     updatedAt: stance.updated_at,
@@ -389,6 +455,58 @@ export async function getStancesPageData() {
 
   return {
     stances,
+    topics,
+  }
+}
+
+export async function getStanceEditorData(id?: number): Promise<StanceEditorData> {
+  const supabase = await createClient()
+  const [topics, initialStanceResult, linkedPostsResult] = await Promise.all([
+    getSelectOptions('topics'),
+    id
+      ? supabase.from('stances').select('*').eq('id', id).maybeSingle()
+      : Promise.resolve({ data: null, error: null }),
+    id
+      ? supabase
+          .from('posts')
+          .select('id, title, slug, updated_at')
+          .eq('stance_id', id)
+          .order('updated_at', { ascending: false })
+      : Promise.resolve({ data: [], error: null }),
+  ])
+
+  const stance = initialStanceResult.data
+    ? {
+        base: initialStanceResult.data.base ?? null,
+        bear: initialStanceResult.data.bear ?? null,
+        body: initialStanceResult.data.body ?? '',
+        bull: initialStanceResult.data.bull ?? null,
+        conviction: initialStanceResult.data.conviction ?? 'medium',
+        coverage_category: initialStanceResult.data.coverage_category ?? 'equity',
+        coverage_status: initialStanceResult.data.coverage_status ?? 'active',
+        id: initialStanceResult.data.id,
+        name: initialStanceResult.data.name ?? initialStanceResult.data.title,
+        opinion: initialStanceResult.data.opinion ?? 'neutral',
+        published_at: initialStanceResult.data.published_at,
+        scenario_type: initialStanceResult.data.scenario_type ?? 'price',
+        slug: initialStanceResult.data.slug,
+        status: initialStanceResult.data.status,
+        summary: initialStanceResult.data.summary,
+        tags: Array.isArray(initialStanceResult.data.tags) ? initialStanceResult.data.tags : [],
+        thesis: initialStanceResult.data.thesis ?? initialStanceResult.data.summary,
+        ticker: initialStanceResult.data.ticker ?? '',
+        title: initialStanceResult.data.title,
+        topic_id: initialStanceResult.data.topic_id,
+      }
+    : null
+
+  return {
+    linkedPosts: (linkedPostsResult.data ?? []).map((post) => ({
+      id: post.id,
+      slug: post.slug,
+      title: post.title,
+    })),
+    stance,
     topics,
   }
 }

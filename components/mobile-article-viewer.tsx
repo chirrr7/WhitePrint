@@ -285,6 +285,7 @@ export function MobileArticleViewer({
             <div className="mav-stagger-2">
               {displayTitle ? (
                 <h1
+                  className="mobile-display-title"
                   dangerouslySetInnerHTML={{ __html: displayTitle }}
                   style={{
                     fontFamily: DISPLAY,

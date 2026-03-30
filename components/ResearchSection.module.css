@@ -64,6 +64,10 @@
   border-top: none;
 }
 
+.featuredCardSolo {
+  grid-template-columns: 1fr;
+}
+
 .featuredBody {
   position: relative;
   display: flex;
@@ -130,6 +134,12 @@
   font-weight: 700;
   line-height: 1.1;
   letter-spacing: -0.03em;
+}
+
+.featuredTitle em,
+.rCardTitle em {
+  color: var(--accent);
+  font-style: italic;
 }
 
 .featuredDeck {

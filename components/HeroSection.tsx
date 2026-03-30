@@ -41,7 +41,7 @@ const initialState: HeroState = {
     ann2: false,
     ann3: false,
   },
-  visibleDocument: false,
+  visibleDocument: true,
   visibleNotes: {
     note0: false,
     note1: false,
@@ -276,7 +276,7 @@ export function HeroSection() {
   }
 
   return (
-    <section className="wp-hero" id="hero">
+    <section className="wp-hero" id="hero" style={{ backgroundColor: "#0a0a0a" }}>
       <div className="wp-hero-grain" />
       <div className="wp-hero-rule" />
 

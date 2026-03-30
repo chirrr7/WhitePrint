@@ -1,7 +1,6 @@
 import Link from "next/link"
-import type { PostMeta } from "@/lib/post-meta"
-import { formatPostDate, getPostCategoryLabel } from "@/lib/post-meta"
 import { StancesTicker } from "@/components/StancesTicker"
+import { formatPostDate, getPostCategoryLabel, type PostMeta } from "@/lib/post-meta"
 import type { Stance } from "@/lib/stances"
 
 const MONO = '"JetBrains Mono", monospace'
@@ -9,12 +8,18 @@ const SERIF = '"Source Serif 4", Georgia, serif'
 const DISPLAY = '"Playfair Display", Georgia, serif'
 
 export function MobileHome({
-  featured,
   briefs,
+  featured,
+  heroLabel,
+  showDeskBriefs = true,
+  showStances = true,
   stances,
 }: {
-  featured: PostMeta
   briefs: PostMeta[]
+  featured: PostMeta
+  heroLabel?: string
+  showDeskBriefs?: boolean
+  showStances?: boolean
   stances: Stance[]
 }) {
   return (
@@ -26,8 +31,22 @@ export function MobileHome({
         minHeight: "calc(100dvh - 44px - 72px)",
       }}
     >
-      {/* Featured / Deskbrief */}
       <div style={{ padding: "24px 16px 20px" }}>
+        {heroLabel ? (
+          <div
+            style={{
+              fontFamily: MONO,
+              fontSize: 8,
+              letterSpacing: "0.28em",
+              textTransform: "uppercase",
+              color: "var(--accent)",
+              marginBottom: 14,
+            }}
+          >
+            {heroLabel}
+          </div>
+        ) : null}
+
         <div
           style={{
             fontFamily: MONO,
@@ -38,8 +57,7 @@ export function MobileHome({
             marginBottom: 14,
           }}
         >
-          {getPostCategoryLabel(featured.category)} ·{" "}
-          {formatPostDate(featured.date)}
+          {getPostCategoryLabel(featured.category)} · {formatPostDate(featured.date)}
         </div>
 
         <Link
@@ -76,80 +94,79 @@ export function MobileHome({
         <Link
           href={`/posts/${featured.slug}`}
           className="mobile-tap-red"
-        style={{
-          fontFamily: MONO,
-          fontSize: 10,
-          letterSpacing: "0.16em",
-          textTransform: "uppercase",
-          color: "var(--accent)",
-          textDecoration: "none",
-          padding: "10px 20px",
-          border: "1px solid color-mix(in srgb, var(--accent) 35%, transparent)",
-          display: "inline-block",
-        }}
+          style={{
+            fontFamily: MONO,
+            fontSize: 10,
+            letterSpacing: "0.16em",
+            textTransform: "uppercase",
+            color: "var(--accent)",
+            textDecoration: "none",
+            padding: "10px 20px",
+            border: "1px solid color-mix(in srgb, var(--accent) 35%, transparent)",
+            display: "inline-block",
+          }}
         >
           Read Analysis →
         </Link>
       </div>
 
-      <StancesTicker stances={stances} />
+      {showStances ? <StancesTicker stances={stances} /> : null}
 
-      {/* Desk Brief */}
-      <div style={{ padding: "20px 16px 24px" }}>
-        <div
-          style={{
-            fontFamily: MONO,
-            fontSize: 8,
-            letterSpacing: "0.32em",
-            textTransform: "uppercase",
-            color: "var(--mobile-page-subtle)",
-            marginBottom: 14,
-          }}
-        >
-          Desk Brief
-        </div>
-
-        {briefs.map((post) => (
-          <Link
-            key={post.slug}
-            href={`/posts/${post.slug}`}
-            className="mobile-tap-red"
+      {showDeskBriefs && briefs.length ? (
+        <div style={{ padding: "20px 16px 24px" }}>
+          <div
             style={{
-              display: "block",
-              padding: "14px 0",
-              borderBottom: "1px solid var(--mobile-page-line)",
-              textDecoration: "none",
+              fontFamily: MONO,
+              fontSize: 8,
+              letterSpacing: "0.32em",
+              textTransform: "uppercase",
+              color: "var(--mobile-page-subtle)",
+              marginBottom: 14,
             }}
           >
-            <span
+            Desk Brief
+          </div>
+
+          {briefs.map((post) => (
+            <Link
+              key={post.slug}
+              href={`/posts/${post.slug}`}
+              className="mobile-tap-red"
               style={{
-                fontFamily: MONO,
-                fontSize: 8,
-                letterSpacing: "0.2em",
-                textTransform: "uppercase",
-                color: "var(--accent)",
                 display: "block",
-                marginBottom: 5,
+                padding: "14px 0",
+                borderBottom: "1px solid var(--mobile-page-line)",
+                textDecoration: "none",
               }}
             >
-              {post.eyebrow ??
-                post.tags[0] ??
-                getPostCategoryLabel(post.category)}
-            </span>
-            <span
-              style={{
-                fontFamily: SERIF,
-                fontSize: 13,
-                lineHeight: 1.5,
-                color: "var(--mobile-page-muted)",
-                display: "block",
-              }}
-            >
-              {post.excerpt}
-            </span>
-          </Link>
-        ))}
-      </div>
+              <span
+                style={{
+                  fontFamily: MONO,
+                  fontSize: 8,
+                  letterSpacing: "0.2em",
+                  textTransform: "uppercase",
+                  color: "var(--accent)",
+                  display: "block",
+                  marginBottom: 5,
+                }}
+              >
+                {post.eyebrow ?? post.tags[0] ?? getPostCategoryLabel(post.category)}
+              </span>
+              <span
+                style={{
+                  fontFamily: SERIF,
+                  fontSize: 13,
+                  lineHeight: 1.5,
+                  color: "var(--mobile-page-muted)",
+                  display: "block",
+                }}
+              >
+                {post.excerpt}
+              </span>
+            </Link>
+          ))}
+        </div>
+      ) : null}
     </div>
   )
 }

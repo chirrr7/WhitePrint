@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { JetBrains_Mono, Playfair_Display, Source_Serif_4 } from 'next/font/google'
 import { RootShell } from '@/components/root-shell'
+import { getPublicGeneralSettings } from '@/lib/public-site'
 import { SEO_CONFIG } from '@/lib/seo.config'
 import './globals.css'
 import '@/styles/mobile.css'
@@ -25,34 +26,38 @@ const jetbrainsMono = JetBrains_Mono({
   variable: '--font-mono',
 })
 
-export const metadata: Metadata = {
-  metadataBase: new URL(SEO_CONFIG.siteUrl),
-  title: {
-    default: 'Whiteprint Research',
-    template: '%s — Whiteprint Research',
-  },
-  description: SEO_CONFIG.siteDescription,
-  openGraph: {
-    type: 'website',
-    siteName: SEO_CONFIG.siteName,
-    locale: SEO_CONFIG.locale,
-  },
-  twitter: {
-    card: 'summary_large_image',
-    site: SEO_CONFIG.twitterHandle,
-  },
-  robots: {
-    index: true,
-    follow: true,
-  },
-  icons: {
-    icon: [
-      { url: '/favicon.ico', sizes: 'any' },
-      { url: '/icon-light-32x32.png', type: 'image/png', sizes: '32x32' },
-    ],
-    shortcut: '/favicon.ico',
-    apple: '/apple-icon.png',
-  },
+export async function generateMetadata(): Promise<Metadata> {
+  const settings = await getPublicGeneralSettings()
+
+  return {
+    metadataBase: new URL(SEO_CONFIG.siteUrl),
+    title: {
+      default: settings.siteTitle,
+      template: `%s - ${settings.siteTitle}`,
+    },
+    description: settings.siteDescription,
+    openGraph: {
+      type: 'website',
+      siteName: settings.siteTitle,
+      locale: SEO_CONFIG.locale,
+    },
+    twitter: {
+      card: 'summary_large_image',
+      site: SEO_CONFIG.twitterHandle,
+    },
+    robots: {
+      index: true,
+      follow: true,
+    },
+    icons: {
+      icon: [
+        { url: '/favicon.ico', sizes: 'any' },
+        { url: '/icon-light-32x32.png', type: 'image/png', sizes: '32x32' },
+      ],
+      shortcut: '/favicon.ico',
+      apple: '/apple-icon.png',
+    },
+  }
 }
 
 export default function RootLayout({
@@ -83,7 +88,7 @@ export default function RootLayout({
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
       </head>
-      <body>
+      <body suppressHydrationWarning>
         <RootShell>{children}</RootShell>
       </body>
     </html>

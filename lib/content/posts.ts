@@ -127,8 +127,11 @@ type DatabasePostRow = Pick<
   | "featured"
   | "homepage"
   | "id"
+  | "linked_model_id"
   | "published_at"
+  | "scenarios_count"
   | "slug"
+  | "sources_count"
   | "summary"
   | "title"
   | "topic_id"
@@ -491,6 +494,8 @@ function buildDatabasePostMeta(row: DatabasePostRow, topic: PublicTopic | null |
     eyebrow: frontmatter?.eyebrow,
     topicLabel: topic?.name ?? getPostCategoryLabel(category),
     topicSlug: topic?.slug ?? category,
+    sourcesCount: row.sources_count ?? undefined,
+    scenariosCount: row.scenarios_count ?? undefined,
     marketNoteTable: frontmatter?.marketNoteTable as MarketNoteTableData | undefined,
     reportDownload: frontmatter?.reportDownload as ReportDownloadData | undefined,
     sidebarCards: frontmatter?.sidebarCards as SidebarCard[] | undefined,
@@ -523,7 +528,7 @@ async function getPublishedDatabasePostRows(): Promise<DatabasePostRow[]> {
     let { data, error } = await supabase
       .from("posts")
       .select(
-        "id, title, slug, summary, body, body_mdx, topic_id, featured, homepage, published_at, created_at, updated_at",
+        "id, title, slug, summary, body, body_mdx, topic_id, featured, homepage, linked_model_id, published_at, created_at, updated_at, sources_count, scenarios_count",
       )
       .eq("status", "published")
       .order("published_at", { ascending: false })
@@ -533,7 +538,7 @@ async function getPublishedDatabasePostRows(): Promise<DatabasePostRow[]> {
       const fallback = await supabase
         .from("posts")
         .select(
-          "id, title, slug, summary, body, topic_id, featured, homepage, published_at, created_at, updated_at",
+          "id, title, slug, summary, body, topic_id, featured, homepage, linked_model_id, published_at, created_at, updated_at, sources_count, scenarios_count",
         )
         .eq("status", "published")
         .order("published_at", { ascending: false })
@@ -573,6 +578,53 @@ async function getPublishedDatabasePosts(): Promise<PostMeta[]> {
   }
 }
 
+async function getArchivedDatabasePosts(): Promise<PostMeta[]> {
+  try {
+    const supabase = getPublicSupabase()
+    let { data, error } = await supabase
+      .from("posts")
+      .select(
+        "id, title, slug, summary, body, body_mdx, topic_id, featured, homepage, linked_model_id, published_at, created_at, updated_at, sources_count, scenarios_count",
+      )
+      .eq("status", "archived")
+      .order("published_at", { ascending: false })
+      .order("updated_at", { ascending: false })
+
+    if (isMissingBodyMdxColumn(error)) {
+      const fallback = await supabase
+        .from("posts")
+        .select(
+          "id, title, slug, summary, body, topic_id, featured, homepage, linked_model_id, published_at, created_at, updated_at, sources_count, scenarios_count",
+        )
+        .eq("status", "archived")
+        .order("published_at", { ascending: false })
+        .order("updated_at", { ascending: false })
+
+      data = (fallback.data ?? []).map((row) => ({
+        ...row,
+        body_mdx: "",
+      }))
+      error = fallback.error
+    }
+
+    if (error) {
+      throw error
+    }
+
+    const rows = data ?? []
+
+    if (!rows.length) {
+      return []
+    }
+
+    const topicsById = await getTopicsByIds(rows.map((row) => row.topic_id))
+    return sortPosts(rows.map((row) => buildDatabasePostMeta(row, topicsById.get(row.topic_id ?? -1))))
+  } catch (error) {
+    console.error("Failed to load archived Supabase posts.", error)
+    return []
+  }
+}
+
 async function getPublishedDatabasePostBySlug(
   slug: string,
 ): Promise<{ content: string; post: PostMeta } | null> {
@@ -581,7 +633,7 @@ async function getPublishedDatabasePostBySlug(
     let { data, error } = await supabase
       .from("posts")
       .select(
-        "id, title, slug, summary, body, body_mdx, topic_id, featured, homepage, published_at, created_at, updated_at",
+        "id, title, slug, summary, body, body_mdx, topic_id, featured, homepage, linked_model_id, published_at, created_at, updated_at, sources_count, scenarios_count",
       )
       .eq("slug", slug)
       .eq("status", "published")
@@ -591,7 +643,7 @@ async function getPublishedDatabasePostBySlug(
       const fallback = await supabase
         .from("posts")
         .select(
-          "id, title, slug, summary, body, topic_id, featured, homepage, published_at, created_at, updated_at",
+          "id, title, slug, summary, body, topic_id, featured, homepage, linked_model_id, published_at, created_at, updated_at, sources_count, scenarios_count",
         )
         .eq("slug", slug)
         .eq("status", "published")
@@ -674,22 +726,21 @@ export async function getAllPosts(): Promise<PostMeta[]> {
   const databasePosts = await getPublishedDatabasePosts()
   const uniquePosts = new Map<string, PostMeta>()
 
-  filesystemPosts.forEach((post) => {
+  databasePosts.forEach((post) => {
     uniquePosts.set(post.slug, post)
   })
 
-  databasePosts.forEach((post) => {
-    if (uniquePosts.has(post.slug)) {
-      console.warn(
-        `Skipping database post "${post.slug}" because a filesystem post already uses that slug.`,
-      )
-      return
+  filesystemPosts.forEach((post) => {
+    if (!uniquePosts.has(post.slug)) {
+      uniquePosts.set(post.slug, post)
     }
-
-    uniquePosts.set(post.slug, post)
   })
 
   return sortPosts(Array.from(uniquePosts.values()))
+}
+
+export async function getArchivedPosts(): Promise<PostMeta[]> {
+  return getArchivedDatabasePosts()
 }
 
 export async function getMdxPosts(): Promise<PostMeta[]> {
@@ -710,17 +761,31 @@ export async function getPostsByTopicSlug(topicSlug: string): Promise<PostMeta[]
 }
 
 export async function getPostMetaBySlug(slug: string): Promise<PostMeta | null> {
+  const databasePost = await getPublishedDatabasePostBySlug(slug)
+
+  if (databasePost) {
+    return databasePost.post
+  }
+
   const filesystemSource = await getVisibleFilesystemPostSourceBySlug(slug)
 
   if (filesystemSource) {
     return buildFilesystemPostMeta(filesystemSource)
   }
 
-  const databasePost = await getPublishedDatabasePostBySlug(slug)
-  return databasePost?.post ?? null
+  return null
 }
 
 export async function getPostBySlug(slug: string): Promise<Post | null> {
+  const databasePost = await getPublishedDatabasePostBySlug(slug)
+
+  if (databasePost) {
+    return {
+      ...databasePost.post,
+      content: await compilePostSource(databasePost.content, postBodyComponents),
+    }
+  }
+
   const filesystemSource = await getVisibleFilesystemPostSourceBySlug(slug)
 
   if (filesystemSource) {
@@ -733,16 +798,7 @@ export async function getPostBySlug(slug: string): Promise<Post | null> {
     }
   }
 
-  const databasePost = await getPublishedDatabasePostBySlug(slug)
-
-  if (!databasePost) {
-    return null
-  }
-
-  return {
-    ...databasePost.post,
-    content: await compilePostSource(databasePost.content, postBodyComponents),
-  }
+  return null
 }
 
 export async function getAllTags(): Promise<string[]> {
@@ -764,6 +820,15 @@ export async function getPostsByTag(tag: string): Promise<PostMeta[]> {
 }
 
 export async function getArticleBySlug(slug: string): Promise<Post | null> {
+  const databasePost = await getPublishedDatabasePostBySlug(slug)
+
+  if (databasePost) {
+    return {
+      ...databasePost.post,
+      content: await compilePostSource(databasePost.content, articleBodyComponents),
+    }
+  }
+
   const filesystemSource = await getVisibleFilesystemPostSourceBySlug(slug)
 
   if (filesystemSource) {
@@ -776,16 +841,7 @@ export async function getArticleBySlug(slug: string): Promise<Post | null> {
     }
   }
 
-  const databasePost = await getPublishedDatabasePostBySlug(slug)
-
-  if (!databasePost) {
-    return null
-  }
-
-  return {
-    ...databasePost.post,
-    content: await compilePostSource(databasePost.content, articleBodyComponents),
-  }
+  return null
 }
 
 export async function getTopicLabelBySlug(topicSlug: string) {

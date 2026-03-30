@@ -10,7 +10,7 @@ const HERO_PIPELINE_SENTINEL_ID = "pipeline-nav-sentinel"
 const navItems = [
   { href: "/research", label: "Research" },
   { href: "/#pipeline", label: "In Progress" },
-  { href: "/stances", label: "Stances" },
+  { href: "/stances", label: "Coverage" },
   { href: "/about", label: "About" },
 ] as const
 
@@ -128,129 +128,6 @@ export function Nav() {
         <span className="wp-nav-right">whiteprintresearch.xyz</span>
       </nav>
 
-      <style jsx>{`
-        .wp-nav {
-          position: fixed;
-          top: 0;
-          right: 0;
-          left: 0;
-          z-index: 200;
-          display: flex;
-          align-items: center;
-          gap: 36px;
-          height: 52px;
-          padding: 0 48px;
-          border-bottom: 1px solid transparent;
-          transition:
-            background 0.4s ease,
-            border-color 0.4s ease,
-            color 0.3s ease,
-            backdrop-filter 0.4s ease,
-            -webkit-backdrop-filter 0.4s ease;
-        }
-
-        .wp-nav.over-hero {
-          background: transparent;
-        }
-
-        .wp-nav.scrolled {
-          background: rgba(250, 249, 247, 0.96);
-          border-bottom-color: var(--border);
-          backdrop-filter: blur(14px);
-          -webkit-backdrop-filter: blur(14px);
-        }
-
-        .wp-nav.over-light {
-          background: rgba(250, 249, 247, 0.96);
-          border-bottom-color: var(--border);
-          backdrop-filter: blur(14px);
-          -webkit-backdrop-filter: blur(14px);
-        }
-
-        .wp-nav-logo {
-          color: rgba(255, 255, 255, 0.92);
-          font-family: var(--font-display-family), Georgia, serif;
-          font-size: 14px;
-          font-weight: 700;
-          letter-spacing: -0.02em;
-          line-height: 1;
-          text-decoration: none;
-          transition: color 0.3s ease;
-        }
-
-        .wp-nav.scrolled .wp-nav-logo {
-          color: var(--ink);
-        }
-
-        .wp-nav.over-light .wp-nav-logo {
-          color: var(--ink);
-        }
-
-        .wp-nav-links {
-          display: flex;
-          align-items: center;
-          gap: 28px;
-        }
-
-        .wp-nav-link {
-          color: rgba(255, 255, 255, 0.3);
-          font-family: var(--font-mono-family), monospace;
-          font-size: 9px;
-          letter-spacing: 0.14em;
-          line-height: 1;
-          text-decoration: none;
-          text-transform: uppercase;
-          transition: color 0.2s ease;
-        }
-
-        .wp-nav-link:hover,
-        .wp-nav-link.is-active {
-          color: rgba(255, 255, 255, 0.75);
-        }
-
-        .wp-nav.scrolled .wp-nav-link {
-          color: var(--subtle);
-        }
-
-        .wp-nav.scrolled .wp-nav-link:hover,
-        .wp-nav.scrolled .wp-nav-link.is-active {
-          color: var(--ink);
-        }
-
-        .wp-nav.over-light .wp-nav-link {
-          color: var(--subtle);
-        }
-
-        .wp-nav.over-light .wp-nav-link:hover,
-        .wp-nav.over-light .wp-nav-link.is-active {
-          color: var(--ink);
-        }
-
-        .wp-nav-right {
-          margin-left: auto;
-          color: rgba(255, 255, 255, 0.18);
-          font-family: var(--font-mono-family), monospace;
-          font-size: 8px;
-          letter-spacing: 0.16em;
-          line-height: 1;
-          text-transform: uppercase;
-          transition: color 0.3s ease;
-        }
-
-        .wp-nav.scrolled .wp-nav-right {
-          color: var(--subtle);
-        }
-
-        .wp-nav.over-light .wp-nav-right {
-          color: var(--subtle);
-        }
-
-        @media (max-width: 1200px) {
-          .wp-nav {
-            padding: 0 32px;
-          }
-        }
-      `}</style>
     </header>
   )
 }

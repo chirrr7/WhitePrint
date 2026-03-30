@@ -272,37 +272,73 @@ export interface Database {
       }
       stances: {
         Row: {
+          base: number | null
+          bear: number | null
           body: string
+          conviction: string
+          coverage_category: string
+          coverage_status: string
           created_at: string
+          bull: number | null
           id: number
+          name: string
+          opinion: string
           published_at: string | null
+          scenario_type: string
           slug: string
           status: string
           summary: string
+          tags: string[]
+          thesis: string
+          ticker: string
           title: string
           topic_id: number | null
           updated_at: string
         }
         Insert: {
+          base?: number | null
+          bear?: number | null
           body?: string
+          conviction?: string
+          coverage_category?: string
+          coverage_status?: string
           created_at?: string
+          bull?: number | null
           id?: number
+          name?: string
+          opinion?: string
           published_at?: string | null
+          scenario_type?: string
           slug: string
           status?: string
           summary?: string
+          tags?: string[]
+          thesis?: string
+          ticker?: string
           title: string
           topic_id?: number | null
           updated_at?: string
         }
         Update: {
+          base?: number | null
+          bear?: number | null
           body?: string
+          conviction?: string
+          coverage_category?: string
+          coverage_status?: string
           created_at?: string
+          bull?: number | null
           id?: number
+          name?: string
+          opinion?: string
           published_at?: string | null
+          scenario_type?: string
           slug?: string
           status?: string
           summary?: string
+          tags?: string[]
+          thesis?: string
+          ticker?: string
           title?: string
           topic_id?: number | null
           updated_at?: string

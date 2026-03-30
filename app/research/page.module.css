@@ -167,6 +167,12 @@
   line-height: 1.2;
 }
 
+.cardTitle em,
+.archiveTitle em {
+  color: var(--accent);
+  font-style: italic;
+}
+
 .archiveTitle {
   font-size: 20px;
   line-height: 1.18;
@@ -183,6 +189,21 @@
 
 .cardDeck {
   font-size: 13px;
+}
+
+.modelLink {
+  display: inline-block;
+  margin-top: 12px;
+  color: var(--accent);
+  font-family: var(--font-mono-family), monospace;
+  font-size: 8.5px;
+  letter-spacing: 0.18em;
+  text-decoration: none;
+  text-transform: uppercase;
+}
+
+.modelLink:hover {
+  color: var(--ink);
 }
 
 .archiveDeck {

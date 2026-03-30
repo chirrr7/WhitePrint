@@ -12,16 +12,25 @@ function SearchContent() {
   const router = useRouter()
   const initialQuery = searchParams.get("q") ?? ""
   const initialTag = searchParams.get("tag") ?? ""
+  const initialIncludeArchived = searchParams.get("archived") === "1"
   const [query, setQuery] = useState(initialQuery)
-  const [tag] = useState(initialTag)
+  const [tag, setTag] = useState(initialTag)
+  const [includeArchived, setIncludeArchived] = useState(initialIncludeArchived)
   const [results, setResults] = useState<PostMeta[]>([])
   const [loading, setLoading] = useState(false)
 
-  const doSearch = useCallback(async (q: string, t: string) => {
+  useEffect(() => {
+    setQuery(initialQuery)
+    setTag(initialTag)
+    setIncludeArchived(initialIncludeArchived)
+  }, [initialIncludeArchived, initialQuery, initialTag])
+
+  const doSearch = useCallback(async (q: string, t: string, archived: boolean) => {
     setLoading(true)
     const params = new URLSearchParams()
     if (q) params.set("q", q)
     if (t) params.set("tag", t)
+    if (archived) params.set("archived", "1")
     const res = await fetch(`/api/search?${params.toString()}`)
     const data = await res.json()
     setResults(data)
@@ -30,17 +39,32 @@ function SearchContent() {
 
   useEffect(() => {
     if (query || tag) {
-      doSearch(query, tag)
+      doSearch(query, tag, includeArchived)
+      return
     }
-  }, [tag, doSearch, query])
+
+    setResults([])
+  }, [includeArchived, tag, doSearch, query])
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     const params = new URLSearchParams()
     if (query) params.set("q", query)
     if (tag) params.set("tag", tag)
+    if (includeArchived) params.set("archived", "1")
     router.push(`/search?${params.toString()}`)
-    doSearch(query, tag)
+    doSearch(query, tag, includeArchived)
+  }
+
+  const handleArchiveToggle = () => {
+    const nextValue = !includeArchived
+    setIncludeArchived(nextValue)
+
+    const params = new URLSearchParams()
+    if (query) params.set("q", query)
+    if (tag) params.set("tag", tag)
+    if (nextValue) params.set("archived", "1")
+    router.push(`/search?${params.toString()}`)
   }
 
   return (
@@ -63,16 +87,25 @@ function SearchContent() {
             Search
           </button>
         </div>
+        <label className="mt-4 inline-flex items-center gap-3 text-xs uppercase tracking-[0.18em] text-muted-foreground">
+          <input
+            type="checkbox"
+            checked={includeArchived}
+            onChange={handleArchiveToggle}
+            className="h-3.5 w-3.5 accent-[var(--accent)]"
+          />
+          Include Archive
+        </label>
         {tag && (
           <div className="mt-3 flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
             <p>
-              Filtering by tag: <span className="text-foreground font-medium">#{tag}</span>
+              Filtering by tag: <span className="text-foreground font-medium">{formatTagLabel(tag)}</span>
             </p>
             <Link
               href={`/stances?tag=${encodeURIComponent(tag)}`}
               className="text-xs uppercase tracking-[0.18em] text-foreground hover:text-muted-foreground transition-colors"
             >
-              View coverage stance →
+              View coverage →
             </Link>
           </div>
         )}
@@ -94,21 +127,37 @@ function SearchContent() {
                 <time dateTime={post.date}>{formatPostDate(post.date)}</time>
               </div>
               <Link href={`/posts/${post.slug}`}>
-                <h3 className="font-serif text-xl font-semibold tracking-tight text-foreground hover:text-muted-foreground transition-colors">
-                  {post.title}
-                </h3>
+                {post.displayTitle ? (
+                  <h3
+                    className="font-serif text-xl font-semibold tracking-tight text-foreground transition-colors hover:text-muted-foreground [&_em]:text-accent [&_em]:italic"
+                    dangerouslySetInnerHTML={{ __html: post.displayTitle }}
+                  />
+                ) : (
+                  <h3 className="font-serif text-xl font-semibold tracking-tight text-foreground hover:text-muted-foreground transition-colors">
+                    {post.title}
+                  </h3>
+                )}
               </Link>
               <p className="mt-2 text-sm text-muted-foreground leading-relaxed max-w-2xl">
                 {post.excerpt}
               </p>
-              <div className="flex items-center gap-2 mt-2">
+              <div className="mt-2 flex flex-wrap items-center gap-2">
+                {post.reportDownload ? (
+                  <a
+                    href={post.reportDownload.href}
+                    download={post.reportDownload.filename}
+                    className="text-xs uppercase tracking-[0.18em] text-accent hover:text-foreground transition-colors"
+                  >
+                    {post.reportDownload.label ?? "Model"}
+                  </a>
+                ) : null}
                 {post.tags.map((t) => (
                   <Link
                     key={t}
                     href={`/search?tag=${encodeURIComponent(t)}`}
                     className="text-xs text-muted-foreground hover:text-foreground transition-colors"
                   >
-                    #{t}
+                    {formatTagLabel(t)}
                   </Link>
                 ))}
               </div>
@@ -130,4 +179,23 @@ export function SearchView() {
       <SearchContent />
     </Suspense>
   )
+}
+
+function formatTagLabel(value: string) {
+  const normalized = value.trim().toLowerCase()
+
+  switch (normalized) {
+    case "orcl":
+      return "Oracle"
+    case "eog":
+      return "EOG"
+    case "e-and-p":
+      return "E&P"
+    case "roic":
+      return "ROIC"
+    case "dcf":
+      return "DCF"
+    default:
+      return normalized.replace(/[-_]/g, " ").replace(/\b\w/g, (char) => char.toUpperCase())
+  }
 }
