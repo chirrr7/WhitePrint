@@ -92,6 +92,63 @@
   line-height: 1.75;
 }
 
+.filterBar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 22px;
+}
+
+.filterChip,
+.filterSummaryLink,
+.coverageTag {
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+  text-decoration: none;
+}
+
+.filterChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 38px;
+  padding: 0 14px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--foreground);
+  font-size: 9px;
+  letter-spacing: 0.16em;
+}
+
+.filterChipActive {
+  border-color: color-mix(in srgb, var(--accent) 34%, var(--border));
+  background: color-mix(in srgb, var(--accent) 8%, var(--surface));
+  color: var(--accent);
+}
+
+.filterChipCount {
+  font-size: 8px;
+  letter-spacing: 0.12em;
+  color: var(--muted-foreground);
+}
+
+.filterSummary {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 14px;
+  color: var(--muted-foreground);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.filterSummaryLink {
+  font-size: 9px;
+  letter-spacing: 0.16em;
+  color: var(--accent);
+}
+
 .mobileHeroPanel {
   margin-top: 26px;
 }
@@ -263,6 +320,31 @@
   letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--muted-foreground);
+}
+
+.coverageTagRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.coverageTag {
+  display: inline-flex;
+  align-items: center;
+  min-height: 26px;
+  padding: 0 9px;
+  border: 1px solid var(--border);
+  background: color-mix(in srgb, var(--surface) 88%, var(--background));
+  color: var(--muted-foreground);
+  font-size: 8px;
+  letter-spacing: 0.14em;
+}
+
+.coverageTag:hover,
+.filterSummaryLink:hover,
+.filterChip:hover {
+  color: var(--accent);
 }
 
 .pill {
@@ -733,6 +815,23 @@
     color: var(--mobile-coverage-hero-muted);
     font-size: 15px;
     line-height: 1.72;
+  }
+
+  .filterBar {
+    margin-top: 18px;
+    gap: 8px;
+  }
+
+  .filterChip {
+    min-height: 34px;
+    padding: 0 12px;
+    background: var(--mobile-coverage-panel-bg);
+  }
+
+  .filterSummary {
+    margin-top: 12px;
+    font-size: 12px;
+    color: var(--mobile-coverage-hero-muted);
   }
 
   .mobileHeroPanel {

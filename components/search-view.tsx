@@ -64,9 +64,17 @@ function SearchContent() {
           </button>
         </div>
         {tag && (
-          <p className="mt-3 text-sm text-muted-foreground">
-            Filtering by tag: <span className="text-foreground font-medium">#{tag}</span>
-          </p>
+          <div className="mt-3 flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
+            <p>
+              Filtering by tag: <span className="text-foreground font-medium">#{tag}</span>
+            </p>
+            <Link
+              href={`/stances?tag=${encodeURIComponent(tag)}`}
+              className="text-xs uppercase tracking-[0.18em] text-foreground hover:text-muted-foreground transition-colors"
+            >
+              View coverage stance →
+            </Link>
+          </div>
         )}
       </form>
 

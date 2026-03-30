@@ -1,6 +1,7 @@
-import { getFilesystemPosts } from "@/lib/posts"
+import { getAllPosts, getFilesystemPosts } from "@/lib/posts"
 import {
   getPostCategoryLabel,
+  type PostMeta,
   type PostConviction,
   type PostScenarioType,
   type PostStance,
@@ -11,6 +12,7 @@ export interface Stance {
   ticker: string
   name: string
   category: string
+  tags: string[]
   stance: PostStance
   conviction: PostConviction
   thesis: string
@@ -33,8 +35,8 @@ function formatStanceDate(date: string) {
   return stanceDateFormatter.format(new Date(`${date}T00:00:00`))
 }
 
-export function getStances(): Stance[] {
-  return getFilesystemPosts()
+function mapPostsToStances(posts: PostMeta[]): Stance[] {
+  return posts
     .filter((post) => Boolean(post.ticker && post.stance))
     .sort((left, right) => {
       if (left.date === right.date) {
@@ -47,6 +49,7 @@ export function getStances(): Stance[] {
       ticker: post.ticker!,
       name: post.name ?? post.title,
       category: getPostCategoryLabel(post.category),
+      tags: post.tags,
       stance: post.stance!,
       conviction: post.conviction ?? "medium",
       thesis: post.stanceThesis ?? post.excerpt,
@@ -58,4 +61,12 @@ export function getStances(): Stance[] {
       date: formatStanceDate(post.date),
       slug: post.slug,
     }))
+}
+
+export function getStances(): Stance[] {
+  return mapPostsToStances(getFilesystemPosts())
+}
+
+export async function getCoverageStances(): Promise<Stance[]> {
+  return mapPostsToStances(await getAllPosts())
 }

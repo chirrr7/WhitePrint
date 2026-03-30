@@ -1,6 +1,6 @@
 import type { Metadata } from "next"
 import Link from "next/link"
-import { getStances } from "@/lib/stances"
+import { getCoverageStances } from "@/lib/stances"
 import { SEO_CONFIG } from "@/lib/seo.config"
 import s from "./page.module.css"
 
@@ -119,8 +119,44 @@ function formatConvictionLabel(conviction: "high" | "medium" | "low") {
   }
 }
 
-export default async function StancesPage() {
-  const stances = getStances()
+function normalizeTag(value: string) {
+  return value.trim().toLowerCase()
+}
+
+interface StancesPageProps {
+  searchParams?: Promise<Record<string, string | string[] | undefined>>
+}
+
+export default async function StancesPage({ searchParams }: StancesPageProps) {
+  const resolvedSearchParams = searchParams ? await searchParams : {}
+  const requestedTag =
+    typeof resolvedSearchParams.tag === "string" ? resolvedSearchParams.tag : ""
+  const activeTag = normalizeTag(requestedTag)
+  const allStances = await getCoverageStances()
+  const tagCounts = new Map<string, number>()
+
+  allStances.forEach((stance) => {
+    stance.tags.forEach((tag) => {
+      const normalizedTag = normalizeTag(tag)
+      tagCounts.set(normalizedTag, (tagCounts.get(normalizedTag) ?? 0) + 1)
+    })
+  })
+
+  const coverageTags = Array.from(tagCounts.entries())
+    .sort((left, right) => {
+      if (right[1] === left[1]) {
+        return left[0].localeCompare(right[0])
+      }
+
+      return right[1] - left[1]
+    })
+    .map(([tag, count]) => ({ tag, count }))
+
+  const stances = activeTag
+    ? allStances.filter((stance) =>
+        stance.tags.some((tag) => normalizeTag(tag) === activeTag),
+      )
+    : allStances
   const activeCount = stances.filter((stance) => stance.status === "active").length
   const monitoringCount = stances.filter(
     (stance) => stance.status === "monitoring",
@@ -138,8 +174,42 @@ export default async function StancesPage() {
           <div className={s.eyebrow}>Whiteprint Research</div>
           <h1 className={s.title}>Coverage</h1>
           <p className={s.deck}>
-            Current Whiteprint coverage across macro, equities, and market notes.
+            Current Whiteprint coverage across macro, equities, and market notes,
+            with opinion-linked tags that connect research to the live stance map.
           </p>
+
+          {coverageTags.length > 0 ? (
+            <div className={s.filterBar}>
+              <Link
+                href="/stances"
+                className={`${s.filterChip} ${!activeTag ? s.filterChipActive : ""}`}
+              >
+                All coverage
+              </Link>
+              {coverageTags.map(({ tag, count }) => (
+                <Link
+                  key={tag}
+                  href={`/stances?tag=${encodeURIComponent(tag)}`}
+                  className={`${s.filterChip} ${activeTag === tag ? s.filterChipActive : ""}`}
+                >
+                  #{tag}
+                  <span className={s.filterChipCount}>{count}</span>
+                </Link>
+              ))}
+            </div>
+          ) : null}
+
+          {activeTag ? (
+            <div className={s.filterSummary}>
+              <span>Showing Whiteprint opinions tagged #{activeTag}.</span>
+              <Link
+                href={`/search?tag=${encodeURIComponent(activeTag)}`}
+                className={s.filterSummaryLink}
+              >
+                Open research search
+              </Link>
+            </div>
+          ) : null}
 
           <div className={`${s.mobileHeroPanel} mobile-only`}>
             <div className={s.mobileHeroStats}>
@@ -200,6 +270,19 @@ export default async function StancesPage() {
                     <span className={s.ticker}>{stance.ticker}</span>
                     <span className={s.name}>{stance.name}</span>
                     <span className={s.category}>{stance.category}</span>
+                    {stance.tags.length > 0 ? (
+                      <div className={s.coverageTagRow}>
+                        {stance.tags.map((tag) => (
+                          <Link
+                            key={`${stance.slug}-${tag}`}
+                            href={`/search?tag=${encodeURIComponent(tag)}`}
+                            className={s.coverageTag}
+                          >
+                            #{tag}
+                          </Link>
+                        ))}
+                      </div>
+                    ) : null}
                   </td>
                   <td className={s.cell}>
                     <span className={getStancePillClassName(stance.stance)}>
@@ -317,6 +400,20 @@ export default async function StancesPage() {
                       : "Price scenario frame"}
                   </span>
                 </div>
+
+                {stance.tags.length > 0 ? (
+                  <div className={s.coverageTagRow}>
+                    {stance.tags.map((tag) => (
+                      <Link
+                        key={`${stance.slug}-${tag}`}
+                        href={`/search?tag=${encodeURIComponent(tag)}`}
+                        className={s.coverageTag}
+                      >
+                        #{tag}
+                      </Link>
+                    ))}
+                  </div>
+                ) : null}
 
                 {hasScenarioFrame ? (
                   <div className={s.mobileScenarioWrap}>
