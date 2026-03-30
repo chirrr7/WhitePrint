@@ -1,5 +1,6 @@
 'use server'
 
+import matter from 'gray-matter'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { z } from 'zod'
@@ -56,6 +57,122 @@ function slugify(value: string) {
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-+|-+$/g, '')
     .replace(/-{2,}/g, '-')
+}
+
+function escapeHtml(value: string) {
+  return value
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;')
+}
+
+function deriveDisplayTitle(rawTitle: string) {
+  const emphasisPattern = /\*([^*]+)\*/g
+  const cleanTitle = rawTitle.replace(emphasisPattern, '$1').replace(/\s+/g, ' ').trim()
+
+  if (!cleanTitle) {
+    return {
+      cleanTitle: '',
+      displayTitle: '',
+    }
+  }
+
+  if (emphasisPattern.test(rawTitle)) {
+    emphasisPattern.lastIndex = 0
+    let html = ''
+    let lastIndex = 0
+    let match: RegExpExecArray | null
+
+    while ((match = emphasisPattern.exec(rawTitle)) !== null) {
+      html += escapeHtml(rawTitle.slice(lastIndex, match.index))
+      html += `<em>${escapeHtml(match[1])}</em>`
+      lastIndex = match.index + match[0].length
+    }
+
+    html += escapeHtml(rawTitle.slice(lastIndex))
+
+    return {
+      cleanTitle,
+      displayTitle: html.replace(/\*/g, '').trim(),
+    }
+  }
+
+  const firstWordMatch = cleanTitle.match(/^(\S+)([\s\S]*)$/)
+
+  if (!firstWordMatch) {
+    return {
+      cleanTitle,
+      displayTitle: escapeHtml(cleanTitle),
+    }
+  }
+
+  return {
+    cleanTitle,
+    displayTitle: `<em>${escapeHtml(firstWordMatch[1])}</em>${escapeHtml(firstWordMatch[2])}`,
+  }
+}
+
+function normalizeBodySource(bodySource: string) {
+  const trimmedSource = bodySource.trim()
+
+  if (!trimmedSource) {
+    return ''
+  }
+
+  const mdxSignals = [
+    /^---\s*$/m,
+    /^#{1,6}\s+/m,
+    /^\s*[-*+]\s+/m,
+    /^\s*\d+\.\s+/m,
+    /```/,
+    /<[A-Z][A-Za-z0-9]*/,
+    /\[[^\]]+\]\([^)]+\)/,
+    /^\|.+\|/m,
+    /^\>\s+/m,
+  ]
+
+  if (mdxSignals.some((pattern) => pattern.test(trimmedSource))) {
+    return trimmedSource
+  }
+
+  return trimmedSource
+    .split(/\r?\n\s*\r?\n/)
+    .map((paragraph) =>
+      paragraph
+        .split(/\r?\n/)
+        .map((line) => line.trim())
+        .filter(Boolean)
+        .join(' '),
+    )
+    .filter(Boolean)
+    .join('\n\n')
+}
+
+function prepareBodyMdxForStorage({
+  bodySource,
+  summary,
+  title,
+}: {
+  bodySource: string
+  summary: string
+  title: string
+}) {
+  const { cleanTitle, displayTitle } = deriveDisplayTitle(title)
+  const normalizedBody = normalizeBodySource(bodySource)
+  const parsed = matter(normalizedBody)
+  const nextData = {
+    ...parsed.data,
+    displayTitle,
+    excerpt: summary || (typeof parsed.data.excerpt === 'string' ? parsed.data.excerpt : ''),
+    title: cleanTitle,
+  }
+
+  return {
+    bodyMdx: matter.stringify(parsed.content.trim(), nextData).trim(),
+    cleanTitle,
+  }
 }
 
 function toIsoTimestamp(raw: string) {
@@ -388,12 +505,11 @@ export async function savePostAction(formData: FormData) {
   await requireAdminIdentity()
 
   const id = readOptionalNumber(formData, 'id')
-  const title = readString(formData, 'title')
+  const rawTitle = readString(formData, 'title')
   const inputSlug = readString(formData, 'slug')
-  const slug = slugify(inputSlug || title)
   const status = postStatusSchema.safeParse(readString(formData, 'status'))
   const summary = readString(formData, 'summary')
-  const bodyMdx = readString(formData, 'body_mdx')
+  const bodySource = readString(formData, 'body_mdx')
   const topicId = readOptionalNumber(formData, 'topic_id')
   const stanceId = readOptionalNumber(formData, 'stance_id')
   const linkedModelId = readOptionalNumber(formData, 'linked_model_id')
@@ -401,6 +517,12 @@ export async function savePostAction(formData: FormData) {
   const homepage = readCheckbox(formData, 'homepage')
   const publishedAtInput = readString(formData, 'published_at')
   const returnPath = id ? `/admin/posts/${id}` : '/admin/posts/new'
+  const { bodyMdx, cleanTitle: title } = prepareBodyMdxForStorage({
+    bodySource,
+    summary,
+    title: rawTitle,
+  })
+  const slug = slugify(inputSlug || title)
 
   if (!title || !slug || !status.success) {
     redirect(withMessage(returnPath, 'error', 'Title, slug, and status are required.'))

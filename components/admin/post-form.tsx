@@ -105,7 +105,11 @@ export function PostForm({
             <p className={styles.helpText}>
               You can paste a full Whiteprint v1-style MDX file here, including
               YAML frontmatter, and it will flow through the same public article
-              renderer.
+              renderer. If you paste normal prose, it will be normalized into
+              readable paragraphs automatically. In the title field, the first
+              word is auto-styled red on the live article, and you can wrap any
+              specific word or phrase in <code>*asterisks*</code> to make that
+              part red too.
             </p>
           </label>
 
