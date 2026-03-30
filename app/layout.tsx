@@ -1,12 +1,7 @@
 import type { Metadata } from 'next'
-import { Analytics } from '@vercel/analytics/next'
-import { StancesTicker } from '@/components/StancesTicker'
+import { RootShell } from '@/components/root-shell'
 import { getStances } from '@/lib/stances'
 import { SEO_CONFIG } from '@/lib/seo.config'
-import { SiteHeader } from '@/components/site-header'
-import { SiteFooter } from '@/components/site-footer'
-import { MobileNav } from '@/components/mobile-nav'
-import { MobileHeader } from '@/components/mobile-header'
 import './globals.css'
 import '@/styles/mobile.css'
 
@@ -73,17 +68,7 @@ export default function RootLayout({
         />
       </head>
       <body>
-        <div className="desktop-only">
-          <SiteHeader />
-          <StancesTicker stances={stances} />
-        </div>
-        <MobileHeader />
-        <main>{children}</main>
-        <div className="desktop-only">
-          <SiteFooter />
-        </div>
-        <MobileNav />
-        <Analytics />
+        <RootShell stances={stances}>{children}</RootShell>
       </body>
     </html>
   )

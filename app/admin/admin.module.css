@@ -1,0 +1,595 @@
+.adminShell {
+  min-height: 100svh;
+  display: grid;
+  grid-template-columns: minmax(260px, 300px) minmax(0, 1fr);
+  background:
+    radial-gradient(circle at top left, rgba(184, 48, 37, 0.08), transparent 26%),
+    linear-gradient(180deg, #f7f4ee 0%, #efe9df 100%);
+  color: #1a1713;
+}
+
+.sidebar {
+  position: sticky;
+  top: 0;
+  height: 100svh;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  gap: 1.5rem;
+  padding: 2rem 1.5rem;
+  background: rgba(255, 255, 255, 0.68);
+  border-right: 1px solid rgba(26, 23, 19, 0.08);
+  backdrop-filter: blur(18px);
+}
+
+.sidebarBrand {
+  display: grid;
+  gap: 0.65rem;
+}
+
+.sidebarTitle {
+  margin: 0;
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: clamp(1.5rem, 2vw, 2rem);
+  line-height: 1.05;
+}
+
+.sidebarIntro {
+  margin: 0;
+  color: rgba(26, 23, 19, 0.68);
+  line-height: 1.6;
+  font-size: 0.98rem;
+}
+
+.sidebarFooter {
+  display: grid;
+  gap: 0.75rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(26, 23, 19, 0.1);
+}
+
+.sidebarMeta,
+.eyebrow {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(26, 23, 19, 0.46);
+}
+
+.sidebarEmail {
+  margin: 0;
+  word-break: break-word;
+  font-size: 0.95rem;
+}
+
+.navList {
+  display: grid;
+  gap: 0.55rem;
+  align-content: start;
+}
+
+.navLink {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.85rem 1rem;
+  border-radius: 1rem;
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid rgba(26, 23, 19, 0.06);
+  color: inherit;
+  text-decoration: none;
+  transition:
+    transform 140ms ease,
+    border-color 140ms ease,
+    background 140ms ease;
+}
+
+.navLink:hover {
+  transform: translateX(2px);
+  border-color: rgba(184, 48, 37, 0.18);
+  background: rgba(255, 255, 255, 0.9);
+}
+
+.content {
+  padding: 2rem;
+}
+
+.contentInner {
+  width: min(1120px, 100%);
+  margin: 0 auto;
+}
+
+.pageStack {
+  display: grid;
+  gap: 1.25rem;
+}
+
+.pageHeader {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.pageTitle {
+  margin: 0;
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: clamp(2rem, 4vw, 3.3rem);
+  line-height: 0.98;
+}
+
+.pageIntro {
+  margin: 0.65rem 0 0;
+  max-width: 62ch;
+  color: rgba(26, 23, 19, 0.68);
+  line-height: 1.65;
+}
+
+.heroCard,
+.panel,
+.statCard,
+.tableCard,
+.loginCard {
+  background: rgba(255, 255, 255, 0.84);
+  border: 1px solid rgba(26, 23, 19, 0.08);
+  border-radius: 1.5rem;
+  box-shadow: 0 18px 50px rgba(18, 16, 12, 0.06);
+}
+
+.heroCard,
+.panel,
+.tableCard,
+.loginCard {
+  padding: 1.5rem;
+}
+
+.panelHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+}
+
+.panelTitle {
+  margin: 0;
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 1.35rem;
+}
+
+.panelIntro {
+  margin: 0.35rem 0 0;
+  color: rgba(26, 23, 19, 0.65);
+  line-height: 1.6;
+}
+
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 1rem;
+}
+
+.statCard {
+  padding: 1.1rem 1.2rem;
+  display: grid;
+  gap: 0.6rem;
+}
+
+.statValue {
+  margin: 0;
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: clamp(2rem, 3vw, 2.6rem);
+  line-height: 1;
+}
+
+.statLabel {
+  margin: 0;
+  font-family: var(--font-mono);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  font-size: 0.72rem;
+  color: rgba(26, 23, 19, 0.5);
+}
+
+.splitGrid {
+  display: grid;
+  grid-template-columns: 1.15fr 0.85fr;
+  gap: 1rem;
+}
+
+.tableWrap {
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table th {
+  padding: 0 0 0.85rem;
+  text-align: left;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(26, 23, 19, 0.48);
+}
+
+.table td {
+  padding: 1rem 0;
+  vertical-align: top;
+  border-top: 1px solid rgba(26, 23, 19, 0.08);
+}
+
+.tableTitle {
+  margin: 0;
+  font-weight: 600;
+}
+
+.tableSubtitle {
+  margin: 0.25rem 0 0;
+  font-size: 0.92rem;
+  color: rgba(26, 23, 19, 0.58);
+}
+
+.mono {
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+}
+
+.list {
+  display: grid;
+  gap: 0.9rem;
+}
+
+.listItem {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem 1.05rem;
+  border-radius: 1.1rem;
+  background: rgba(255, 255, 255, 0.78);
+  border: 1px solid rgba(26, 23, 19, 0.08);
+}
+
+.listItemTitle {
+  margin: 0;
+  font-weight: 600;
+}
+
+.listItemMeta {
+  margin: 0.3rem 0 0;
+  color: rgba(26, 23, 19, 0.62);
+  line-height: 1.55;
+  font-size: 0.93rem;
+}
+
+.stackedMeta {
+  display: grid;
+  justify-items: end;
+  gap: 0.45rem;
+}
+
+.statusBadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 92px;
+  padding: 0.42rem 0.72rem;
+  border-radius: 999px;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.statusBadge[data-status='draft'] {
+  background: #efe6d8;
+  color: #8a6844;
+}
+
+.statusBadge[data-status='published'],
+.statusBadge[data-status='active'] {
+  background: #dfece2;
+  color: #41684d;
+}
+
+.statusBadge[data-status='archived'],
+.statusBadge[data-status='done'] {
+  background: #e7e6e3;
+  color: #67625a;
+}
+
+.statusBadge[data-status='blocked'] {
+  background: #f4ddd8;
+  color: #8f4338;
+}
+
+.statusBadge[data-status='backlog'] {
+  background: #ede9df;
+  color: #786a4d;
+}
+
+.noteCard {
+  display: grid;
+  gap: 0.85rem;
+  padding: 1.1rem 1.15rem;
+  border-radius: 1.2rem;
+  background: rgba(255, 255, 255, 0.78);
+  border: 1px solid rgba(26, 23, 19, 0.08);
+}
+
+.noteTitle {
+  margin: 0;
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 1.15rem;
+}
+
+.noteBody {
+  margin: 0;
+  color: rgba(26, 23, 19, 0.64);
+  line-height: 1.6;
+}
+
+.message {
+  padding: 0.95rem 1rem;
+  border-radius: 1rem;
+  border: 1px solid transparent;
+}
+
+.message[data-tone='success'] {
+  background: rgba(223, 236, 226, 0.82);
+  border-color: rgba(65, 104, 77, 0.18);
+  color: #31553d;
+}
+
+.message[data-tone='error'] {
+  background: rgba(244, 221, 216, 0.86);
+  border-color: rgba(143, 67, 56, 0.18);
+  color: #6d3129;
+}
+
+.formGrid {
+  display: grid;
+  gap: 1rem;
+}
+
+.formGridTwo {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem;
+}
+
+.field {
+  display: grid;
+  gap: 0.55rem;
+}
+
+.label {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(26, 23, 19, 0.52);
+}
+
+.input,
+.select,
+.textarea,
+.textareaTall {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0.9rem 1rem;
+  border-radius: 1rem;
+  border: 1px solid rgba(26, 23, 19, 0.12);
+  background: rgba(255, 255, 255, 0.92);
+  color: inherit;
+  font: inherit;
+}
+
+.textarea {
+  min-height: 120px;
+  resize: vertical;
+}
+
+.textareaTall {
+  min-height: 340px;
+  resize: vertical;
+}
+
+.input:focus,
+.select:focus,
+.textarea:focus,
+.textareaTall:focus {
+  outline: none;
+  border-color: rgba(184, 48, 37, 0.35);
+  box-shadow: 0 0 0 4px rgba(184, 48, 37, 0.08);
+}
+
+.checkboxGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 0.9rem;
+}
+
+.checkboxCard {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.8rem;
+  padding: 1rem;
+  border-radius: 1rem;
+  border: 1px solid rgba(26, 23, 19, 0.09);
+  background: rgba(255, 255, 255, 0.76);
+}
+
+.checkboxCard input {
+  margin-top: 0.2rem;
+}
+
+.checkboxTitle {
+  display: block;
+  font-weight: 600;
+}
+
+.checkboxHint {
+  display: block;
+  margin-top: 0.2rem;
+  color: rgba(26, 23, 19, 0.6);
+  line-height: 1.5;
+  font-size: 0.92rem;
+}
+
+.buttonRow {
+  display: flex;
+  gap: 0.8rem;
+  flex-wrap: wrap;
+  margin-top: 1.25rem;
+}
+
+.primaryButton,
+.secondaryButton,
+.dangerButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 44px;
+  padding: 0.8rem 1.05rem;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  font: inherit;
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    transform 140ms ease,
+    box-shadow 140ms ease,
+    background 140ms ease;
+}
+
+.primaryButton {
+  background: #171411;
+  color: #f7f4ee;
+  box-shadow: 0 12px 28px rgba(18, 16, 12, 0.16);
+}
+
+.secondaryButton {
+  background: rgba(255, 255, 255, 0.82);
+  color: inherit;
+  border-color: rgba(26, 23, 19, 0.1);
+}
+
+.dangerButton {
+  background: #b83025;
+  color: #fff;
+}
+
+.primaryButton:hover,
+.secondaryButton:hover,
+.dangerButton:hover {
+  transform: translateY(-1px);
+}
+
+.quickLinks {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  margin-top: 1rem;
+}
+
+.emptyState {
+  padding: 1.25rem;
+  border-radius: 1rem;
+  border: 1px dashed rgba(26, 23, 19, 0.16);
+  color: rgba(26, 23, 19, 0.6);
+}
+
+.helpText {
+  margin: 0;
+  color: rgba(26, 23, 19, 0.58);
+  line-height: 1.55;
+  font-size: 0.93rem;
+}
+
+.referenceList {
+  display: grid;
+  gap: 0.55rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.referenceItem {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.8rem 0.9rem;
+  border-radius: 0.9rem;
+  background: rgba(255, 255, 255, 0.78);
+  border: 1px solid rgba(26, 23, 19, 0.07);
+}
+
+.loginShell {
+  min-height: 100svh;
+  display: grid;
+  place-items: center;
+  padding: 1.5rem;
+  background:
+    radial-gradient(circle at top right, rgba(184, 48, 37, 0.14), transparent 24%),
+    linear-gradient(180deg, #f7f4ee 0%, #ece3d7 100%);
+}
+
+.loginCard {
+  width: min(560px, 100%);
+}
+
+.loginTitle {
+  margin: 0;
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: clamp(2rem, 5vw, 3rem);
+  line-height: 0.98;
+}
+
+.loginIntro {
+  margin: 0.75rem 0 0;
+  color: rgba(26, 23, 19, 0.64);
+  line-height: 1.65;
+}
+
+@media (max-width: 1040px) {
+  .adminShell {
+    grid-template-columns: 1fr;
+  }
+
+  .sidebar {
+    position: static;
+    height: auto;
+    border-right: none;
+    border-bottom: 1px solid rgba(26, 23, 19, 0.08);
+  }
+
+  .splitGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .content {
+    padding: 1rem;
+  }
+
+  .heroCard,
+  .panel,
+  .tableCard,
+  .loginCard {
+    padding: 1.15rem;
+  }
+
+  .table td,
+  .table th {
+    min-width: 140px;
+  }
+}
