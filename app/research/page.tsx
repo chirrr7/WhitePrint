@@ -48,7 +48,10 @@ export default async function ResearchIndexPage() {
                     <span className={s.date}>{formatDateLabel(post.date)}</span>
                   </div>
 
-                  <h2 className={s.cardTitle}>{post.displayTitle ?? post.title}</h2>
+                  <h2
+                    className={s.cardTitle}
+                    dangerouslySetInnerHTML={{ __html: sanitizeInlineHtml(post.displayTitle ?? post.title) }}
+                  />
                   <p className={s.cardDeck}>{post.excerpt}</p>
                 </div>
 
@@ -77,4 +80,15 @@ function formatDateLabel(value: string) {
 
 function humanize(value: string) {
   return value.replace(/[-_]/g, " ").replace(/\b\w/g, (char) => char.toUpperCase())
+}
+
+function sanitizeInlineHtml(value: string) {
+  const escaped = value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+
+  return escaped
+    .replace(/&lt;em&gt;/g, "<em>")
+    .replace(/&lt;\/em&gt;/g, "</em>")
 }

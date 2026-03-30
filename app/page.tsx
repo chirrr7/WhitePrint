@@ -3,6 +3,7 @@ import { HeroSection } from "@/components/HeroSection"
 import { MobileHome } from "@/components/mobile-home"
 import { PipelineDocket } from "@/components/PipelineDocket"
 import { ResearchSection } from "@/components/ResearchSection"
+import { StancesTicker } from "@/components/StancesTicker"
 import { getAllPosts } from "@/lib/posts"
 import { SEO_CONFIG } from "@/lib/seo.config"
 import { getStances } from "@/lib/stances"
@@ -33,6 +34,7 @@ export default async function HomePage() {
 
       <div className="desktop-only">
         <HeroSection />
+        <StancesTicker stances={stances} />
         <PipelineDocket />
         <ResearchSection />
       </div>

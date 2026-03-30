@@ -154,15 +154,15 @@ export function Nav() {
         }
 
         .wp-nav.scrolled {
-          background: rgba(10, 10, 10, 0.94);
-          border-bottom-color: rgba(255, 255, 255, 0.05);
+          background: rgba(250, 249, 247, 0.96);
+          border-bottom-color: var(--border);
           backdrop-filter: blur(14px);
           -webkit-backdrop-filter: blur(14px);
         }
 
         .wp-nav.over-light {
-          background: rgba(250, 249, 247, 0.96);
-          border-bottom-color: var(--border);
+          background: rgba(10, 10, 10, 0.94);
+          border-bottom-color: rgba(255, 255, 255, 0.05);
           backdrop-filter: blur(14px);
           -webkit-backdrop-filter: blur(14px);
         }
@@ -178,7 +178,7 @@ export function Nav() {
           transition: color 0.3s ease;
         }
 
-        .wp-nav.over-light .wp-nav-logo {
+        .wp-nav.scrolled .wp-nav-logo {
           color: var(--ink);
         }
 
@@ -204,12 +204,12 @@ export function Nav() {
           color: rgba(255, 255, 255, 0.75);
         }
 
-        .wp-nav.over-light .wp-nav-link {
+        .wp-nav.scrolled .wp-nav-link {
           color: var(--subtle);
         }
 
-        .wp-nav.over-light .wp-nav-link:hover,
-        .wp-nav.over-light .wp-nav-link.is-active {
+        .wp-nav.scrolled .wp-nav-link:hover,
+        .wp-nav.scrolled .wp-nav-link.is-active {
           color: var(--ink);
         }
 
@@ -224,7 +224,7 @@ export function Nav() {
           transition: color 0.3s ease;
         }
 
-        .wp-nav.over-light .wp-nav-right {
+        .wp-nav.scrolled .wp-nav-right {
           color: var(--subtle);
         }
 

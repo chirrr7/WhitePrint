@@ -51,7 +51,10 @@ export async function ResearchSection() {
                 <span className={s.pillDate}>{featured.dateLabel}</span>
               </div>
 
-              <h2 className={s.featuredTitle}>{featured.title}</h2>
+              <h2
+                className={s.featuredTitle}
+                dangerouslySetInnerHTML={{ __html: sanitizeInlineHtml(featured.title) }}
+              />
               <p className={s.featuredDeck}>{featured.excerpt}</p>
 
               <div className={s.featuredStats}>
@@ -116,7 +119,10 @@ export async function ResearchSection() {
                   <span className={s.rPillDate}>{post.dateLabel}</span>
                 </div>
 
-                <h3 className={s.rCardTitle}>{post.title}</h3>
+                <h3
+                  className={s.rCardTitle}
+                  dangerouslySetInnerHTML={{ __html: sanitizeInlineHtml(post.title) }}
+                />
                 <p className={s.rCardDeck}>{post.excerpt}</p>
               </div>
 
@@ -290,4 +296,15 @@ function humanizeLabel(value: string) {
 
 function asString(value: unknown) {
   return typeof value === "string" ? value : ""
+}
+
+function sanitizeInlineHtml(value: string) {
+  const escaped = value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+
+  return escaped
+    .replace(/&lt;em&gt;/g, "<em>")
+    .replace(/&lt;\/em&gt;/g, "</em>")
 }

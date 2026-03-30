@@ -64,7 +64,6 @@ const noteCopy = {
 export function HeroSection() {
   const [state, setState] = useState<HeroState>(initialState)
   const [replayKey, setReplayKey] = useState(0)
-  const [circleVisible, setCircleVisible] = useState(false)
   const [notePositions, setNotePositions] = useState<Record<(typeof NOTE_IDS)[number], number>>({
     note0: 0,
     note1: 0,
@@ -80,7 +79,7 @@ export function HeroSection() {
     ann3: null,
   })
   const notePanelRef = useRef<HTMLDivElement | null>(null)
-  const replayCountRef = useRef(0)
+  const circleVisibleRef = useRef(false)
 
   const clearTimers = useCallback(() => {
     timersRef.current.forEach((timer) => window.clearTimeout(timer))
@@ -195,7 +194,7 @@ export function HeroSection() {
               ann2: true,
             },
           }))
-          setCircleVisible(true)
+          circleVisibleRef.current = true
           window.requestAnimationFrame(() => {
             drawCircle()
             positionNotes()
@@ -220,8 +219,7 @@ export function HeroSection() {
 
   const runSequence = useCallback(() => {
     clearTimers()
-    replayCountRef.current += 1
-    setCircleVisible(false)
+    circleVisibleRef.current = false
     setState(initialState)
 
     ANNOTATION_IDS.forEach((id) => {
@@ -251,11 +249,13 @@ export function HeroSection() {
 
   useEffect(() => {
     runSequence()
+  }, [replayKey, runSequence])
 
+  useEffect(() => {
     const handleResize = () => {
       positionNotes()
 
-      if (circleVisible) {
+      if (circleVisibleRef.current) {
         drawCircle()
       }
     }
@@ -269,7 +269,7 @@ export function HeroSection() {
         annRefs.current[id]?.querySelectorAll("svg[data-ann-circle='true']").forEach((node) => node.remove())
       })
     }
-  }, [circleVisible, clearTimers, drawCircle, positionNotes, replayKey, runSequence])
+  }, [clearTimers, drawCircle, positionNotes])
 
   const handleReplay = () => {
     setReplayKey((current) => current + 1)
