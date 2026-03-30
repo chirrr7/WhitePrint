@@ -4,7 +4,11 @@ import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { z } from 'zod'
 import { getAuthenticatedUser, requireAdminIdentity } from '@/lib/admin/auth'
-import { hasFilesystemPostSlug } from '@/lib/posts'
+import {
+  getAllFilesystemPostSlugs,
+  getLegacyMigrationPosts,
+  hasFilesystemPostSlug,
+} from '@/lib/posts'
 import type { Json } from '@/lib/supabase/database.types'
 import { createClient } from '@/lib/supabase/server'
 
@@ -173,6 +177,115 @@ async function revalidatePublicPostSurfaces({
   })
 }
 
+export async function runLegacyMigrationTestAction() {
+  await requireAdminIdentity()
+
+  const supabase = await createClient()
+  const migrationPosts = getLegacyMigrationPosts()
+  const legacyFilesystemSlugs = getAllFilesystemPostSlugs()
+  const categorySlugs = Array.from(new Set(migrationPosts.map((post) => post.category)))
+
+  const { data: topics, error: topicsError } = await supabase
+    .from('topics')
+    .select('id, slug')
+    .in('slug', categorySlugs)
+
+  if (topicsError) {
+    redirect(withMessage('/admin/posts', 'error', topicsError.message || 'Could not load topics for migration.'))
+  }
+
+  const topicIdBySlug = new Map((topics ?? []).map((topic) => [topic.slug, topic.id]))
+  const missingCategories = categorySlugs.filter((slug) => !topicIdBySlug.has(slug))
+
+  if (missingCategories.length) {
+    redirect(
+      withMessage(
+        '/admin/posts',
+        'error',
+        `Missing topic records for: ${missingCategories.join(', ')}. Add those topics first.`,
+      ),
+    )
+  }
+
+  let archiveQuery = supabase
+    .from('posts')
+    .update({ featured: false, homepage: false, status: 'archived' })
+
+  for (const post of migrationPosts) {
+    archiveQuery = archiveQuery.neq('slug', post.slug)
+  }
+
+  const { error: archiveError } = await archiveQuery
+
+  if (archiveError) {
+    redirect(withMessage('/admin/posts', 'error', archiveError.message || 'Could not archive other posts.'))
+  }
+
+  const payloads = migrationPosts.map((post) => ({
+    body: post.bodyMdx,
+    body_mdx: post.bodyMdx,
+    featured: false,
+    homepage: false,
+    published_at: post.publishedAt,
+    slug: post.slug,
+    status: 'published' as const,
+    summary: post.summary,
+    title: post.title,
+    topic_id: topicIdBySlug.get(post.category) ?? null,
+  }))
+
+  let { error: migrateError } = await supabase
+    .from('posts')
+    .upsert(payloads, { onConflict: 'slug' })
+
+  if (isMissingBodyMdxColumn(migrateError)) {
+    const fallbackPayloads = payloads.map(({ body_mdx: _bodyMdx, ...payload }) => payload)
+    const fallbackResult = await supabase
+      .from('posts')
+      .upsert(fallbackPayloads, { onConflict: 'slug' })
+
+    migrateError = fallbackResult.error
+  }
+
+  if (migrateError) {
+    redirect(withMessage('/admin/posts', 'error', migrateError.message || 'Could not migrate legacy posts.'))
+  }
+
+  const { error: settingsError } = await supabase.from('site_settings').upsert({
+    is_public: true,
+    key: 'content_migration',
+    label: 'Content Migration',
+    value: {
+      suppressedFilesystemSlugs: legacyFilesystemSlugs,
+    },
+  })
+
+  if (settingsError) {
+    redirect(
+      withMessage(
+        '/admin/posts',
+        'error',
+        settingsError.message || 'Migrated posts, but could not update filesystem suppression.',
+      ),
+    )
+  }
+
+  revalidatePath('/admin')
+  revalidatePath('/admin/posts')
+  await revalidatePublicPostSurfaces({
+    slugs: legacyFilesystemSlugs,
+    topicIds: migrationPosts.map((post) => topicIdBySlug.get(post.category) ?? null),
+  })
+
+  redirect(
+    withMessage(
+      '/admin/posts',
+      'success',
+      'Migrated Oracle, EOG, and Eight Body Problem into Supabase and archived the rest.',
+    ),
+  )
+}
+
 export async function loginAction(formData: FormData) {
   const email = readString(formData, 'email')
   const password = readString(formData, 'password')
@@ -293,16 +406,6 @@ export async function savePostAction(formData: FormData) {
     redirect(withMessage(returnPath, 'error', 'Title, slug, and status are required.'))
   }
 
-  if (hasFilesystemPostSlug(slug)) {
-    redirect(
-      withMessage(
-        returnPath,
-        'error',
-        'That slug is already used by a filesystem MDX post. Choose a new slug in admin.',
-      ),
-    )
-  }
-
   const linkedModelError = await ensureModelCanBeLinked(id, linkedModelId)
   if (linkedModelError) {
     redirect(withMessage(returnPath, 'error', linkedModelError))
@@ -330,6 +433,16 @@ export async function savePostAction(formData: FormData) {
     previousModelId = existingPost?.linked_model_id ?? null
     previousSlug = existingPost?.slug ?? null
     previousTopicId = existingPost?.topic_id ?? null
+  }
+
+  if (hasFilesystemPostSlug(slug) && previousSlug !== slug) {
+    redirect(
+      withMessage(
+        returnPath,
+        'error',
+        'That slug is already used by a filesystem MDX post. Choose a new slug in admin.',
+      ),
+    )
   }
 
   const payload = {

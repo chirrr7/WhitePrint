@@ -82,9 +82,28 @@ const postFrontmatterSchema = z.object({
   reportDownload: reportDownloadSchema.optional(),
   sidebarCards: z.array(sidebarCardSchema).max(4).optional(),
 })
+const databaseBodyFrontmatterSchema = postFrontmatterSchema.partial()
+const contentMigrationSettingsSchema = z.object({
+  suppressedFilesystemSlugs: z.array(postSlugSchema).default([]),
+})
+
+export const LEGACY_MIGRATION_TEST_SLUGS = [
+  "oracle-software-margins-infrastructure-capex",
+  "eog-resources-the-base-case-is-priced-in",
+  "the-eight-body-problem",
+] as const
 
 export interface Post extends PostMeta {
   content: ReactNode
+}
+
+export interface LegacyMigrationPost {
+  bodyMdx: string
+  category: PostCategory
+  publishedAt: string
+  slug: string
+  summary: string
+  title: string
 }
 
 interface PostSource {
@@ -95,6 +114,11 @@ interface PostSource {
 interface PostSourceData {
   content: string
   frontmatter: z.infer<typeof postFrontmatterSchema>
+}
+
+interface DatabaseBodySourceData {
+  content: string
+  frontmatter: z.infer<typeof databaseBodyFrontmatterSchema> | null
 }
 
 type DatabasePostRow = Pick<
@@ -193,6 +217,10 @@ function readPostSourceData(source: PostSource): PostSourceData {
   }
 }
 
+function readRawPostSource(source: PostSource) {
+  return fs.readFileSync(source.fullPath, "utf8")
+}
+
 function buildFilesystemPostMeta(source: PostSource): PostMeta {
   const { content, frontmatter } = readPostSourceData(source)
   const slugFromFile = source.fileName.replace(/\.(md|mdx)$/, "")
@@ -230,11 +258,65 @@ function buildFilesystemPostMeta(source: PostSource): PostMeta {
   }
 }
 
+function buildLegacyMigrationPost(source: PostSource): LegacyMigrationPost {
+  const { frontmatter } = readPostSourceData(source)
+  const slugFromFile = source.fileName.replace(/\.(md|mdx)$/, "")
+
+  return {
+    bodyMdx: readRawPostSource(source),
+    category: frontmatter.category,
+    publishedAt: new Date(`${frontmatter.date}T00:00:00.000Z`).toISOString(),
+    slug: frontmatter.slug ?? slugFromFile,
+    summary: frontmatter.excerpt,
+    title: frontmatter.title,
+  }
+}
+
 function getFilesystemPostSources(): PostSource[] {
   return [
     ...getSourcesFromDirectory(mdxPostsDirectory, ".mdx"),
     ...getSourcesFromDirectory(legacyPostsDirectory, ".md"),
   ]
+}
+
+function readDatabaseBodySource(rawSource: string): DatabaseBodySourceData {
+  const trimmedSource = rawSource.trim()
+
+  if (!trimmedSource) {
+    return {
+      content: "",
+      frontmatter: null,
+    }
+  }
+
+  const { data, content } = matter(rawSource)
+
+  if (!Object.keys(data).length) {
+    return {
+      content: trimmedSource,
+      frontmatter: null,
+    }
+  }
+
+  const parsed = databaseBodyFrontmatterSchema.safeParse(data)
+
+  if (!parsed.success) {
+    console.warn(
+      `Ignoring invalid database frontmatter: ${parsed.error.issues
+        .map((issue) => issue.path.join(".") + " " + issue.message)
+        .join(", ")}`,
+    )
+
+    return {
+      content: content.trim(),
+      frontmatter: null,
+    }
+  }
+
+  return {
+    content: content.trim(),
+    frontmatter: parsed.data,
+  }
 }
 
 function sortPosts(posts: PostMeta[]) {
@@ -250,6 +332,51 @@ function sortPosts(posts: PostMeta[]) {
 function getAllFilesystemPostMeta(): PostMeta[] {
   const posts = getFilesystemPostSources().map(buildFilesystemPostMeta)
   return sortPosts(posts)
+}
+
+async function getSuppressedFilesystemSlugSet() {
+  try {
+    const supabase = getPublicSupabase()
+    const { data, error } = await supabase
+      .from("site_settings")
+      .select("value")
+      .eq("key", "content_migration")
+      .maybeSingle()
+
+    if (error) {
+      throw error
+    }
+
+    const parsed = contentMigrationSettingsSchema.safeParse(data?.value ?? {})
+
+    if (!parsed.success) {
+      return new Set<string>()
+    }
+
+    return new Set(parsed.data.suppressedFilesystemSlugs)
+  } catch (error) {
+    console.error("Failed to load content migration settings.", error)
+    return new Set<string>()
+  }
+}
+
+async function getVisibleFilesystemPostMeta(): Promise<PostMeta[]> {
+  const suppressedSlugs = await getSuppressedFilesystemSlugSet()
+  const posts = getFilesystemPostSources()
+    .map(buildFilesystemPostMeta)
+    .filter((post) => !suppressedSlugs.has(post.slug))
+
+  return sortPosts(posts)
+}
+
+async function getVisibleFilesystemPostSourceBySlug(slug: string): Promise<PostSource | null> {
+  const suppressedSlugs = await getSuppressedFilesystemSlugSet()
+
+  if (suppressedSlugs.has(slug)) {
+    return null
+  }
+
+  return getFilesystemPostSourceBySlug(slug)
 }
 
 function getFilesystemPostSourceBySlug(slug: string): PostSource | null {
@@ -329,26 +456,44 @@ function toPostDate(value: string | null | undefined, fallback: string | null | 
 }
 
 function getDatabasePostContent(row: Pick<DatabasePostRow, "body" | "body_mdx">) {
-  return row.body_mdx?.trim() || row.body?.trim() || ""
+  return readDatabaseBodySource(row.body_mdx?.trim() || row.body?.trim() || "")
 }
 
 function buildDatabasePostMeta(row: DatabasePostRow, topic: PublicTopic | null | undefined): PostMeta {
-  const category = resolveDatabasePostCategory(topic)
-  const content = getDatabasePostContent(row)
+  const bodySource = getDatabasePostContent(row)
+  const frontmatter = bodySource.frontmatter
+  const category = frontmatter?.category ?? resolveDatabasePostCategory(topic)
+  const readTime = frontmatter?.readTime ?? estimateReadTime(bodySource.content)
 
   return {
     slug: row.slug,
-    title: row.title,
-    date: toPostDate(row.published_at, row.created_at),
+    title: frontmatter?.title ?? row.title,
+    date: frontmatter?.date ?? toPostDate(row.published_at, row.created_at),
     category,
     source: "database",
-    tags: [],
-    excerpt: row.summary,
-    readTime: estimateReadTime(content),
+    tags: frontmatter?.tags ?? [],
+    excerpt: frontmatter?.excerpt ?? row.summary,
+    readTime,
     featured: row.featured,
     homepage: row.homepage,
+    ticker: frontmatter?.ticker,
+    name: frontmatter?.name,
+    stance: frontmatter?.stance as PostStance | undefined,
+    conviction: frontmatter?.conviction as PostConviction | undefined,
+    stanceThesis: frontmatter?.stanceThesis,
+    status: frontmatter?.status as PostStatus | undefined,
+    scenarioType: frontmatter?.scenarioType as PostScenarioType | undefined,
+    stanceMetric: frontmatter?.stanceMetric,
+    bear: frontmatter?.bear,
+    base: frontmatter?.base,
+    bull: frontmatter?.bull,
+    displayTitle: frontmatter?.displayTitle,
+    eyebrow: frontmatter?.eyebrow,
     topicLabel: topic?.name ?? getPostCategoryLabel(category),
     topicSlug: topic?.slug ?? category,
+    marketNoteTable: frontmatter?.marketNoteTable as MarketNoteTableData | undefined,
+    reportDownload: frontmatter?.reportDownload as ReportDownloadData | undefined,
+    sidebarCards: frontmatter?.sidebarCards as SidebarCard[] | undefined,
   }
 }
 
@@ -472,7 +617,7 @@ async function getPublishedDatabasePostBySlug(
     }
 
     return {
-      content: getDatabasePostContent(data),
+      content: getDatabasePostContent(data).content,
       post: buildDatabasePostMeta(data, topic),
     }
   } catch (error) {
@@ -506,8 +651,26 @@ export function hasFilesystemPostSlug(slug: string) {
   return Boolean(getFilesystemPostSourceBySlug(slug))
 }
 
+export function getAllFilesystemPostSlugs() {
+  return getAllFilesystemPostMeta().map((post) => post.slug)
+}
+
+export function getLegacyMigrationPosts(
+  slugs: readonly string[] = LEGACY_MIGRATION_TEST_SLUGS,
+): LegacyMigrationPost[] {
+  return slugs.map((slug) => {
+    const source = getFilesystemPostSourceBySlug(slug)
+
+    if (!source) {
+      throw new Error(`Could not find legacy post source for slug "${slug}".`)
+    }
+
+    return buildLegacyMigrationPost(source)
+  })
+}
+
 export async function getAllPosts(): Promise<PostMeta[]> {
-  const filesystemPosts = getAllFilesystemPostMeta()
+  const filesystemPosts = await getVisibleFilesystemPostMeta()
   const databasePosts = await getPublishedDatabasePosts()
   const uniquePosts = new Map<string, PostMeta>()
 
@@ -547,7 +710,7 @@ export async function getPostsByTopicSlug(topicSlug: string): Promise<PostMeta[]
 }
 
 export async function getPostMetaBySlug(slug: string): Promise<PostMeta | null> {
-  const filesystemSource = getFilesystemPostSourceBySlug(slug)
+  const filesystemSource = await getVisibleFilesystemPostSourceBySlug(slug)
 
   if (filesystemSource) {
     return buildFilesystemPostMeta(filesystemSource)
@@ -558,7 +721,7 @@ export async function getPostMetaBySlug(slug: string): Promise<PostMeta | null> 
 }
 
 export async function getPostBySlug(slug: string): Promise<Post | null> {
-  const filesystemSource = getFilesystemPostSourceBySlug(slug)
+  const filesystemSource = await getVisibleFilesystemPostSourceBySlug(slug)
 
   if (filesystemSource) {
     const postMeta = buildFilesystemPostMeta(filesystemSource)
@@ -601,7 +764,7 @@ export async function getPostsByTag(tag: string): Promise<PostMeta[]> {
 }
 
 export async function getArticleBySlug(slug: string): Promise<Post | null> {
-  const filesystemSource = getFilesystemPostSourceBySlug(slug)
+  const filesystemSource = await getVisibleFilesystemPostSourceBySlug(slug)
 
   if (filesystemSource) {
     const postMeta = buildFilesystemPostMeta(filesystemSource)

@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { runLegacyMigrationTestAction } from '@/lib/admin/actions'
 import { getPostsPageData } from '@/lib/admin/data'
 import { formatAdminDate, readPageMessage } from '@/lib/admin/messages'
 import styles from '@/app/admin/admin.module.css'
@@ -34,6 +35,39 @@ export default async function AdminPostsPage({ searchParams }: AdminPostsPagePro
           {message.text}
         </div>
       ) : null}
+
+      <div className={styles.panel}>
+        <div className={styles.panelHeader}>
+          <div>
+            <h2 className={styles.panelTitle}>Whiteprint migration test</h2>
+            <p className={styles.panelIntro}>
+              Import the live Oracle, EOG, and Eight Body Problem articles into Supabase,
+              then suppress the old filesystem archive so the public site is forced to read
+              those migrated versions.
+            </p>
+          </div>
+          <form action={runLegacyMigrationTestAction}>
+            <button type="submit" className={styles.primaryButton}>
+              Run migration test
+            </button>
+          </form>
+        </div>
+
+        <div className={styles.referenceList}>
+          <div className={styles.referenceItem}>
+            <span>Oracle</span>
+            <span className={styles.mono}>oracle-software-margins-infrastructure-capex</span>
+          </div>
+          <div className={styles.referenceItem}>
+            <span>EOG Resources</span>
+            <span className={styles.mono}>eog-resources-the-base-case-is-priced-in</span>
+          </div>
+          <div className={styles.referenceItem}>
+            <span>Eight Body Problem</span>
+            <span className={styles.mono}>the-eight-body-problem</span>
+          </div>
+        </div>
+      </div>
 
       <div className={styles.tableCard}>
         <div className={styles.tableWrap}>

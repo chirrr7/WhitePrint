@@ -39,7 +39,8 @@ export function PostForm({
           </h1>
           <p className={styles.pageIntro}>
             Start with simple structured fields. We can layer in richer editorial
-            tooling later without changing the content model.
+            tooling later without changing the content model. The MDX field can
+            hold the full Whiteprint document, including optional frontmatter.
           </p>
         </div>
         <Link href="/admin/posts" className={styles.secondaryButton}>
@@ -101,6 +102,11 @@ export function PostForm({
               rows={18}
               placeholder="Write the article body in MDX. Keep the prose and custom Whiteprint components exactly as you want them to render."
             />
+            <p className={styles.helpText}>
+              You can paste a full Whiteprint v1-style MDX file here, including
+              YAML frontmatter, and it will flow through the same public article
+              renderer.
+            </p>
           </label>
 
           <div className={styles.formGridTwo}>
