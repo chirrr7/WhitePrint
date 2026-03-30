@@ -11,7 +11,6 @@ import {
 import { MarketNoteTable } from "@/components/research-blocks"
 import { SEO_CONFIG } from "@/lib/seo.config"
 import {
-  getAllPosts,
   getArticleBySlug,
   getPostMetaBySlug,
 } from "@/lib/posts"
@@ -30,17 +29,11 @@ const bespokePostSlugs = new Set([
   "liquidity-squeeze-fed-march-2026",
 ])
 
-export const dynamicParams = false
-
-export function generateStaticParams() {
-  return getAllPosts()
-    .filter((post) => !bespokePostSlugs.has(post.slug))
-    .map((post) => ({ slug: post.slug }))
-}
+export const dynamic = "force-dynamic"
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params
-  const post = getPostMetaBySlug(slug)
+  const post = bespokePostSlugs.has(slug) ? null : await getPostMetaBySlug(slug)
   if (!post) return {}
 
   const url = `${SEO_CONFIG.siteUrl}/posts/${post.slug}`

@@ -3,10 +3,12 @@ import path from "path"
 import type { ReactNode } from "react"
 import matter from "gray-matter"
 import { compileMDX } from "next-mdx-remote/rsc"
+import { createClient as createSupabaseClient } from "@supabase/supabase-js"
 import remarkGfm from "remark-gfm"
 import { z } from "zod"
 import { articleBodyComponents, postBodyComponents } from "@/components/post-body"
 import {
+  getPostCategoryLabel,
   type MarketNoteTableData,
   type PostConviction,
   postCategories,
@@ -18,6 +20,8 @@ import {
   type ReportDownloadData,
   type SidebarCard,
 } from "@/lib/post-meta"
+import type { Database } from "@/lib/supabase/database.types"
+import { supabasePublishableKey, supabaseUrl } from "@/lib/supabase/config"
 
 const mdxPostsDirectory = path.join(process.cwd(), "content", "posts")
 const legacyPostsDirectory = path.join(process.cwd(), "posts")
@@ -72,7 +76,6 @@ const postFrontmatterSchema = z.object({
   bear: z.number().finite().optional(),
   base: z.number().finite().optional(),
   bull: z.number().finite().optional(),
-  // Optional editorial fields
   displayTitle: z.string().trim().optional(),
   eyebrow: z.string().trim().optional(),
   marketNoteTable: marketNoteTableSchema.optional(),
@@ -92,6 +95,51 @@ interface PostSource {
 interface PostSourceData {
   content: string
   frontmatter: z.infer<typeof postFrontmatterSchema>
+}
+
+type DatabasePostRow = Pick<
+  Database["public"]["Tables"]["posts"]["Row"],
+  | "created_at"
+  | "featured"
+  | "homepage"
+  | "id"
+  | "published_at"
+  | "slug"
+  | "summary"
+  | "title"
+  | "topic_id"
+  | "updated_at"
+  | "body"
+  | "body_mdx"
+>
+
+type PublicTopic = Pick<
+  Database["public"]["Tables"]["topics"]["Row"],
+  "id" | "name" | "slug"
+>
+
+interface PostgrestLikeError {
+  code?: string
+  message?: string
+}
+
+let publicSupabase: ReturnType<typeof createSupabaseClient<Database>> | null = null
+
+function getPublicSupabase() {
+  if (!publicSupabase) {
+    publicSupabase = createSupabaseClient<Database>(supabaseUrl, supabasePublishableKey, {
+      auth: {
+        autoRefreshToken: false,
+        persistSession: false,
+      },
+    })
+  }
+
+  return publicSupabase
+}
+
+function isMissingBodyMdxColumn(error: PostgrestLikeError | null | undefined) {
+  return error?.code === "42703" && error.message?.includes("body_mdx")
 }
 
 function estimateReadTime(content: string): number {
@@ -145,7 +193,7 @@ function readPostSourceData(source: PostSource): PostSourceData {
   }
 }
 
-function buildPostMeta(source: PostSource): PostMeta {
+function buildFilesystemPostMeta(source: PostSource): PostMeta {
   const { content, frontmatter } = readPostSourceData(source)
   const slugFromFile = source.fileName.replace(/\.(md|mdx)$/, "")
   const slug = frontmatter.slug ?? slugFromFile
@@ -155,9 +203,12 @@ function buildPostMeta(source: PostSource): PostMeta {
     title: frontmatter.title,
     date: frontmatter.date,
     category: frontmatter.category,
+    source: "filesystem",
     tags: frontmatter.tags,
     excerpt: frontmatter.excerpt,
     readTime: frontmatter.readTime ?? estimateReadTime(content),
+    featured: false,
+    homepage: false,
     ticker: frontmatter.ticker,
     name: frontmatter.name,
     stance: frontmatter.stance as PostStance | undefined,
@@ -171,29 +222,23 @@ function buildPostMeta(source: PostSource): PostMeta {
     bull: frontmatter.bull,
     displayTitle: frontmatter.displayTitle,
     eyebrow: frontmatter.eyebrow,
+    topicLabel: getPostCategoryLabel(frontmatter.category),
+    topicSlug: frontmatter.category,
     marketNoteTable: frontmatter.marketNoteTable as MarketNoteTableData | undefined,
     reportDownload: frontmatter.reportDownload as ReportDownloadData | undefined,
     sidebarCards: frontmatter.sidebarCards as SidebarCard[] | undefined,
   }
 }
 
-function getAllPostMeta(): PostMeta[] {
-  const posts = [
+function getFilesystemPostSources(): PostSource[] {
+  return [
     ...getSourcesFromDirectory(mdxPostsDirectory, ".mdx"),
     ...getSourcesFromDirectory(legacyPostsDirectory, ".md"),
-  ].map(buildPostMeta)
+  ]
+}
 
-  const uniquePosts = new Map<string, PostMeta>()
-
-  posts.forEach((post) => {
-    if (uniquePosts.has(post.slug)) {
-      throw new Error(`Duplicate post slug detected: ${post.slug}`)
-    }
-
-    uniquePosts.set(post.slug, post)
-  })
-
-  return Array.from(uniquePosts.values()).sort((left, right) => {
+function sortPosts(posts: PostMeta[]) {
+  return posts.sort((left, right) => {
     if (left.date === right.date) {
       return left.title.localeCompare(right.title)
     }
@@ -202,19 +247,12 @@ function getAllPostMeta(): PostMeta[] {
   })
 }
 
-export function getMdxPosts(): PostMeta[] {
-  return getSourcesFromDirectory(mdxPostsDirectory, ".mdx")
-    .map(buildPostMeta)
-    .sort((left, right) => {
-      if (left.date === right.date) {
-        return left.title.localeCompare(right.title)
-      }
-
-      return left.date > right.date ? -1 : 1
-    })
+function getAllFilesystemPostMeta(): PostMeta[] {
+  const posts = getFilesystemPostSources().map(buildFilesystemPostMeta)
+  return sortPosts(posts)
 }
 
-function getPostSourceBySlug(slug: string): PostSource | null {
+function getFilesystemPostSourceBySlug(slug: string): PostSource | null {
   const mdxPath = path.join(mdxPostsDirectory, `${slug}.mdx`)
   if (fs.existsSync(mdxPath)) {
     return {
@@ -234,30 +272,222 @@ function getPostSourceBySlug(slug: string): PostSource | null {
   return null
 }
 
-export function getAllPosts(): PostMeta[] {
-  return getAllPostMeta()
+function normalizeTopicValue(value: string | null | undefined) {
+  return value
+    ? value
+        .trim()
+        .toLowerCase()
+        .replace(/_/g, "-")
+        .replace(/\s+/g, "-")
+    : ""
 }
 
-export function getPostsByCategory(category: PostCategory): PostMeta[] {
-  return getAllPosts().filter((post) => post.category === category)
+function humanizeTopicSlug(topicSlug: string) {
+  return topicSlug
+    .split("-")
+    .filter(Boolean)
+    .map((segment) => segment.charAt(0).toUpperCase() + segment.slice(1))
+    .join(" ")
 }
 
-export function getPostMetaBySlug(slug: string): PostMeta | null {
-  return getAllPosts().find((post) => post.slug === slug) ?? null
-}
+function resolveDatabasePostCategory(topic: PublicTopic | null | undefined): PostCategory {
+  const candidates = [normalizeTopicValue(topic?.slug), normalizeTopicValue(topic?.name)]
 
-export async function getPostBySlug(slug: string): Promise<Post | null> {
-  const source = getPostSourceBySlug(slug)
-  if (!source) {
-    return null
+  if (candidates.some((value) => value === "equity" || value === "equity-research" || value === "equities")) {
+    return "equity"
   }
 
-  const postMeta = buildPostMeta(source)
-  const { content } = readPostSourceData(source)
+  if (
+    candidates.some(
+      (value) =>
+        value === "market-notes" ||
+        value === "market-note" ||
+        value === "marketnotes" ||
+        value === "notes",
+    )
+  ) {
+    return "market-notes"
+  }
 
+  return "macro"
+}
+
+function toPostDate(value: string | null | undefined, fallback: string | null | undefined) {
+  const candidate = value ?? fallback
+
+  if (!candidate) {
+    return new Date().toISOString().slice(0, 10)
+  }
+
+  const parsed = new Date(candidate)
+
+  if (Number.isNaN(parsed.getTime())) {
+    return new Date().toISOString().slice(0, 10)
+  }
+
+  return parsed.toISOString().slice(0, 10)
+}
+
+function getDatabasePostContent(row: Pick<DatabasePostRow, "body" | "body_mdx">) {
+  return row.body_mdx?.trim() || row.body?.trim() || ""
+}
+
+function buildDatabasePostMeta(row: DatabasePostRow, topic: PublicTopic | null | undefined): PostMeta {
+  const category = resolveDatabasePostCategory(topic)
+  const content = getDatabasePostContent(row)
+
+  return {
+    slug: row.slug,
+    title: row.title,
+    date: toPostDate(row.published_at, row.created_at),
+    category,
+    source: "database",
+    tags: [],
+    excerpt: row.summary,
+    readTime: estimateReadTime(content),
+    featured: row.featured,
+    homepage: row.homepage,
+    topicLabel: topic?.name ?? getPostCategoryLabel(category),
+    topicSlug: topic?.slug ?? category,
+  }
+}
+
+async function getTopicsByIds(topicIds: Array<number | null>) {
+  const ids = Array.from(new Set(topicIds.filter((id): id is number => typeof id === "number")))
+
+  if (!ids.length) {
+    return new Map<number, PublicTopic>()
+  }
+
+  const supabase = getPublicSupabase()
+  const { data, error } = await supabase
+    .from("topics")
+    .select("id, name, slug")
+    .in("id", ids)
+
+  if (error) {
+    throw error
+  }
+
+  return new Map((data ?? []).map((topic) => [topic.id, topic]))
+}
+
+async function getPublishedDatabasePostRows(): Promise<DatabasePostRow[]> {
+  try {
+    const supabase = getPublicSupabase()
+    let { data, error } = await supabase
+      .from("posts")
+      .select(
+        "id, title, slug, summary, body, body_mdx, topic_id, featured, homepage, published_at, created_at, updated_at",
+      )
+      .eq("status", "published")
+      .order("published_at", { ascending: false })
+      .order("updated_at", { ascending: false })
+
+    if (isMissingBodyMdxColumn(error)) {
+      const fallback = await supabase
+        .from("posts")
+        .select(
+          "id, title, slug, summary, body, topic_id, featured, homepage, published_at, created_at, updated_at",
+        )
+        .eq("status", "published")
+        .order("published_at", { ascending: false })
+        .order("updated_at", { ascending: false })
+
+      data = (fallback.data ?? []).map((row) => ({
+        ...row,
+        body_mdx: "",
+      }))
+      error = fallback.error
+    }
+
+    if (error) {
+      throw error
+    }
+
+    return data ?? []
+  } catch (error) {
+    console.error("Failed to load published Supabase posts.", error)
+    return []
+  }
+}
+
+async function getPublishedDatabasePosts(): Promise<PostMeta[]> {
+  const rows = await getPublishedDatabasePostRows()
+
+  if (!rows.length) {
+    return []
+  }
+
+  try {
+    const topicsById = await getTopicsByIds(rows.map((row) => row.topic_id))
+    return sortPosts(rows.map((row) => buildDatabasePostMeta(row, topicsById.get(row.topic_id ?? -1))))
+  } catch (error) {
+    console.error("Failed to load post topics for Supabase posts.", error)
+    return sortPosts(rows.map((row) => buildDatabasePostMeta(row, null)))
+  }
+}
+
+async function getPublishedDatabasePostBySlug(
+  slug: string,
+): Promise<{ content: string; post: PostMeta } | null> {
+  try {
+    const supabase = getPublicSupabase()
+    let { data, error } = await supabase
+      .from("posts")
+      .select(
+        "id, title, slug, summary, body, body_mdx, topic_id, featured, homepage, published_at, created_at, updated_at",
+      )
+      .eq("slug", slug)
+      .eq("status", "published")
+      .maybeSingle()
+
+    if (isMissingBodyMdxColumn(error)) {
+      const fallback = await supabase
+        .from("posts")
+        .select(
+          "id, title, slug, summary, body, topic_id, featured, homepage, published_at, created_at, updated_at",
+        )
+        .eq("slug", slug)
+        .eq("status", "published")
+        .maybeSingle()
+
+      data = fallback.data ? { ...fallback.data, body_mdx: "" } : null
+      error = fallback.error
+    }
+
+    if (error) {
+      throw error
+    }
+
+    if (!data) {
+      return null
+    }
+
+    let topic: PublicTopic | null = null
+
+    if (data.topic_id) {
+      const topicsById = await getTopicsByIds([data.topic_id])
+      topic = topicsById.get(data.topic_id) ?? null
+    }
+
+    return {
+      content: getDatabasePostContent(data),
+      post: buildDatabasePostMeta(data, topic),
+    }
+  } catch (error) {
+    console.error(`Failed to load Supabase post for slug "${slug}".`, error)
+    return null
+  }
+}
+
+async function compilePostSource(
+  source: string,
+  components: typeof articleBodyComponents | typeof postBodyComponents,
+) {
   const compiled = await compileMDX({
-    source: content,
-    components: postBodyComponents,
+    source,
+    components,
     options: {
       mdxOptions: {
         remarkPlugins: [remarkGfm],
@@ -265,16 +495,98 @@ export async function getPostBySlug(slug: string): Promise<Post | null> {
     },
   })
 
+  return compiled.content
+}
+
+export function getFilesystemPosts(): PostMeta[] {
+  return getAllFilesystemPostMeta()
+}
+
+export function hasFilesystemPostSlug(slug: string) {
+  return Boolean(getFilesystemPostSourceBySlug(slug))
+}
+
+export async function getAllPosts(): Promise<PostMeta[]> {
+  const filesystemPosts = getAllFilesystemPostMeta()
+  const databasePosts = await getPublishedDatabasePosts()
+  const uniquePosts = new Map<string, PostMeta>()
+
+  filesystemPosts.forEach((post) => {
+    uniquePosts.set(post.slug, post)
+  })
+
+  databasePosts.forEach((post) => {
+    if (uniquePosts.has(post.slug)) {
+      console.warn(
+        `Skipping database post "${post.slug}" because a filesystem post already uses that slug.`,
+      )
+      return
+    }
+
+    uniquePosts.set(post.slug, post)
+  })
+
+  return sortPosts(Array.from(uniquePosts.values()))
+}
+
+export async function getMdxPosts(): Promise<PostMeta[]> {
+  const posts = getSourcesFromDirectory(mdxPostsDirectory, ".mdx").map(buildFilesystemPostMeta)
+  return sortPosts(posts)
+}
+
+export async function getPostsByCategory(category: PostCategory): Promise<PostMeta[]> {
+  const posts = await getAllPosts()
+  return posts.filter((post) => post.category === category)
+}
+
+export async function getPostsByTopicSlug(topicSlug: string): Promise<PostMeta[]> {
+  const normalizedSlug = normalizeTopicValue(topicSlug)
+  const posts = await getAllPosts()
+
+  return posts.filter((post) => normalizeTopicValue(post.topicSlug) === normalizedSlug)
+}
+
+export async function getPostMetaBySlug(slug: string): Promise<PostMeta | null> {
+  const filesystemSource = getFilesystemPostSourceBySlug(slug)
+
+  if (filesystemSource) {
+    return buildFilesystemPostMeta(filesystemSource)
+  }
+
+  const databasePost = await getPublishedDatabasePostBySlug(slug)
+  return databasePost?.post ?? null
+}
+
+export async function getPostBySlug(slug: string): Promise<Post | null> {
+  const filesystemSource = getFilesystemPostSourceBySlug(slug)
+
+  if (filesystemSource) {
+    const postMeta = buildFilesystemPostMeta(filesystemSource)
+    const { content } = readPostSourceData(filesystemSource)
+
+    return {
+      ...postMeta,
+      content: await compilePostSource(content, postBodyComponents),
+    }
+  }
+
+  const databasePost = await getPublishedDatabasePostBySlug(slug)
+
+  if (!databasePost) {
+    return null
+  }
+
   return {
-    ...postMeta,
-    content: compiled.content,
+    ...databasePost.post,
+    content: await compilePostSource(databasePost.content, postBodyComponents),
   }
 }
 
-export function getAllTags(): string[] {
+export async function getAllTags(): Promise<string[]> {
+  const posts = await getAllPosts()
   const tagSet = new Set<string>()
 
-  getAllPosts().forEach((post) => {
+  posts.forEach((post) => {
     post.tags.forEach((tag) => {
       tagSet.add(tag)
     })
@@ -283,30 +595,44 @@ export function getAllTags(): string[] {
   return Array.from(tagSet).sort()
 }
 
-export function getPostsByTag(tag: string): PostMeta[] {
-  return getAllPosts().filter((post) => post.tags.includes(tag))
+export async function getPostsByTag(tag: string): Promise<PostMeta[]> {
+  const posts = await getAllPosts()
+  return posts.filter((post) => post.tags.includes(tag))
 }
 
-// Compiles MDX using article-specific components (bare HTML — styled via article.module.css)
 export async function getArticleBySlug(slug: string): Promise<Post | null> {
-  const source = getPostSourceBySlug(slug)
-  if (!source) return null
+  const filesystemSource = getFilesystemPostSourceBySlug(slug)
 
-  const postMeta = buildPostMeta(source)
-  const { content } = readPostSourceData(source)
+  if (filesystemSource) {
+    const postMeta = buildFilesystemPostMeta(filesystemSource)
+    const { content } = readPostSourceData(filesystemSource)
 
-  const compiled = await compileMDX({
-    source: content,
-    components: articleBodyComponents,
-    options: {
-      mdxOptions: {
-        remarkPlugins: [remarkGfm],
-      },
-    },
-  })
+    return {
+      ...postMeta,
+      content: await compilePostSource(content, articleBodyComponents),
+    }
+  }
+
+  const databasePost = await getPublishedDatabasePostBySlug(slug)
+
+  if (!databasePost) {
+    return null
+  }
 
   return {
-    ...postMeta,
-    content: compiled.content,
+    ...databasePost.post,
+    content: await compilePostSource(databasePost.content, articleBodyComponents),
   }
+}
+
+export async function getTopicLabelBySlug(topicSlug: string) {
+  const posts = await getPostsByTopicSlug(topicSlug)
+
+  if (!posts.length) {
+    return getPostCategoryLabel(
+      resolveDatabasePostCategory({ id: 0, name: topicSlug, slug: topicSlug }),
+    )
+  }
+
+  return posts[0].topicLabel ?? humanizeTopicSlug(topicSlug)
 }

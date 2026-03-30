@@ -43,6 +43,7 @@ export interface PostEditorData {
   models: SelectOption[]
   post: {
     body: string
+    body_mdx: string
     featured: boolean
     homepage: boolean
     id: number
@@ -160,6 +161,10 @@ function asStringArray(value: Json | undefined) {
   }
 
   return value.filter((item): item is string => typeof item === 'string')
+}
+
+function isMissingBodyMdxColumn(error: { code?: string; message?: string } | null | undefined) {
+  return error?.code === '42703' && error.message?.includes('body_mdx')
 }
 
 function normalizeHomepageSettings(value: Json | null | undefined): HomepageSettings {
@@ -312,7 +317,7 @@ export async function getPostsPageData() {
 export async function getPostEditorData(id?: number): Promise<PostEditorData> {
   const supabase = await createClient()
 
-  const [topics, stances, models, postResult] = await Promise.all([
+  const [topics, stances, models, initialPostResult] = await Promise.all([
     getSelectOptions('topics'),
     getSelectOptions('stances'),
     getSelectOptions('models'),
@@ -320,16 +325,41 @@ export async function getPostEditorData(id?: number): Promise<PostEditorData> {
       ? supabase
           .from('posts')
           .select(
-            'id, title, slug, summary, body, status, topic_id, featured, homepage, stance_id, linked_model_id, published_at',
+            'id, title, slug, summary, body, body_mdx, status, topic_id, featured, homepage, stance_id, linked_model_id, published_at',
           )
           .eq('id', id)
           .single()
       : Promise.resolve({ data: null, error: null }),
   ])
 
+  let postResult = initialPostResult
+
+  if (id && isMissingBodyMdxColumn(initialPostResult.error)) {
+    const fallback = await supabase
+      .from('posts')
+      .select(
+        'id, title, slug, summary, body, status, topic_id, featured, homepage, stance_id, linked_model_id, published_at',
+      )
+      .eq('id', id)
+      .single()
+
+    postResult = {
+      ...fallback,
+      data: fallback.data ? { ...fallback.data, body_mdx: '' } : null,
+    }
+  }
+
+  const post =
+    postResult.data
+      ? {
+          ...postResult.data,
+          body_mdx: postResult.data.body_mdx || postResult.data.body || '',
+        }
+      : null
+
   return {
     models,
-    post: postResult.data,
+    post,
     stances,
     topics,
   }

@@ -38,9 +38,12 @@ export interface PostMeta {
   title: string
   date: string
   category: PostCategory
+  source?: "filesystem" | "database"
   tags: string[]
   excerpt: string
   readTime: number
+  featured?: boolean
+  homepage?: boolean
   ticker?: string
   name?: string
   stance?: PostStance
@@ -54,6 +57,8 @@ export interface PostMeta {
   bull?: number
   displayTitle?: string
   eyebrow?: string
+  topicLabel?: string
+  topicSlug?: string
   marketNoteTable?: MarketNoteTableData
   reportDownload?: ReportDownloadData
   sidebarCards?: SidebarCard[]

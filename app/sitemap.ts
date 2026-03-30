@@ -1,8 +1,8 @@
 import type { MetadataRoute } from "next"
-import { getMdxPosts } from "@/lib/posts"
+import { getAllPosts } from "@/lib/posts"
 import { SEO_CONFIG } from "@/lib/seo.config"
 
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const today = new Date()
   const staticRoutes = [
     { path: "/", changeFrequency: "weekly" as const, priority: 1.0 },
@@ -21,12 +21,34 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: route.priority,
   }))
 
-  const postEntries: MetadataRoute.Sitemap = getMdxPosts().map((post) => ({
+  const posts = await getAllPosts()
+
+  const postEntries: MetadataRoute.Sitemap = posts.map((post) => ({
     url: new URL(`/posts/${post.slug}`, SEO_CONFIG.siteUrl).toString(),
     lastModified: new Date(`${post.date}T00:00:00.000Z`),
     changeFrequency: "never",
     priority: 0.6,
   }))
 
-  return [...staticEntries, ...postEntries]
+  const topicEntries: MetadataRoute.Sitemap = Array.from(
+    new Map(
+      posts
+        .filter(
+          (post) =>
+            post.topicSlug &&
+            !["macro", "equity", "market-notes"].includes(post.topicSlug),
+        )
+        .map((post) => [
+          post.topicSlug!,
+          {
+            url: new URL(`/topics/${post.topicSlug}`, SEO_CONFIG.siteUrl).toString(),
+            lastModified: new Date(`${post.date}T00:00:00.000Z`),
+            changeFrequency: "weekly" as const,
+            priority: 0.5,
+          },
+        ]),
+    ).values(),
+  )
+
+  return [...staticEntries, ...topicEntries, ...postEntries]
 }

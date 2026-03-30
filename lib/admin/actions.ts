@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { z } from 'zod'
 import { getAuthenticatedUser, requireAdminIdentity } from '@/lib/admin/auth'
+import { hasFilesystemPostSlug } from '@/lib/posts'
 import type { Json } from '@/lib/supabase/database.types'
 import { createClient } from '@/lib/supabase/server'
 
@@ -14,6 +15,10 @@ const uploadSchema = z.object({
   title: z.string().trim().min(1),
   version: z.string().trim().min(1),
 })
+
+function isMissingBodyMdxColumn(error: { code?: string; message?: string } | null | undefined) {
+  return error?.code === '42703' && error.message?.includes('body_mdx')
+}
 
 function withMessage(path: string, kind: 'error' | 'success', message: string) {
   const params = new URLSearchParams({ [kind]: message })
@@ -112,6 +117,60 @@ async function syncLinkedModel(postId: number, previousModelId: number | null, n
   if (nextModelId) {
     await supabase.from('models').update({ post_id: postId }).eq('id', nextModelId)
   }
+}
+
+async function getTopicSlug(topicId: number | null) {
+  if (!topicId) {
+    return null
+  }
+
+  const supabase = await createClient()
+  const { data } = await supabase
+    .from('topics')
+    .select('slug')
+    .eq('id', topicId)
+    .maybeSingle()
+
+  return data?.slug ?? null
+}
+
+async function revalidatePublicPostSurfaces({
+  slugs = [],
+  topicIds = [],
+}: {
+  slugs?: Array<string | null | undefined>
+  topicIds?: Array<number | null | undefined>
+}) {
+  const paths = new Set<string>([
+    '/',
+    '/macro',
+    '/equity',
+    '/market-notes',
+    '/search',
+    '/rss.xml',
+  ])
+
+  slugs.forEach((slug) => {
+    if (slug) {
+      paths.add(`/posts/${slug}`)
+    }
+  })
+
+  const topicSlugs = await Promise.all(
+    topicIds
+      .filter((topicId): topicId is number => typeof topicId === 'number')
+      .map((topicId) => getTopicSlug(topicId)),
+  )
+
+  topicSlugs.forEach((topicSlug) => {
+    if (topicSlug) {
+      paths.add(`/topics/${topicSlug}`)
+    }
+  })
+
+  paths.forEach((path) => {
+    revalidatePath(path)
+  })
 }
 
 export async function loginAction(formData: FormData) {
@@ -221,7 +280,7 @@ export async function savePostAction(formData: FormData) {
   const slug = slugify(inputSlug || title)
   const status = postStatusSchema.safeParse(readString(formData, 'status'))
   const summary = readString(formData, 'summary')
-  const body = readString(formData, 'body')
+  const bodyMdx = readString(formData, 'body_mdx')
   const topicId = readOptionalNumber(formData, 'topic_id')
   const stanceId = readOptionalNumber(formData, 'stance_id')
   const linkedModelId = readOptionalNumber(formData, 'linked_model_id')
@@ -232,6 +291,16 @@ export async function savePostAction(formData: FormData) {
 
   if (!title || !slug || !status.success) {
     redirect(withMessage(returnPath, 'error', 'Title, slug, and status are required.'))
+  }
+
+  if (hasFilesystemPostSlug(slug)) {
+    redirect(
+      withMessage(
+        returnPath,
+        'error',
+        'That slug is already used by a filesystem MDX post. Choose a new slug in admin.',
+      ),
+    )
   }
 
   const linkedModelError = await ensureModelCanBeLinked(id, linkedModelId)
@@ -248,19 +317,24 @@ export async function savePostAction(formData: FormData) {
 
   const supabase = await createClient()
   let previousModelId: number | null = null
+  let previousSlug: string | null = null
+  let previousTopicId: number | null = null
 
   if (id) {
     const { data: existingPost } = await supabase
       .from('posts')
-      .select('linked_model_id')
+      .select('linked_model_id, slug, topic_id')
       .eq('id', id)
       .single()
 
     previousModelId = existingPost?.linked_model_id ?? null
+    previousSlug = existingPost?.slug ?? null
+    previousTopicId = existingPost?.topic_id ?? null
   }
 
   const payload = {
-    body,
+    body: bodyMdx,
+    body_mdx: bodyMdx,
     featured,
     homepage,
     linked_model_id: linkedModelId,
@@ -277,7 +351,19 @@ export async function savePostAction(formData: FormData) {
     ? supabase.from('posts').update(payload).eq('id', id).select('id').single()
     : supabase.from('posts').insert(payload).select('id').single()
 
-  const { data: savedPost, error } = await query
+  let { data: savedPost, error } = await query
+
+  if (isMissingBodyMdxColumn(error)) {
+    const { body_mdx: _bodyMdx, ...fallbackPayload } = payload
+
+    const fallbackQuery = id
+      ? supabase.from('posts').update(fallbackPayload).eq('id', id).select('id').single()
+      : supabase.from('posts').insert(fallbackPayload).select('id').single()
+
+    const fallbackResult = await fallbackQuery
+    savedPost = fallbackResult.data
+    error = fallbackResult.error
+  }
 
   if (error || !savedPost) {
     redirect(withMessage(returnPath, 'error', error?.message || 'Unable to save this post.'))
@@ -288,6 +374,10 @@ export async function savePostAction(formData: FormData) {
   revalidatePath('/admin')
   revalidatePath('/admin/posts')
   revalidatePath(`/admin/posts/${savedPost.id}`)
+  await revalidatePublicPostSurfaces({
+    slugs: [previousSlug, slug],
+    topicIds: [previousTopicId, topicId],
+  })
   redirect(withMessage('/admin/posts', 'success', 'Post saved.'))
 }
 
@@ -300,6 +390,11 @@ export async function deletePostAction(formData: FormData) {
   }
 
   const supabase = await createClient()
+  const { data: post } = await supabase
+    .from('posts')
+    .select('slug, topic_id')
+    .eq('id', id)
+    .maybeSingle()
   const { error } = await supabase.from('posts').delete().eq('id', id)
 
   if (error) {
@@ -308,6 +403,10 @@ export async function deletePostAction(formData: FormData) {
 
   revalidatePath('/admin')
   revalidatePath('/admin/posts')
+  await revalidatePublicPostSurfaces({
+    slugs: [post?.slug],
+    topicIds: [post?.topic_id],
+  })
   redirect(withMessage('/admin/posts', 'success', 'Post deleted.'))
 }
 

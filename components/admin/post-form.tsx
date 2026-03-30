@@ -93,13 +93,13 @@ export function PostForm({
           </label>
 
           <label className={styles.field}>
-            <span className={styles.label}>Body</span>
+            <span className={styles.label}>Body MDX</span>
             <textarea
               className={styles.textareaTall}
-              name="body"
-              defaultValue={post?.body ?? ''}
+              name="body_mdx"
+              defaultValue={post?.body_mdx ?? post?.body ?? ''}
               rows={18}
-              placeholder="Use plain text or markdown for the first version."
+              placeholder="Write the article body in MDX. Keep the prose and custom Whiteprint components exactly as you want them to render."
             />
           </label>
 

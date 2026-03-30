@@ -117,6 +117,7 @@ export interface Database {
       posts: {
         Row: {
           body: string
+          body_mdx: string
           created_at: string
           featured: boolean
           homepage: boolean
@@ -133,6 +134,7 @@ export interface Database {
         }
         Insert: {
           body?: string
+          body_mdx?: string
           created_at?: string
           featured?: boolean
           homepage?: boolean
@@ -149,6 +151,7 @@ export interface Database {
         }
         Update: {
           body?: string
+          body_mdx?: string
           created_at?: string
           featured?: boolean
           homepage?: boolean

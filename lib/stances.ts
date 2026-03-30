@@ -1,4 +1,4 @@
-import { getAllPosts } from "@/lib/posts"
+import { getFilesystemPosts } from "@/lib/posts"
 import {
   getPostCategoryLabel,
   type PostConviction,
@@ -34,7 +34,7 @@ function formatStanceDate(date: string) {
 }
 
 export function getStances(): Stance[] {
-  return getAllPosts()
+  return getFilesystemPosts()
     .filter((post) => Boolean(post.ticker && post.stance))
     .sort((left, right) => {
       if (left.date === right.date) {

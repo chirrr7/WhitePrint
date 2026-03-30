@@ -3,6 +3,8 @@ import { getPostsByCategory } from "@/lib/posts"
 import { SEO_CONFIG } from "@/lib/seo.config"
 import { CategoryPage } from "@/components/category-page"
 
+export const dynamic = "force-dynamic"
+
 export const metadata: Metadata = {
   title: "Equity Research",
   description:
@@ -12,8 +14,8 @@ export const metadata: Metadata = {
   },
 }
 
-export default function EquityPage() {
-  const posts = getPostsByCategory("equity")
+export default async function EquityPage() {
+  const posts = await getPostsByCategory("equity")
   return (
     <CategoryPage
       title="Equity Research"

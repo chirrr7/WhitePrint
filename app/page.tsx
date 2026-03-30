@@ -1,11 +1,13 @@
 import type { Metadata } from "next"
 import Link from "next/link"
-import { getAllPosts, getPostsByCategory } from "@/lib/posts"
+import { getAllPosts } from "@/lib/posts"
 import { formatPostDate, getPostCategoryLabel, type PostMeta } from "@/lib/post-meta"
 import { SEO_CONFIG } from "@/lib/seo.config"
 import { getStances } from "@/lib/stances"
 import { MobileHome } from "@/components/mobile-home"
 import s from "./home.module.css"
+
+export const dynamic = "force-dynamic"
 
 export const metadata: Metadata = {
   title: {
@@ -17,8 +19,8 @@ export const metadata: Metadata = {
   },
 }
 
-export default function HomePage() {
-  const allPosts = getAllPosts()
+export default async function HomePage() {
+  const allPosts = await getAllPosts()
 
   // Featured: most recent non-market-notes post
   const featuredPost =
@@ -35,7 +37,7 @@ export default function HomePage() {
     .slice(0, 4)
 
   // Market notes: all market-notes posts
-  const marketNotes = getPostsByCategory("market-notes")
+  const marketNotes = allPosts.filter((post) => post.category === "market-notes")
 
   const stances = getStances()
 

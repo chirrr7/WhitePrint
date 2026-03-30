@@ -1,7 +1,7 @@
 import { getAllPosts } from "@/lib/posts"
 
 export async function GET() {
-  const posts = getAllPosts()
+  const posts = await getAllPosts()
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://whiteprint.vercel.app"
 
   const items = posts

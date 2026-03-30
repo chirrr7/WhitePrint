@@ -3,6 +3,8 @@ import { getPostsByCategory } from "@/lib/posts"
 import { SEO_CONFIG } from "@/lib/seo.config"
 import { CategoryPage } from "@/components/category-page"
 
+export const dynamic = "force-dynamic"
+
 export const metadata: Metadata = {
   title: "Macro Research",
   description:
@@ -12,8 +14,8 @@ export const metadata: Metadata = {
   },
 }
 
-export default function MacroPage() {
-  const posts = getPostsByCategory("macro")
+export default async function MacroPage() {
+  const posts = await getPostsByCategory("macro")
   return (
     <CategoryPage
       title="Macro"
