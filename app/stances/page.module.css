@@ -1,6 +1,55 @@
 .page {
   min-height: 100vh;
   background: var(--background);
+  --coverage-row-alt: #fbfaf7;
+  --coverage-card-bg: #fbfaf7;
+  --coverage-cautious: var(--accent);
+  --coverage-cautious-border: color-mix(in srgb, var(--accent) 35%, var(--border));
+  --coverage-cautious-bg: color-mix(in srgb, var(--accent) 8%, white);
+  --coverage-neutral: #8e6d26;
+  --coverage-neutral-border: #d8c89f;
+  --coverage-neutral-bg: #fcf7ea;
+  --coverage-constructive: #1b6a47;
+  --coverage-constructive-border: #bdd8cb;
+  --coverage-constructive-bg: #eff7f2;
+  --coverage-expired: #6a645d;
+  --coverage-expired-border: #d7d0c4;
+  --coverage-expired-bg: #f2efe8;
+}
+
+@media (max-width: 768px) and (prefers-color-scheme: dark) {
+  .page {
+    --coverage-row-alt: color-mix(in srgb, var(--surface) 82%, var(--background));
+    --coverage-card-bg: color-mix(in srgb, var(--surface) 88%, var(--background));
+    --coverage-cautious: color-mix(in srgb, var(--accent) 72%, white);
+    --coverage-cautious-border: color-mix(in srgb, var(--accent) 46%, var(--border));
+    --coverage-cautious-bg: color-mix(in srgb, var(--accent) 16%, var(--surface));
+    --coverage-neutral: #f0cb77;
+    --coverage-neutral-border: color-mix(in srgb, #f0cb77 34%, var(--border));
+    --coverage-neutral-bg: color-mix(in srgb, #f0cb77 16%, var(--surface));
+    --coverage-constructive: #78d8a8;
+    --coverage-constructive-border: color-mix(
+      in srgb,
+      #78d8a8 34%,
+      var(--border)
+    );
+    --coverage-constructive-bg: color-mix(in srgb, #78d8a8 15%, var(--surface));
+    --coverage-expired: color-mix(
+      in srgb,
+      var(--muted-foreground) 86%,
+      var(--foreground)
+    );
+    --coverage-expired-border: color-mix(
+      in srgb,
+      var(--muted-foreground) 28%,
+      var(--border)
+    );
+    --coverage-expired-bg: color-mix(
+      in srgb,
+      var(--muted-foreground) 12%,
+      var(--surface)
+    );
+  }
 }
 
 .hero {
@@ -179,7 +228,7 @@
 }
 
 .row:nth-child(even) td {
-  background: #fbfaf7;
+  background: var(--coverage-row-alt);
 }
 
 .cell {
@@ -229,21 +278,21 @@
 }
 
 .pillCautious {
-  color: var(--accent);
-  border-color: color-mix(in srgb, var(--accent) 35%, var(--border));
-  background: color-mix(in srgb, var(--accent) 8%, white);
+  color: var(--coverage-cautious);
+  border-color: var(--coverage-cautious-border);
+  background: var(--coverage-cautious-bg);
 }
 
 .pillNeutral {
-  color: #8e6d26;
-  border-color: #d8c89f;
-  background: #fcf7ea;
+  color: var(--coverage-neutral);
+  border-color: var(--coverage-neutral-border);
+  background: var(--coverage-neutral-bg);
 }
 
 .pillConstructive {
-  color: #1b6a47;
-  border-color: #bdd8cb;
-  background: #eff7f2;
+  color: var(--coverage-constructive);
+  border-color: var(--coverage-constructive-border);
+  background: var(--coverage-constructive-bg);
 }
 
 .conviction {
@@ -282,21 +331,21 @@
 }
 
 .statusActive {
-  color: #1b6a47;
-  border-color: #bdd8cb;
-  background: #eff7f2;
+  color: var(--coverage-constructive);
+  border-color: var(--coverage-constructive-border);
+  background: var(--coverage-constructive-bg);
 }
 
 .statusMonitoring {
-  color: #8e6d26;
-  border-color: #d8c89f;
-  background: #fcf7ea;
+  color: var(--coverage-neutral);
+  border-color: var(--coverage-neutral-border);
+  background: var(--coverage-neutral-bg);
 }
 
 .statusExpired {
-  color: #6a645d;
-  border-color: #d7d0c4;
-  background: #f2efe8;
+  color: var(--coverage-expired);
+  border-color: var(--coverage-expired-border);
+  background: var(--coverage-expired-bg);
 }
 
 .targets {
@@ -319,19 +368,19 @@
   min-height: 92px;
   padding: 14px 10px 12px;
   border: 1px solid var(--border);
-  background: #fbfaf7;
+  background: var(--coverage-card-bg);
 }
 
 .targetCardBear {
-  border-color: color-mix(in srgb, var(--accent) 28%, var(--border));
+  border-color: var(--coverage-cautious-border);
 }
 
 .targetCardBase {
-  border-color: #d8c89f;
+  border-color: var(--coverage-neutral-border);
 }
 
 .targetCardBull {
-  border-color: #bdd8cb;
+  border-color: var(--coverage-constructive-border);
 }
 
 .targetLabel {
@@ -349,6 +398,7 @@
   font-weight: 700;
   line-height: 1;
   text-align: center;
+  color: var(--foreground);
 }
 
 .targetEmpty {
@@ -461,15 +511,15 @@
 }
 
 .mobileCardCautious {
-  --mobile-accent: var(--accent);
+  --mobile-accent: var(--coverage-cautious);
 }
 
 .mobileCardNeutral {
-  --mobile-accent: #9a7b2f;
+  --mobile-accent: var(--coverage-neutral);
 }
 
 .mobileCardConstructive {
-  --mobile-accent: #1b6a47;
+  --mobile-accent: var(--coverage-constructive);
 }
 
 .mobileCardTop {
@@ -550,6 +600,75 @@
 
 .mobileScenarioWrap {
   margin-top: -2px;
+  padding: 14px;
+  border: 1px solid color-mix(in srgb, var(--border) 82%, transparent);
+  background: color-mix(in srgb, var(--surface) 92%, var(--background));
+}
+
+.mobileScenarioWrap .targetGrid {
+  grid-template-columns: 1fr;
+  gap: 10px;
+}
+
+.mobileScenarioWrap .targetCard {
+  align-items: flex-start;
+  justify-content: flex-start;
+  min-height: 0;
+  padding: 13px 14px 12px;
+  gap: 6px;
+}
+
+.mobileScenarioWrap .targetCardBear {
+  background:
+    linear-gradient(
+      90deg,
+      color-mix(in srgb, var(--coverage-cautious) 12%, var(--coverage-card-bg))
+        0%,
+      var(--coverage-card-bg) 34%
+    );
+}
+
+.mobileScenarioWrap .targetCardBase {
+  background:
+    linear-gradient(
+      90deg,
+      color-mix(in srgb, var(--coverage-neutral) 12%, var(--coverage-card-bg))
+        0%,
+      var(--coverage-card-bg) 34%
+    );
+}
+
+.mobileScenarioWrap .targetCardBull {
+  background:
+    linear-gradient(
+      90deg,
+      color-mix(
+          in srgb,
+          var(--coverage-constructive) 12%,
+          var(--coverage-card-bg)
+        )
+        0%,
+      var(--coverage-card-bg) 34%
+    );
+}
+
+.mobileScenarioWrap .targetValue,
+.mobileScenarioWrap .targetLabel {
+  text-align: left;
+}
+
+.mobileScenarioWrap .targetValue {
+  font-size: 23px;
+  line-height: 1.05;
+}
+
+.mobileScenarioWrap .targetLabel {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-style: normal;
+  line-height: 1.5;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
 }
 
 .mobileNoFrame {
@@ -679,18 +798,21 @@
     letter-spacing: 0.14em;
   }
 
-  .targetCard {
-    min-height: 78px;
-    padding: 12px 8px 10px;
+  .mobileScenarioWrap {
+    padding: 12px;
   }
 
-  .targetValue {
-    font-size: 18px;
+  .mobileScenarioWrap .targetCard {
+    padding: 12px;
   }
 
-  .targetLabel {
-    font-size: 12px;
-    line-height: 1.2;
+  .mobileScenarioWrap .targetValue {
+    font-size: 21px;
+  }
+
+  .mobileScenarioWrap .targetLabel {
+    font-size: 9px;
+    line-height: 1.45;
   }
 
   .statusDot {

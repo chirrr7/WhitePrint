@@ -267,10 +267,10 @@ export default async function StancesPage() {
 
       <div className={`${s.mobileBody} mobile-only`}>
         <div className={s.mobileIntro}>
-          <span className={s.mobileIntroEyebrow}>Live coverage feed</span>
+          <span className={s.mobileIntroEyebrow}>Current view</span>
           <p className={s.mobileIntroText}>
-            No sideways scrolling. Every stance is readable as a card with the
-            thesis, status, conviction, and scenario frame in one pass.
+            A quick read on where Whiteprint is constructive, neutral, or
+            cautious right now.
           </p>
         </div>
 

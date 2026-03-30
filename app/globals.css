@@ -81,7 +81,7 @@
   --mobile-coverage-intro-bg: rgba(255, 255, 255, 0.96);
 }
 
-@media (prefers-color-scheme: dark) {
+@media (max-width: 768px) and (prefers-color-scheme: dark) {
   :root {
     color-scheme: dark;
     --background: #0c0c0d;

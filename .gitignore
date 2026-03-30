@@ -7,4 +7,6 @@ __v0_jsx-dev-runtime.ts
 node_modules/
 .next/
 .env*.local
-.DS_Store.claude/settings.local.json
+.DS_Store
+.claude/settings.local.json
+*.tsbuildinfo
