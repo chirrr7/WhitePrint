@@ -42,6 +42,33 @@ export interface Database {
         }
         Relationships: []
       }
+      desk_brief: {
+        Row: {
+          badge: string
+          body: string
+          id: string
+          label: string
+          sort_order: number | null
+          visible: boolean
+        }
+        Insert: {
+          badge: string
+          body: string
+          id?: string
+          label: string
+          sort_order?: number | null
+          visible?: boolean
+        }
+        Update: {
+          badge?: string
+          body?: string
+          id?: string
+          label?: string
+          sort_order?: number | null
+          visible?: boolean
+        }
+        Relationships: []
+      }
       in_progress_items: {
         Row: {
           body: string
@@ -114,6 +141,51 @@ export interface Database {
         }
         Relationships: []
       }
+      pipeline: {
+        Row: {
+          category: string[]
+          codename: string
+          format: string | null
+          hook: string | null
+          id: string
+          last_updated: string | null
+          redacted: boolean
+          sort_order: number | null
+          status: string | null
+          status_type: string | null
+          subtitle: string | null
+          visible: boolean
+        }
+        Insert: {
+          category?: string[]
+          codename: string
+          format?: string | null
+          hook?: string | null
+          id?: string
+          last_updated?: string | null
+          redacted?: boolean
+          sort_order?: number | null
+          status?: string | null
+          status_type?: string | null
+          subtitle?: string | null
+          visible?: boolean
+        }
+        Update: {
+          category?: string[]
+          codename?: string
+          format?: string | null
+          hook?: string | null
+          id?: string
+          last_updated?: string | null
+          redacted?: boolean
+          sort_order?: number | null
+          status?: string | null
+          status_type?: string | null
+          subtitle?: string | null
+          visible?: boolean
+        }
+        Relationships: []
+      }
       posts: {
         Row: {
           body: string
@@ -124,7 +196,9 @@ export interface Database {
           id: number
           linked_model_id: number | null
           published_at: string | null
+          scenarios_count: number | null
           slug: string
+          sources_count: number | null
           stance_id: number | null
           status: string
           summary: string
@@ -141,7 +215,9 @@ export interface Database {
           id?: number
           linked_model_id?: number | null
           published_at?: string | null
+          scenarios_count?: number | null
           slug: string
+          sources_count?: number | null
           stance_id?: number | null
           status?: string
           summary?: string
@@ -158,7 +234,9 @@ export interface Database {
           id?: number
           linked_model_id?: number | null
           published_at?: string | null
+          scenarios_count?: number | null
           slug?: string
+          sources_count?: number | null
           stance_id?: number | null
           status?: string
           summary?: string

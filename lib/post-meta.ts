@@ -44,6 +44,8 @@ export interface PostMeta {
   readTime: number
   featured?: boolean
   homepage?: boolean
+  sourcesCount?: number
+  scenariosCount?: number
   ticker?: string
   name?: string
   stance?: PostStance

@@ -346,7 +346,7 @@ export async function getPostEditorData(id?: number): Promise<PostEditorData> {
     postResult = {
       ...fallback,
       data: fallback.data ? { ...fallback.data, body_mdx: '' } : null,
-    }
+    } as typeof initialPostResult
   }
 
   const post =
