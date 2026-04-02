@@ -1,5 +1,7 @@
 import type { Metadata } from "next"
 import Link from "next/link"
+import { MobileCoverageDashboard } from "@/components/mobile-coverage-dashboard"
+import { isMobilePreviewEnabled, withMobilePreviewHref } from "@/lib/mobile-preview"
 import { getCoverageStances } from "@/lib/stances"
 import { SEO_CONFIG } from "@/lib/seo.config"
 import s from "./page.module.css"
@@ -128,6 +130,7 @@ interface StancesPageProps {
 
 export default async function StancesPage({ searchParams }: StancesPageProps) {
   const resolvedSearchParams = searchParams ? await searchParams : {}
+  const forceMobilePreview = isMobilePreviewEnabled(resolvedSearchParams.mobile)
   const requestedTag =
     typeof resolvedSearchParams.tag === "string" ? resolvedSearchParams.tag : ""
   const activeTag = normalizeTag(requestedTag)
@@ -180,7 +183,7 @@ export default async function StancesPage({ searchParams }: StancesPageProps) {
           {coverageTags.length > 0 ? (
             <div className={s.filterBar}>
               <Link
-                href="/stances"
+                href={withMobilePreviewHref("/stances", forceMobilePreview)}
                 className={`${s.filterChip} ${!activeTag ? s.filterChipActive : ""}`}
               >
                 All
@@ -188,7 +191,7 @@ export default async function StancesPage({ searchParams }: StancesPageProps) {
               {coverageTags.map(({ tag }) => (
                 <Link
                   key={tag}
-                  href={`/stances?tag=${encodeURIComponent(tag)}`}
+                  href={withMobilePreviewHref(`/stances?tag=${encodeURIComponent(tag)}`, forceMobilePreview)}
                   className={`${s.filterChip} ${activeTag === tag ? s.filterChipActive : ""}`}
                 >
                   {humanizeTag(tag)}
@@ -201,7 +204,7 @@ export default async function StancesPage({ searchParams }: StancesPageProps) {
             <div className={s.filterSummary}>
               <span>Showing Whiteprint opinions tagged {humanizeTag(activeTag)}.</span>
               <Link
-                href={`/search?tag=${encodeURIComponent(activeTag)}`}
+                href={withMobilePreviewHref(`/search?tag=${encodeURIComponent(activeTag)}`, forceMobilePreview)}
                 className={s.filterSummaryLink}
               >
                 Open research search
@@ -273,7 +276,7 @@ export default async function StancesPage({ searchParams }: StancesPageProps) {
                         {stance.tags.map((tag) => (
                           <Link
                             key={`${stance.slug}-${tag}`}
-                            href={`/search?tag=${encodeURIComponent(tag)}`}
+                            href={withMobilePreviewHref(`/search?tag=${encodeURIComponent(tag)}`, forceMobilePreview)}
                             className={s.coverageTag}
                           >
                             {humanizeTag(tag)}
@@ -336,7 +339,7 @@ export default async function StancesPage({ searchParams }: StancesPageProps) {
                   </td>
                   <td className={`${s.cell} ${s.postCell}`}>
                     {stance.postSlug ? (
-                      <Link href={`/posts/${stance.postSlug}`} className={s.link}>
+                      <Link href={withMobilePreviewHref(`/posts/${stance.postSlug}`, forceMobilePreview)} className={s.link}>
                         Open
                       </Link>
                     ) : (
@@ -358,109 +361,11 @@ export default async function StancesPage({ searchParams }: StancesPageProps) {
             cautious right now.
           </p>
         </div>
-
-        <div className={s.mobileCardStack}>
-          {stances.map((stance) => {
-            const hasScenarioFrame =
-              stance.bear !== null || stance.base !== null || stance.bull !== null
-
-            return (
-              <article
-                key={stance.slug}
-                className={getMobileCardClassName(stance.stance)}
-              >
-                <div className={s.mobileCardTop}>
-                  <div className={s.mobileCoverageMeta}>
-                    <span className={s.mobileTicker}>{stance.ticker}</span>
-                    <span className={s.mobileCategory}>{stance.category}</span>
-                  </div>
-                  <span className={s.mobileDate}>{stance.date}</span>
-                </div>
-
-                <div className={s.mobileCardHeader}>
-                  <h2 className={s.mobileName}>{stance.name}</h2>
-                  <div className={s.mobilePillRow}>
-                    <span className={getStancePillClassName(stance.stance)}>
-                      {formatStanceLabel(stance.stance)}
-                    </span>
-                    <span className={getStatusClassName(stance.status)}>
-                      <span className={s.statusDot} />
-                      {formatStatusLabel(stance.status)}
-                    </span>
-                  </div>
-                </div>
-
-                <p className={s.mobileThesis}>{stance.thesis}</p>
-
-                <div className={s.mobileMetaRow}>
-                  <span className={s.mobileConviction}>
-                    {formatConvictionLabel(stance.conviction)}
-                  </span>
-                  <span className={s.mobileScenarioType}>
-                    {stance.scenarioType === "fcf"
-                      ? "FCF scenario frame"
-                      : "Price scenario frame"}
-                  </span>
-                </div>
-
-                {stance.tags.length > 0 ? (
-                  <div className={s.coverageTagRow}>
-                    {stance.tags.map((tag) => (
-                      <Link
-                        key={`${stance.slug}-${tag}`}
-                        href={`/search?tag=${encodeURIComponent(tag)}`}
-                        className={s.coverageTag}
-                      >
-                        {humanizeTag(tag)}
-                      </Link>
-                    ))}
-                  </div>
-                ) : null}
-
-                {hasScenarioFrame ? (
-                  <div className={s.mobileScenarioWrap}>
-                    <div className={s.targetGrid}>
-                      <div className={getScenarioCardClassName("bear")}>
-                        <span className={s.targetValue}>
-                          {formatScenarioValue(stance.bear, stance.scenarioType)}
-                        </span>
-                        <span className={s.targetLabel}>
-                          {formatScenarioLabel("bear", stance.scenarioType)}
-                        </span>
-                      </div>
-                      <div className={getScenarioCardClassName("base")}>
-                        <span className={s.targetValue}>
-                          {formatScenarioValue(stance.base, stance.scenarioType)}
-                        </span>
-                        <span className={s.targetLabel}>
-                          {formatScenarioLabel("base", stance.scenarioType)}
-                        </span>
-                      </div>
-                      <div className={getScenarioCardClassName("bull")}>
-                        <span className={s.targetValue}>
-                          {formatScenarioValue(stance.bull, stance.scenarioType)}
-                        </span>
-                        <span className={s.targetLabel}>
-                          {formatScenarioLabel("bull", stance.scenarioType)}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                ) : (
-                  <div className={s.mobileNoFrame}>No scenario frame published yet.</div>
-                )}
-
-                {stance.postSlug ? (
-                  <Link href={`/posts/${stance.postSlug}`} className={s.mobileLink}>
-                    Open analysis
-                  </Link>
-                ) : (
-                  <span className={s.mobileNoFrame}>No linked post yet.</span>
-                )}
-              </article>
-            )
-          })}
-        </div>
+        <MobileCoverageDashboard
+          coverageTags={coverageTags}
+          initialTag={activeTag}
+          stances={stances}
+        />
       </div>
     </div>
   )

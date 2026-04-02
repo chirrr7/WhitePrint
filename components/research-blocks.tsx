@@ -70,7 +70,11 @@ export function ResearchTable({
   const hasStructuredData = Array.isArray(headers) && Array.isArray(rows)
 
   return (
-    <div className="my-10">
+    <div
+      className="my-10"
+      data-mobile-table-modal={hasStructuredData ? "1" : undefined}
+      data-mobile-table-title={typeof caption === "string" ? caption : "Research Table"}
+    >
       {hasStructuredData ? (
         <div className="overflow-x-auto border border-border">
           <table className="w-full min-w-[640px] border-collapse text-sm">
@@ -135,6 +139,8 @@ export function MarketNoteTable({
         "my-10 overflow-hidden border border-border bg-background",
         className,
       )}
+      data-mobile-table-modal="1"
+      data-mobile-table-title={typeof heading === "string" ? heading : "Market Note Summary"}
     >
       <div className="border-b border-border bg-foreground px-4 py-3 font-mono text-[10px] uppercase tracking-[0.18em] text-background">
         {heading}

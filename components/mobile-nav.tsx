@@ -1,21 +1,24 @@
 "use client"
 
 import Link from "next/link"
-import { usePathname } from "next/navigation"
-import { Home, TrendingUp, BarChart3, Newspaper } from "lucide-react"
+import { usePathname, useSearchParams } from "next/navigation"
+import { Home, LineChart, Search, Sigma } from "lucide-react"
 import type React from "react"
+import { withMobilePreviewHref } from "@/lib/mobile-preview"
 
 const tabs = [
   { href: "/", label: "Home", icon: Home },
-  { href: "/equity", label: "Equity", icon: TrendingUp },
-  { href: "/macro", label: "Macro", icon: BarChart3 },
-  { href: "/market-notes", label: "Notes", icon: Newspaper },
+  { href: "/stances", label: "Coverage", icon: LineChart },
+  { href: "/search", label: "Search", icon: Search },
+  { href: "/models", label: "Models", icon: Sigma },
 ]
 
 const MONO = '"JetBrains Mono", monospace'
 
 export function MobileNav() {
   const pathname = usePathname()
+  const searchParams = useSearchParams()
+  const forceMobilePreview = searchParams.get("mobile") === "1"
 
   return (
     <>
@@ -25,7 +28,7 @@ export function MobileNav() {
       <nav
         className="mobile-only-flex"
         style={{
-          position: "fixed",
+          position: forceMobilePreview ? "absolute" : "fixed",
           bottom: 0,
           left: 0,
           right: 0,
@@ -52,7 +55,7 @@ export function MobileNav() {
           return (
             <Link
               key={tab.href}
-              href={tab.href}
+              href={withMobilePreviewHref(tab.href, forceMobilePreview)}
               style={{
                 display: "flex",
                 flexDirection: "column",

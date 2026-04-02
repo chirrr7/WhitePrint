@@ -1,5 +1,7 @@
 import Link from "next/link"
+import { MobileDeskPreview } from "@/components/mobile-desk-preview"
 import { StancesTicker } from "@/components/StancesTicker"
+import { withMobilePreviewHref } from "@/lib/mobile-preview"
 import { formatPostDate, getPostCategoryLabel, type PostMeta } from "@/lib/post-meta"
 import type { Stance } from "@/lib/stances"
 
@@ -10,6 +12,7 @@ const DISPLAY = '"Playfair Display", Georgia, serif'
 export function MobileHome({
   briefs,
   featured,
+  forceMobilePreview = false,
   heroLabel,
   showDeskBriefs = true,
   showStances = true,
@@ -17,6 +20,7 @@ export function MobileHome({
 }: {
   briefs: PostMeta[]
   featured: PostMeta
+  forceMobilePreview?: boolean
   heroLabel?: string
   showDeskBriefs?: boolean
   showStances?: boolean
@@ -24,16 +28,17 @@ export function MobileHome({
 }) {
   return (
     <div
-      className="mobile-only"
+      className="mobile-only mobile-home-shell"
       style={{
         background: "var(--mobile-page-bg)",
         color: "var(--mobile-page-fg)",
         minHeight: "calc(100dvh - 44px - 72px)",
       }}
     >
-      <div style={{ padding: "24px 16px 20px" }}>
+      <div className="mobile-home-lead" style={{ padding: "24px 16px 20px" }}>
         {heroLabel ? (
           <div
+            className="mobile-home-label mav-stagger-1"
             style={{
               fontFamily: MONO,
               fontSize: 8,
@@ -48,6 +53,7 @@ export function MobileHome({
         ) : null}
 
         <div
+          className="mobile-home-meta mav-stagger-2"
           style={{
             fontFamily: MONO,
             fontSize: 9,
@@ -61,8 +67,8 @@ export function MobileHome({
         </div>
 
         <Link
-          href={`/posts/${featured.slug}`}
-          className="mobile-tap-red"
+          href={withMobilePreviewHref(`/posts/${featured.slug}`, forceMobilePreview)}
+          className="mobile-tap-red mobile-home-title mav-stagger-3"
           style={{
             fontFamily: DISPLAY,
             fontSize: 28,
@@ -79,6 +85,7 @@ export function MobileHome({
         </Link>
 
         <p
+          className="mobile-home-excerpt mav-stagger-4"
           style={{
             fontFamily: SERIF,
             fontSize: 14,
@@ -92,8 +99,8 @@ export function MobileHome({
         </p>
 
         <Link
-          href={`/posts/${featured.slug}`}
-          className="mobile-tap-red"
+          href={withMobilePreviewHref(`/posts/${featured.slug}`, forceMobilePreview)}
+          className="mobile-tap-red mobile-home-cta mav-stagger-5"
           style={{
             fontFamily: MONO,
             fontSize: 10,
@@ -106,15 +113,16 @@ export function MobileHome({
             display: "inline-block",
           }}
         >
-          Read Analysis →
+          Read analysis →
         </Link>
       </div>
 
       {showStances ? <StancesTicker stances={stances} /> : null}
 
       {showDeskBriefs && briefs.length ? (
-        <div style={{ padding: "20px 16px 24px" }}>
+        <div className="mobile-home-briefs" style={{ padding: "20px 16px 24px" }}>
           <div
+            className="mobile-home-briefs-label"
             style={{
               fontFamily: MONO,
               fontSize: 8,
@@ -124,47 +132,12 @@ export function MobileHome({
               marginBottom: 14,
             }}
           >
-            Desk Brief
+            Research Desk
           </div>
-
-          {briefs.map((post) => (
-            <Link
-              key={post.slug}
-              href={`/posts/${post.slug}`}
-              className="mobile-tap-red"
-              style={{
-                display: "block",
-                padding: "14px 0",
-                borderBottom: "1px solid var(--mobile-page-line)",
-                textDecoration: "none",
-              }}
-            >
-              <span
-                style={{
-                  fontFamily: MONO,
-                  fontSize: 8,
-                  letterSpacing: "0.2em",
-                  textTransform: "uppercase",
-                  color: "var(--accent)",
-                  display: "block",
-                  marginBottom: 5,
-                }}
-              >
-                {post.eyebrow ?? post.tags[0] ?? getPostCategoryLabel(post.category)}
-              </span>
-              <span
-                style={{
-                  fontFamily: SERIF,
-                  fontSize: 13,
-                  lineHeight: 1.5,
-                  color: "var(--mobile-page-muted)",
-                  display: "block",
-                }}
-              >
-                {post.excerpt}
-              </span>
-            </Link>
-          ))}
+          <MobileDeskPreview
+            forceMobilePreview={forceMobilePreview}
+            posts={briefs}
+          />
         </div>
       ) : null}
     </div>

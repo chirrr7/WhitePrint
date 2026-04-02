@@ -5,6 +5,7 @@ import { MobileHome } from "@/components/mobile-home"
 import { PipelineDocket } from "@/components/PipelineDocket"
 import { ResearchSection } from "@/components/ResearchSection"
 import { StancesTicker } from "@/components/StancesTicker"
+import { isMobilePreviewEnabled } from "@/lib/mobile-preview"
 import { getPublicGeneralSettings, getHomepageContentData } from "@/lib/public-site"
 import { SEO_CONFIG } from "@/lib/seo.config"
 
@@ -24,7 +25,13 @@ export async function generateMetadata(): Promise<Metadata> {
   }
 }
 
-export default async function HomePage() {
+interface HomePageProps {
+  searchParams?: Promise<Record<string, string | string[] | undefined>>
+}
+
+export default async function HomePage({ searchParams }: HomePageProps) {
+  const resolvedSearchParams = searchParams ? await searchParams : {}
+  const forceMobilePreview = isMobilePreviewEnabled(resolvedSearchParams.mobile)
   const userAgent = (await headers()).get("user-agent") ?? ""
   const isMobileRequest = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Mobile/i.test(
     userAgent,
@@ -36,10 +43,11 @@ export default async function HomePage() {
 
   return (
     <>
-      {isMobileRequest && homepageData.leadPost ? (
+      {homepageData.leadPost && (isMobileRequest || forceMobilePreview) ? (
         <MobileHome
           briefs={homepageData.mobileBriefPosts}
           featured={homepageData.leadPost}
+          forceMobilePreview={forceMobilePreview}
           heroLabel={homepageData.settings.heroLabel}
           showDeskBriefs={homepageData.settings.showDeskBriefs}
           showStances={homepageData.settings.showStances}

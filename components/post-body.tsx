@@ -45,7 +45,11 @@ function MdxTable({
   ...props
 }: ComponentPropsWithoutRef<"table">) {
   return (
-    <div className="my-8 overflow-x-auto border border-border">
+    <div
+      className="my-8 overflow-x-auto border border-border"
+      data-mobile-table-modal="1"
+      data-mobile-table-title="Table"
+    >
       <table
         className={cn("w-full min-w-[640px] border-collapse text-sm", className)}
         {...props}

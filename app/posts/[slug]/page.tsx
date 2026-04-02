@@ -14,6 +14,7 @@ import {
   getArticleBySlug,
   getPostMetaBySlug,
 } from "@/lib/posts"
+import { isMobilePreviewEnabled, withMobilePreviewHref } from "@/lib/mobile-preview"
 import { cn } from "@/lib/utils"
 import { ArticleProgressBar } from "./progress-bar"
 import { MobileArticleViewer } from "@/components/mobile-article-viewer"
@@ -22,6 +23,7 @@ import marketNoteStyles from "./market-note.module.css"
 
 interface Props {
   params: Promise<{ slug: string }>
+  searchParams?: Promise<Record<string, string | string[] | undefined>>
 }
 
 export const dynamic = "force-dynamic"
@@ -57,8 +59,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
 }
 
-export default async function PostPage({ params }: Props) {
+export default async function PostPage({ params, searchParams }: Props) {
   const { slug } = await params
+  const resolvedSearchParams = searchParams ? await searchParams : {}
+  const forceMobilePreview = isMobilePreviewEnabled(resolvedSearchParams.mobile)
   const post = await getArticleBySlug(slug)
   if (!post) notFound()
 
@@ -66,6 +70,21 @@ export default async function PostPage({ params }: Props) {
   const categoryLabel = getPostCategoryLabel(post.category)
   const customSidebarCards = post.sidebarCards ?? []
   const hasCustomSidebarCards = customSidebarCards.length > 0
+  const mobileHighlights = hasCustomSidebarCards
+    ? customSidebarCards
+        .flatMap((card) => card.rows.map((row) => ({ label: row.label, value: row.value })))
+        .slice(0, 4)
+    : post.marketNoteTable
+      ? [
+          { label: "Stance", value: post.marketNoteTable.stance },
+          { label: "Confidence", value: post.marketNoteTable.confidence },
+          { label: "Horizon", value: post.marketNoteTable.horizon },
+        ]
+      : [
+          { label: "Category", value: categoryLabel },
+          { label: "Published", value: formatPostDate(post.date) },
+          { label: "Read time", value: `${post.readTime} min` },
+        ]
 
   function getSidebarValueClass(tone: SidebarValueTone = "neutral") {
     switch (tone) {
@@ -157,7 +176,7 @@ export default async function PostPage({ params }: Props) {
             {post.tags.map((tag) => (
               <Link
                 key={tag}
-                href={`/search?tag=${encodeURIComponent(tag)}`}
+                href={withMobilePreviewHref(`/search?tag=${encodeURIComponent(tag)}`, forceMobilePreview)}
                 className={s.sidebarTag}
               >
                 {tag}
@@ -186,11 +205,15 @@ export default async function PostPage({ params }: Props) {
       <MobileArticleViewer
         title={post.title}
         displayTitle={post.displayTitle}
+        backHref={categoryHref}
         category={categoryLabel}
         date={formatPostDate(post.date)}
         excerpt={post.excerpt}
+        highlights={mobileHighlights}
         readTime={post.readTime}
+        reportDownload={post.reportDownload}
         tagCount={post.tags.length}
+        tags={post.tags}
         articleClassName={s.article}
         articleContent={
           <div className={s.wrapper}>
@@ -337,11 +360,11 @@ export default async function PostPage({ params }: Props) {
                     <div className={s.sidebarHead}>Topics</div>
                     <div className={s.tagCloud}>
                       {post.tags.map((tag) => (
-                        <Link
-                          key={tag}
-                          href={`/search?tag=${encodeURIComponent(tag)}`}
-                          className={s.sidebarTag}
-                        >
+              <Link
+                key={tag}
+                href={withMobilePreviewHref(`/search?tag=${encodeURIComponent(tag)}`, forceMobilePreview)}
+                className={s.sidebarTag}
+              >
                           {tag}
                         </Link>
                       ))}

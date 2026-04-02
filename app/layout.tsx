@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { Suspense } from 'react'
 import { JetBrains_Mono, Playfair_Display, Source_Serif_4 } from 'next/font/google'
 import { RootShell } from '@/components/root-shell'
 import { getPublicGeneralSettings } from '@/lib/public-site'
@@ -89,7 +90,9 @@ export default function RootLayout({
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
       </head>
       <body suppressHydrationWarning>
-        <RootShell>{children}</RootShell>
+        <Suspense fallback={<main>{children}</main>}>
+          <RootShell>{children}</RootShell>
+        </Suspense>
       </body>
     </html>
   )

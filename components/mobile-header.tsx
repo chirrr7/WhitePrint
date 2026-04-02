@@ -1,16 +1,19 @@
 "use client"
 
 import Link from "next/link"
-import { usePathname } from "next/navigation"
+import { usePathname, useSearchParams } from "next/navigation"
 import { useState } from "react"
 import { X } from "lucide-react"
+import { withMobilePreviewHref } from "@/lib/mobile-preview"
 
 const MONO = '"JetBrains Mono", monospace'
 const DISPLAY = '"Playfair Display", Georgia, serif'
 
 export function MobileHeader() {
   const pathname = usePathname()
+  const searchParams = useSearchParams()
   const [open, setOpen] = useState(false)
+  const forceMobilePreview = searchParams.get("mobile") === "1"
 
   return (
     <div className="mobile-only">
@@ -20,7 +23,7 @@ export function MobileHeader() {
       {/* Fixed compact bar */}
       <header
         style={{
-          position: "fixed",
+          position: forceMobilePreview ? "absolute" : "fixed",
           top: 0,
           left: 0,
           right: 0,
@@ -64,7 +67,7 @@ export function MobileHeader() {
       {open && (
         <div
           style={{
-            position: "fixed",
+            position: forceMobilePreview ? "absolute" : "fixed",
             top: 0,
             left: 0,
             right: 0,
@@ -121,7 +124,7 @@ export function MobileHeader() {
             ].map((link) => (
               <Link
                 key={link.href}
-                href={link.href}
+                href={withMobilePreviewHref(link.href, forceMobilePreview)}
                 onClick={() => setOpen(false)}
                 style={{
                   fontFamily: MONO,
