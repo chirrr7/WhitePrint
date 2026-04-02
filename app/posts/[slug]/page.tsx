@@ -24,16 +24,11 @@ interface Props {
   params: Promise<{ slug: string }>
 }
 
-const bespokePostSlugs = new Set([
-  "fed-decision-week-three-things-to-watch",
-  "liquidity-squeeze-fed-march-2026",
-])
-
 export const dynamic = "force-dynamic"
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params
-  const post = bespokePostSlugs.has(slug) ? null : await getPostMetaBySlug(slug)
+  const post = await getPostMetaBySlug(slug)
   if (!post) return {}
 
   const url = `${SEO_CONFIG.siteUrl}/posts/${post.slug}`

@@ -2,6 +2,14 @@ import "server-only"
 
 import type { PostMeta } from "@/lib/post-meta"
 import { getAllPosts } from "@/lib/posts"
+import {
+  normalizeAboutSettings,
+  normalizeGeneralSettings,
+  normalizeHomepageSettings,
+  type AboutSettings,
+  type GeneralSettings,
+  type HomepageSettings,
+} from "@/lib/site-settings"
 import { type Stance, getCoverageStances } from "@/lib/stances"
 import { createClient } from "@/lib/supabase/server"
 import type { Database, Json } from "@/lib/supabase/database.types"
@@ -9,28 +17,6 @@ import type { Database, Json } from "@/lib/supabase/database.types"
 type DeskBriefRow = Database["public"]["Tables"]["desk_brief"]["Row"]
 type InProgressRow = Database["public"]["Tables"]["in_progress_items"]["Row"]
 type LegacyPipelineRow = Database["public"]["Tables"]["pipeline"]["Row"]
-
-export interface HomepageSettings {
-  featuredPostSlug: string
-  heroLabel: string
-  latestResearchLimit: number
-  marketNotesLimit: number
-  orderedPostSlugs: string[]
-  orderedStanceSlugs: string[]
-  showDeskBriefs: boolean
-  showFeatured: boolean
-  showLatestResearch: boolean
-  showMarketNotes: boolean
-  showStances: boolean
-}
-
-export interface GeneralSettings {
-  brandTagline: string
-  contactEmail: string
-  navCtaLabel: string
-  siteDescription: string
-  siteTitle: string
-}
 
 export interface PublicDeskBrief {
   badge: string
@@ -62,56 +48,6 @@ export interface PublicDocketItem {
   updatedLabel: string | null
 }
 
-const homepageDefaults: HomepageSettings = {
-  featuredPostSlug: "",
-  heroLabel: "Today's Desk",
-  latestResearchLimit: 4,
-  marketNotesLimit: 6,
-  orderedPostSlugs: [],
-  orderedStanceSlugs: [],
-  showDeskBriefs: true,
-  showFeatured: true,
-  showLatestResearch: true,
-  showMarketNotes: true,
-  showStances: true,
-}
-
-const generalDefaults: GeneralSettings = {
-  brandTagline: "Clarity over consensus.",
-  contactEmail: "",
-  navCtaLabel: "Get in touch",
-  siteDescription: "Independent macro and equity research",
-  siteTitle: "Whiteprint Research",
-}
-
-function asRecord(value: Json | null | undefined): Record<string, Json | undefined> {
-  if (!value || Array.isArray(value) || typeof value !== "object") {
-    return {}
-  }
-
-  return value as Record<string, Json | undefined>
-}
-
-function asString(value: Json | undefined, fallback = "") {
-  return typeof value === "string" ? value : fallback
-}
-
-function asBoolean(value: Json | undefined, fallback = false) {
-  return typeof value === "boolean" ? value : fallback
-}
-
-function asNumber(value: Json | undefined, fallback = 0) {
-  return typeof value === "number" && Number.isFinite(value) ? value : fallback
-}
-
-function asStringArray(value: Json | undefined) {
-  if (!Array.isArray(value)) {
-    return []
-  }
-
-  return value.filter((item): item is string => typeof item === "string")
-}
-
 async function getSiteSettingValue(key: string) {
   const supabase = await createClient()
   const { data, error } = await supabase.from("site_settings").select("value").eq("key", key).maybeSingle()
@@ -123,37 +59,6 @@ async function getSiteSettingValue(key: string) {
 
   return data?.value ?? null
 }
-
-function normalizeHomepageSettings(value: Json | null | undefined): HomepageSettings {
-  const record = asRecord(value)
-
-  return {
-    featuredPostSlug: asString(record.featuredPostSlug, homepageDefaults.featuredPostSlug),
-    heroLabel: asString(record.heroLabel, homepageDefaults.heroLabel),
-    latestResearchLimit: asNumber(record.latestResearchLimit, homepageDefaults.latestResearchLimit),
-    marketNotesLimit: asNumber(record.marketNotesLimit, homepageDefaults.marketNotesLimit),
-    orderedPostSlugs: asStringArray(record.orderedPostSlugs),
-    orderedStanceSlugs: asStringArray(record.orderedStanceSlugs),
-    showDeskBriefs: asBoolean(record.showDeskBriefs, homepageDefaults.showDeskBriefs),
-    showFeatured: asBoolean(record.showFeatured, homepageDefaults.showFeatured),
-    showLatestResearch: asBoolean(record.showLatestResearch, homepageDefaults.showLatestResearch),
-    showMarketNotes: asBoolean(record.showMarketNotes, homepageDefaults.showMarketNotes),
-    showStances: asBoolean(record.showStances, homepageDefaults.showStances),
-  }
-}
-
-function normalizeGeneralSettings(value: Json | null | undefined): GeneralSettings {
-  const record = asRecord(value)
-
-  return {
-    brandTagline: asString(record.brandTagline, generalDefaults.brandTagline),
-    contactEmail: asString(record.contactEmail, generalDefaults.contactEmail),
-    navCtaLabel: asString(record.navCtaLabel, generalDefaults.navCtaLabel),
-    siteDescription: asString(record.siteDescription, generalDefaults.siteDescription),
-    siteTitle: asString(record.siteTitle, generalDefaults.siteTitle),
-  }
-}
-
 function orderBySlugPreference<T extends { slug: string }>(items: T[], orderedSlugs: string[]) {
   const seen = new Set<string>()
   const bySlug = new Map(items.map((item) => [item.slug, item]))
@@ -298,6 +203,10 @@ export async function getPublicHomepageSettings() {
 
 export async function getPublicGeneralSettings() {
   return normalizeGeneralSettings(await getSiteSettingValue("general"))
+}
+
+export async function getPublicAboutSettings(): Promise<AboutSettings> {
+  return normalizeAboutSettings(await getSiteSettingValue("about"))
 }
 
 export async function getHomepageContentData(): Promise<HomepageContentData> {

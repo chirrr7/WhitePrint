@@ -4,12 +4,16 @@ import matter from 'gray-matter'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { z } from 'zod'
+import type { PostCategory } from '@/lib/post-meta'
 import { getAuthenticatedUser, requireAdminIdentity } from '@/lib/admin/auth'
 import {
   getAllFilesystemPostSlugs,
+  getFilesystemMigrationPostBySlug,
   getLegacyMigrationPosts,
   hasFilesystemPostSlug,
+  getFilesystemPosts,
 } from '@/lib/posts'
+import { aboutDefaults } from '@/lib/site-settings'
 import type { Json } from '@/lib/supabase/database.types'
 import { createClient } from '@/lib/supabase/server'
 
@@ -24,6 +28,9 @@ const scenarioTypeSchema = z.enum(['price', 'fcf'])
 const uploadSchema = z.object({
   title: z.string().trim().min(1),
   version: z.string().trim().min(1),
+})
+const contentMigrationSettingsSchema = z.object({
+  suppressedFilesystemSlugs: z.array(z.string()).default([]),
 })
 
 function isMissingBodyMdxColumn(error: { code?: string; message?: string } | null | undefined) {
@@ -211,6 +218,40 @@ function readTagList(value: string) {
   )
 }
 
+function readParagraphBlocks(value: string) {
+  return value
+    .split(/\r?\n\s*\r?\n/)
+    .map((paragraph) =>
+      paragraph
+        .split(/\r?\n/)
+        .map((line) => line.trim())
+        .filter(Boolean)
+        .join(' '),
+    )
+    .filter(Boolean)
+}
+
+function readScheduleItems(value: string) {
+  return value
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .map((line) => {
+      const [day, ...topicParts] = line.split('|')
+      const topic = topicParts.join('|').trim()
+
+      if (!day?.trim() || !topic) {
+        return null
+      }
+
+      return {
+        day: day.trim(),
+        topic,
+      }
+    })
+    .filter((item): item is { day: string; topic: string } => Boolean(item))
+}
+
 function getFileExtension(fileName: string) {
   const segments = fileName.split('.')
 
@@ -273,6 +314,117 @@ async function getTopicSlug(topicId: number | null) {
     .maybeSingle()
 
   return data?.slug ?? null
+}
+
+async function ensureTopicForCategory(category: PostCategory) {
+  const supabase = await createClient()
+  const { data: existingTopic } = await supabase
+    .from('topics')
+    .select('id')
+    .eq('slug', category)
+    .maybeSingle()
+
+  if (existingTopic) {
+    return existingTopic.id
+  }
+
+  const topicName =
+    category === 'market-notes'
+      ? 'Market Notes'
+      : category === 'equity'
+        ? 'Equity'
+        : 'Macro'
+
+  const { data: createdTopic, error } = await supabase
+    .from('topics')
+    .insert({
+      description: null,
+      is_visible: true,
+      name: topicName,
+      slug: category,
+      sort_order: 0,
+    })
+    .select('id')
+    .single()
+
+  if (error || !createdTopic) {
+    throw new Error(error?.message || `Unable to create topic for ${category}.`)
+  }
+
+  return createdTopic.id
+}
+
+async function addSuppressedFilesystemSlug(slug: string) {
+  const supabase = await createClient()
+  const { data: settingsRow } = await supabase
+    .from('site_settings')
+    .select('value')
+    .eq('key', 'content_migration')
+    .maybeSingle()
+
+  const parsed = contentMigrationSettingsSchema.safeParse(settingsRow?.value ?? {})
+  const suppressedFilesystemSlugs = new Set(
+    parsed.success ? parsed.data.suppressedFilesystemSlugs : [],
+  )
+  suppressedFilesystemSlugs.add(slug)
+
+  const { error } = await supabase.from('site_settings').upsert({
+    is_public: true,
+    key: 'content_migration',
+    label: 'Content Migration',
+    value: {
+      suppressedFilesystemSlugs: Array.from(suppressedFilesystemSlugs),
+    },
+  })
+
+  return error
+}
+
+async function importFilesystemPost(slug: string) {
+  const migrationPost = getFilesystemMigrationPostBySlug(slug)
+  const topicId = await ensureTopicForCategory(migrationPost.category)
+  const supabase = await createClient()
+  const payload = {
+    body: migrationPost.bodyMdx,
+    body_mdx: migrationPost.bodyMdx,
+    featured: false,
+    homepage: false,
+    published_at: migrationPost.publishedAt,
+    slug: migrationPost.slug,
+    status: 'published' as const,
+    summary: migrationPost.summary,
+    title: migrationPost.title,
+    topic_id: topicId,
+  }
+
+  let { error } = await supabase.from('posts').upsert(payload, { onConflict: 'slug' })
+
+  if (isMissingBodyMdxColumn(error)) {
+    const { body_mdx: _bodyMdx, ...fallbackPayload } = payload
+    const fallbackResult = await supabase
+      .from('posts')
+      .upsert(fallbackPayload, { onConflict: 'slug' })
+    error = fallbackResult.error
+  }
+
+  if (error) {
+    throw new Error(error.message || `Unable to import "${migrationPost.title}".`)
+  }
+
+  const suppressionError = await addSuppressedFilesystemSlug(migrationPost.slug)
+
+  if (suppressionError) {
+    throw new Error(
+      suppressionError.message || `Imported "${migrationPost.title}" but could not suppress the filesystem version.`,
+    )
+  }
+
+  await revalidatePublicPostSurfaces({
+    slugs: [migrationPost.slug],
+    topicIds: [topicId],
+  })
+
+  return migrationPost
 }
 
 async function revalidatePublicPostSurfaces({
@@ -421,6 +573,38 @@ export async function runLegacyMigrationTestAction() {
       'Migrated Oracle, EOG, and Eight Body Problem into Supabase and archived the rest.',
     ),
   )
+}
+
+export async function importFilesystemPostAction(formData: FormData) {
+  await requireAdminIdentity()
+
+  const slug = readString(formData, 'slug')
+
+  if (!slug) {
+    redirect(withMessage('/admin/posts', 'error', 'Missing filesystem post slug.'))
+  }
+
+  try {
+    const migrationPost = await importFilesystemPost(slug)
+
+    revalidatePath('/admin')
+    revalidatePath('/admin/posts')
+    redirect(
+      withMessage(
+        '/admin/posts',
+        'success',
+        `Imported "${migrationPost.title}" into admin and suppressed the filesystem fallback.`,
+      ),
+    )
+  } catch (error) {
+    redirect(
+      withMessage(
+        '/admin/posts',
+        'error',
+        error instanceof Error ? error.message : 'Unable to import filesystem post.',
+      ),
+    )
+  }
 }
 
 export async function loginAction(formData: FormData) {
@@ -794,9 +978,10 @@ export async function deleteStanceAction(formData: FormData) {
   redirect(withMessage('/admin/stances', 'success', 'Coverage record deleted.'))
 }
 
-export async function createInProgressItemAction(formData: FormData) {
+export async function saveInProgressItemAction(formData: FormData) {
   await requireAdminIdentity()
 
+  const id = readOptionalNumber(formData, 'id')
   const title = readString(formData, 'title')
   const slug = slugify(readString(formData, 'slug') || title)
   const summary = readString(formData, 'summary')
@@ -806,29 +991,69 @@ export async function createInProgressItemAction(formData: FormData) {
 
   if (!title || !slug || !status.success) {
     redirect(
-      withMessage('/admin/in-progress', 'error', 'Title, slug, and status are required.'),
+      withMessage(id ? `/admin/in-progress/${id}` : '/admin/in-progress/new', 'error', 'Title, slug, and status are required.'),
     )
   }
 
   const supabase = await createClient()
-  const { error } = await supabase.from('in_progress_items').insert({
+  const payload = {
     body,
     priority,
     slug,
     status: status.data,
     summary,
     title,
-  })
+  }
+  const query = id
+    ? supabase.from('in_progress_items').update(payload).eq('id', id)
+    : supabase.from('in_progress_items').insert(payload)
+  const { error } = await query
 
   if (error) {
     redirect(
-      withMessage('/admin/in-progress', 'error', error.message || 'Unable to save this work item.'),
+      withMessage(
+        id ? `/admin/in-progress/${id}` : '/admin/in-progress/new',
+        'error',
+        error.message || 'Unable to save this work item.',
+      ),
     )
   }
 
   revalidatePath('/admin')
   revalidatePath('/admin/in-progress')
+  if (id) {
+    revalidatePath(`/admin/in-progress/${id}`)
+  }
+  revalidatePath('/')
   redirect(withMessage('/admin/in-progress', 'success', 'In-progress item saved.'))
+}
+
+export async function createInProgressItemAction(formData: FormData) {
+  return saveInProgressItemAction(formData)
+}
+
+export async function deleteInProgressItemAction(formData: FormData) {
+  await requireAdminIdentity()
+
+  const id = readOptionalNumber(formData, 'id')
+  if (!id) {
+    redirect(withMessage('/admin/in-progress', 'error', 'Missing work item id.'))
+  }
+
+  const supabase = await createClient()
+  const { error } = await supabase.from('in_progress_items').delete().eq('id', id)
+
+  if (error) {
+    redirect(
+      withMessage(`/admin/in-progress/${id}`, 'error', error.message || 'Unable to delete this work item.'),
+    )
+  }
+
+  revalidatePath('/admin')
+  revalidatePath('/admin/in-progress')
+  revalidatePath(`/admin/in-progress/${id}`)
+  revalidatePath('/')
+  redirect(withMessage('/admin/in-progress', 'success', 'In-progress item deleted.'))
 }
 
 export async function uploadModelAction(formData: FormData) {
@@ -890,7 +1115,7 @@ export async function uploadModelAction(formData: FormData) {
 }
 
 async function saveSiteSettingsRecord(
-  key: 'homepage' | 'general',
+  key: 'homepage' | 'general' | 'about',
   label: string,
   value: Json,
   path: string,
@@ -955,6 +1180,46 @@ export async function saveGeneralSettingsAction(formData: FormData) {
   revalidatePath('/admin')
   revalidatePath('/admin/settings')
   redirect(withMessage('/admin/settings', 'success', 'General settings saved.'))
+}
+
+export async function saveAboutSettingsAction(formData: FormData) {
+  await requireAdminIdentity()
+
+  const scheduleItems = readScheduleItems(readString(formData, 'scheduleItems'))
+
+  await saveSiteSettingsRecord(
+    'about',
+    'About Page',
+    {
+      contactIntro: readString(formData, 'contactIntro'),
+      copyrightLine: readString(formData, 'copyrightLine'),
+      disclaimer: readString(formData, 'disclaimer'),
+      heroTitle: readString(formData, 'heroTitle'),
+      howWeWork: readParagraphBlocks(readString(formData, 'howWeWork')),
+      instagramLabel: readString(formData, 'instagramLabel'),
+      instagramUrl: readString(formData, 'instagramUrl'),
+      introParagraphs: readParagraphBlocks(readString(formData, 'introParagraphs')),
+      linkedinLabel: readString(formData, 'linkedinLabel'),
+      linkedinUrl: readString(formData, 'linkedinUrl'),
+      researchAvailabilityNote: readString(formData, 'researchAvailabilityNote'),
+      responseNote: readString(formData, 'responseNote'),
+      scheduleIntro: readString(formData, 'scheduleIntro'),
+      scheduleItems: (scheduleItems.length ? scheduleItems : aboutDefaults.scheduleItems).map(
+        (item) => ({
+          day: item.day,
+          topic: item.topic,
+        }),
+      ),
+      whatWeBelieve: readParagraphBlocks(readString(formData, 'whatWeBelieve')),
+      whereWeAre: readParagraphBlocks(readString(formData, 'whereWeAre')),
+    },
+    '/admin/settings',
+  )
+
+  revalidatePath('/admin')
+  revalidatePath('/admin/settings')
+  revalidatePath('/about')
+  redirect(withMessage('/admin/settings', 'success', 'About page settings saved.'))
 }
 
 export async function createTopicAction(formData: FormData) {

@@ -721,6 +721,16 @@ export function getLegacyMigrationPosts(
   })
 }
 
+export function getFilesystemMigrationPostBySlug(slug: string): LegacyMigrationPost {
+  const source = getFilesystemPostSourceBySlug(slug)
+
+  if (!source) {
+    throw new Error(`Could not find legacy post source for slug "${slug}".`)
+  }
+
+  return buildLegacyMigrationPost(source)
+}
+
 export async function getAllPosts(): Promise<PostMeta[]> {
   const filesystemPosts = await getVisibleFilesystemPostMeta()
   const databasePosts = await getPublishedDatabasePosts()

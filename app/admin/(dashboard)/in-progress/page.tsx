@@ -1,4 +1,4 @@
-import { createInProgressItemAction } from '@/lib/admin/actions'
+import Link from 'next/link'
 import { getInProgressPageData } from '@/lib/admin/data'
 import { formatAdminDate, readPageMessage } from '@/lib/admin/messages'
 import styles from '@/app/admin/admin.module.css'
@@ -26,6 +26,9 @@ export default async function AdminInProgressPage({
             items can all live here.
           </p>
         </div>
+        <Link href="/admin/in-progress/new" className={styles.primaryButton}>
+          New work item
+        </Link>
       </div>
 
       {message ? (
@@ -34,69 +37,14 @@ export default async function AdminInProgressPage({
         </div>
       ) : null}
 
-      <div className={styles.splitGrid}>
-        <form action={createInProgressItemAction} className={styles.panel}>
-          <div className={styles.panelHeader}>
-            <div>
-              <h2 className={styles.panelTitle}>New work item</h2>
-              <p className={styles.panelIntro}>
-                Capture what is being researched right now without forcing it into the
-                posts table too early.
-              </p>
-            </div>
-          </div>
-
-          <div className={styles.formGrid}>
-            <div className={styles.formGridTwo}>
-              <label className={styles.field}>
-                <span className={styles.label}>Title</span>
-                <input className={styles.input} type="text" name="title" required />
-              </label>
-              <label className={styles.field}>
-                <span className={styles.label}>Slug</span>
-                <input className={styles.input} type="text" name="slug" />
-              </label>
-            </div>
-
-            <div className={styles.formGridTwo}>
-              <label className={styles.field}>
-                <span className={styles.label}>Status</span>
-                <select className={styles.select} name="status" defaultValue="active">
-                  <option value="backlog">Backlog</option>
-                  <option value="active">Active</option>
-                  <option value="blocked">Blocked</option>
-                  <option value="done">Done</option>
-                </select>
-              </label>
-              <label className={styles.field}>
-                <span className={styles.label}>Priority</span>
-                <input className={styles.input} type="number" name="priority" defaultValue="0" />
-              </label>
-            </div>
-
-            <label className={styles.field}>
-              <span className={styles.label}>Summary</span>
-              <textarea className={styles.textarea} name="summary" rows={4} />
-            </label>
-
-            <label className={styles.field}>
-              <span className={styles.label}>Body</span>
-              <textarea className={styles.textareaTall} name="body" rows={10} />
-            </label>
-          </div>
-
-          <div className={styles.buttonRow}>
-            <button type="submit" className={styles.primaryButton}>
-              Save work item
-            </button>
-          </div>
-        </form>
-
-        <div className={styles.panel}>
+      <div className={styles.panel}>
           <div className={styles.panelHeader}>
             <div>
               <h2 className={styles.panelTitle}>Pipeline ledger</h2>
-              <p className={styles.panelIntro}>What the team is working through now.</p>
+              <p className={styles.panelIntro}>
+                What the team is working through now, and what readers may see on the
+                homepage docket.
+              </p>
             </div>
           </div>
           {items.length ? (
@@ -113,6 +61,9 @@ export default async function AdminInProgressPage({
                       {item.status}
                     </span>
                     <span className={styles.mono}>{formatAdminDate(item.updatedAt)}</span>
+                    <Link href={`/admin/in-progress/${item.id}`} className={styles.secondaryButton}>
+                      Edit
+                    </Link>
                   </div>
                 </div>
               ))}
@@ -120,7 +71,6 @@ export default async function AdminInProgressPage({
           ) : (
             <div className={styles.emptyState}>No in-progress items saved yet.</div>
           )}
-        </div>
       </div>
     </div>
   )

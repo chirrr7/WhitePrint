@@ -1,6 +1,14 @@
 import 'server-only'
 
-import type { Json } from '@/lib/supabase/database.types'
+import { getFilesystemPosts } from '@/lib/posts'
+import {
+  normalizeAboutSettings,
+  normalizeGeneralSettings,
+  normalizeHomepageSettings,
+  type AboutSettings,
+  type GeneralSettings,
+  type HomepageSettings,
+} from '@/lib/site-settings'
 import { createClient } from '@/lib/supabase/server'
 
 export interface SelectOption {
@@ -16,6 +24,9 @@ export interface DashboardData {
     inProgress: number
     published: number
     stances: number
+  }
+  editorialHealth: {
+    unmanagedFilesystemPosts: FilesystemBacklogPost[]
   }
   latestModels: Array<{
     id: number
@@ -37,6 +48,14 @@ export interface PostListItem {
   title: string
   topicLabel: string | null
   updatedAt: string
+}
+
+export interface FilesystemBacklogPost {
+  category: string
+  date: string
+  excerpt: string
+  slug: string
+  title: string
 }
 
 export interface PostEditorData {
@@ -121,6 +140,18 @@ export interface InProgressListItem {
   updatedAt: string
 }
 
+export interface InProgressEditorData {
+  item: {
+    body: string
+    id: number
+    priority: number
+    slug: string
+    status: string
+    summary: string
+    title: string
+  } | null
+}
+
 export interface ModelListItem {
   filePath: string
   id: number
@@ -131,110 +162,22 @@ export interface ModelListItem {
   version: string
 }
 
-export interface HomepageSettings {
-  featuredPostSlug: string
-  heroLabel: string
-  latestResearchLimit: number
-  marketNotesLimit: number
-  orderedPostSlugs: string[]
-  orderedStanceSlugs: string[]
-  showDeskBriefs: boolean
-  showFeatured: boolean
-  showLatestResearch: boolean
-  showMarketNotes: boolean
-  showStances: boolean
-}
-
-export interface GeneralSettings {
-  brandTagline: string
-  contactEmail: string
-  navCtaLabel: string
-  siteDescription: string
-  siteTitle: string
-}
-
-const homepageDefaults: HomepageSettings = {
-  featuredPostSlug: '',
-  heroLabel: "Today's Desk",
-  latestResearchLimit: 4,
-  marketNotesLimit: 6,
-  orderedPostSlugs: [],
-  orderedStanceSlugs: [],
-  showDeskBriefs: true,
-  showFeatured: true,
-  showLatestResearch: true,
-  showMarketNotes: true,
-  showStances: true,
-}
-
-const generalDefaults: GeneralSettings = {
-  brandTagline: 'Clarity over consensus.',
-  contactEmail: '',
-  navCtaLabel: 'Get in touch',
-  siteDescription: 'Independent macro and equity research',
-  siteTitle: 'Whiteprint Research',
-}
-
-function asRecord(value: Json | null | undefined): Record<string, Json | undefined> {
-  if (!value || Array.isArray(value) || typeof value !== 'object') {
-    return {}
-  }
-
-  return value as Record<string, Json | undefined>
-}
-
-function asString(value: Json | undefined, fallback = '') {
-  return typeof value === 'string' ? value : fallback
-}
-
-function asBoolean(value: Json | undefined, fallback = false) {
-  return typeof value === 'boolean' ? value : fallback
-}
-
-function asNumber(value: Json | undefined, fallback = 0) {
-  return typeof value === 'number' && Number.isFinite(value) ? value : fallback
-}
-
-function asStringArray(value: Json | undefined) {
-  if (!Array.isArray(value)) {
-    return []
-  }
-
-  return value.filter((item): item is string => typeof item === 'string')
-}
-
 function isMissingBodyMdxColumn(error: { code?: string; message?: string } | null | undefined) {
   return error?.code === '42703' && error.message?.includes('body_mdx')
 }
 
-function normalizeHomepageSettings(value: Json | null | undefined): HomepageSettings {
-  const record = asRecord(value)
+function getFilesystemBacklogPosts(databasePostSlugs: string[]): FilesystemBacklogPost[] {
+  const databaseSlugSet = new Set(databasePostSlugs)
 
-  return {
-    featuredPostSlug: asString(record.featuredPostSlug, homepageDefaults.featuredPostSlug),
-    heroLabel: asString(record.heroLabel, homepageDefaults.heroLabel),
-    latestResearchLimit: asNumber(record.latestResearchLimit, homepageDefaults.latestResearchLimit),
-    marketNotesLimit: asNumber(record.marketNotesLimit, homepageDefaults.marketNotesLimit),
-    orderedPostSlugs: asStringArray(record.orderedPostSlugs),
-    orderedStanceSlugs: asStringArray(record.orderedStanceSlugs),
-    showDeskBriefs: asBoolean(record.showDeskBriefs, homepageDefaults.showDeskBriefs),
-    showFeatured: asBoolean(record.showFeatured, homepageDefaults.showFeatured),
-    showLatestResearch: asBoolean(record.showLatestResearch, homepageDefaults.showLatestResearch),
-    showMarketNotes: asBoolean(record.showMarketNotes, homepageDefaults.showMarketNotes),
-    showStances: asBoolean(record.showStances, homepageDefaults.showStances),
-  }
-}
-
-function normalizeGeneralSettings(value: Json | null | undefined): GeneralSettings {
-  const record = asRecord(value)
-
-  return {
-    brandTagline: asString(record.brandTagline, generalDefaults.brandTagline),
-    contactEmail: asString(record.contactEmail, generalDefaults.contactEmail),
-    navCtaLabel: asString(record.navCtaLabel, generalDefaults.navCtaLabel),
-    siteDescription: asString(record.siteDescription, generalDefaults.siteDescription),
-    siteTitle: asString(record.siteTitle, generalDefaults.siteTitle),
-  }
+  return getFilesystemPosts()
+    .filter((post) => !databaseSlugSet.has(post.slug))
+    .map((post) => ({
+      category: post.category,
+      date: post.date,
+      excerpt: post.excerpt,
+      slug: post.slug,
+      title: post.title,
+    }))
 }
 
 export async function getDashboardData(): Promise<DashboardData> {
@@ -244,6 +187,7 @@ export async function getDashboardData(): Promise<DashboardData> {
     draftPosts,
     publishedPosts,
     archivedPosts,
+    allPosts,
     stances,
     inProgress,
     latestModels,
@@ -251,6 +195,7 @@ export async function getDashboardData(): Promise<DashboardData> {
     supabase.from('posts').select('id', { count: 'exact', head: true }).eq('status', 'draft'),
     supabase.from('posts').select('id', { count: 'exact', head: true }).eq('status', 'published'),
     supabase.from('posts').select('id', { count: 'exact', head: true }).eq('status', 'archived'),
+    supabase.from('posts').select('slug'),
     supabase.from('stances').select('id', { count: 'exact', head: true }),
     supabase.from('in_progress_items').select('id', { count: 'exact', head: true }),
     supabase
@@ -267,6 +212,11 @@ export async function getDashboardData(): Promise<DashboardData> {
       inProgress: inProgress.count ?? 0,
       published: publishedPosts.count ?? 0,
       stances: stances.count ?? 0,
+    },
+    editorialHealth: {
+      unmanagedFilesystemPosts: getFilesystemBacklogPosts(
+        (allPosts.data ?? []).map((post) => post.slug),
+      ),
     },
     latestModels: (latestModels.data ?? []).map((model) => ({
       id: model.id,
@@ -351,7 +301,10 @@ export async function getPostsPageData() {
     updatedAt: post.updated_at,
   }))
 
-  return { posts }
+  return {
+    filesystemBacklog: getFilesystemBacklogPosts(posts.map((post) => post.slug)),
+    posts,
+  }
 }
 
 export async function getPostEditorData(id?: number): Promise<PostEditorData> {
@@ -532,6 +485,31 @@ export async function getInProgressPageData() {
   return { items }
 }
 
+export async function getInProgressEditorData(id?: number): Promise<InProgressEditorData> {
+  const supabase = await createClient()
+  const itemResult = id
+    ? await supabase
+        .from('in_progress_items')
+        .select('id, title, slug, summary, body, status, priority')
+        .eq('id', id)
+        .maybeSingle()
+    : { data: null }
+
+  return {
+    item: itemResult.data
+      ? {
+          body: itemResult.data.body ?? '',
+          id: itemResult.data.id,
+          priority: itemResult.data.priority ?? 0,
+          slug: itemResult.data.slug,
+          status: itemResult.data.status,
+          summary: itemResult.data.summary,
+          title: itemResult.data.title,
+        }
+      : null,
+  }
+}
+
 export async function getModelsPageData() {
   const supabase = await createClient()
   const [modelsResult, posts, topics] = await Promise.all([
@@ -595,8 +573,9 @@ export async function getHomepagePageData() {
 
 export async function getSettingsPageData() {
   const supabase = await createClient()
-  const [settingsResult, topicsResult] = await Promise.all([
+  const [generalSettingsResult, aboutSettingsResult, topicsResult] = await Promise.all([
     supabase.from('site_settings').select('value').eq('key', 'general').maybeSingle(),
+    supabase.from('site_settings').select('value').eq('key', 'about').maybeSingle(),
     supabase
       .from('topics')
       .select('id, name, slug, description, is_visible, sort_order, updated_at')
@@ -605,7 +584,8 @@ export async function getSettingsPageData() {
   ])
 
   return {
-    general: normalizeGeneralSettings(settingsResult.data?.value),
+    about: normalizeAboutSettings(aboutSettingsResult.data?.value),
+    general: normalizeGeneralSettings(generalSettingsResult.data?.value),
     topics: topicsResult.data ?? [],
   }
 }

@@ -1,80 +1,87 @@
-import type { Metadata } from "next"
-import { getPublicGeneralSettings } from "@/lib/public-site"
-import { SEO_CONFIG } from "@/lib/seo.config"
-
-export const metadata: Metadata = {
-  title: "About",
-  description:
-    "About Whiteprint Research — independent macro and equity research.",
-  alternates: {
-    canonical: `${SEO_CONFIG.siteUrl}/about`,
-  },
-}
+import type { Metadata } from 'next'
+import { getPublicAboutSettings, getPublicGeneralSettings } from '@/lib/public-site'
+import { SEO_CONFIG } from '@/lib/seo.config'
 
 const MONO = '"JetBrains Mono", monospace'
 const DISPLAY = '"Playfair Display", Georgia, serif'
 const SERIF = '"Source Serif 4", Georgia, serif'
 
 const v = {
-  bg: "#f7f6f3",
-  surface: "#fff",
-  ink: "#0a0a0a",
-  accent: "#b83025",
-  muted: "#555",
-  subtle: "#8a8a8a",
-  border: "#dedad4",
-  borderLight: "#eceae5",
+  accent: '#b83025',
+  bg: '#f7f6f3',
+  border: '#dedad4',
+  borderLight: '#eceae5',
+  ink: '#0a0a0a',
+  muted: '#555',
+  subtle: '#8a8a8a',
+  surface: '#fff',
+}
+
+export async function generateMetadata(): Promise<Metadata> {
+  const [about, general] = await Promise.all([
+    getPublicAboutSettings(),
+    getPublicGeneralSettings(),
+  ])
+
+  return {
+    title: 'About',
+    description: about.introParagraphs[0] || general.siteDescription,
+    alternates: {
+      canonical: `${SEO_CONFIG.siteUrl}/about`,
+    },
+  }
 }
 
 export default async function AboutPage() {
-  const settings = await getPublicGeneralSettings()
-  const contactEmail = settings.contactEmail || "contact@whiteprintresearch.xyz"
+  const [about, settings] = await Promise.all([
+    getPublicAboutSettings(),
+    getPublicGeneralSettings(),
+  ])
+  const contactEmail = settings.contactEmail || 'contact@whiteprintresearch.xyz'
 
   return (
-    <div style={{ background: v.bg, minHeight: "100vh" }}>
-
-      {/* Page header */}
+    <div style={{ background: v.bg, minHeight: '100vh' }}>
       <div
         style={{
           background: v.surface,
           borderBottom: `1px solid ${v.border}`,
-          padding: "56px 40px 48px",
+          padding: '56px 40px 48px',
         }}
       >
-        <div style={{ maxWidth: 780, margin: "0 auto" }}>
+        <div style={{ margin: '0 auto', maxWidth: 780 }}>
           <div
             style={{
+              color: v.subtle,
               fontFamily: MONO,
               fontSize: 9,
-              letterSpacing: "0.28em",
-              textTransform: "uppercase",
-              color: v.subtle,
+              letterSpacing: '0.28em',
               marginBottom: 16,
+              textTransform: 'uppercase',
             }}
           >
             About
           </div>
           <h1
             style={{
-              fontFamily: DISPLAY,
-              fontSize: "clamp(28px, 4vw, 44px)",
-              fontWeight: 700,
-              letterSpacing: "-0.025em",
               color: v.ink,
-              margin: 0,
+              fontFamily: DISPLAY,
+              fontSize: 'clamp(28px, 4vw, 44px)',
+              fontWeight: 700,
+              letterSpacing: '-0.025em',
               lineHeight: 1.1,
+              margin: 0,
             }}
           >
-            What we do
+            {about.heroTitle}
           </h1>
           <p
             style={{
-              margin: "14px 0 0",
+              color: v.accent,
               fontFamily: MONO,
               fontSize: 9,
-              letterSpacing: "0.22em",
-              textTransform: "uppercase",
-              color: v.accent,
+              letterSpacing: '0.22em',
+              margin: '14px 0 0',
+              textTransform: 'uppercase',
             }}
           >
             {settings.brandTagline}
@@ -82,95 +89,71 @@ export default async function AboutPage() {
         </div>
       </div>
 
-      {/* Body */}
-      <div style={{ maxWidth: 780, margin: "0 auto", padding: "0 40px 80px" }}>
+      <div style={{ margin: '0 auto', maxWidth: 780, padding: '0 40px 80px' }}>
+        <div style={{ padding: '48px 0 0' }}>
+          {about.introParagraphs.map((paragraph, index) => (
+            <p
+              key={`${paragraph}-${index}`}
+              style={{
+                color: index === 0 ? v.ink : v.muted,
+                fontFamily: SERIF,
+                fontSize: index === 0 ? 17 : 16,
+                lineHeight: 1.75,
+                margin: index === about.introParagraphs.length - 1 ? '0 0 32px' : '0 0 20px',
+                maxWidth: 660,
+              }}
+            >
+              {paragraph}
+            </p>
+          ))}
 
-        {/* Intro */}
-        <div style={{ padding: "48px 0 0" }}>
           <p
             style={{
-              fontFamily: SERIF,
-              fontSize: 17,
-              lineHeight: 1.75,
-              color: v.ink,
-              margin: "0 0 20px",
-              maxWidth: 660,
-            }}
-          >
-            Whiteprint Research is an independent publication producing macro,
-            equity, and sector research at institutional quality.
-          </p>
-          <p
-            style={{
+              color: v.muted,
               fontFamily: SERIF,
               fontSize: 16,
               lineHeight: 1.75,
-              color: v.muted,
-              margin: "0 0 20px",
+              margin: '0 0 20px',
               maxWidth: 660,
             }}
           >
-            We cover public equities, macroeconomic policy, credit markets, and
-            geopolitical risk — with a focus on primary-source analysis grounded
-            in regulatory filings, central bank data, and verifiable financial
-            disclosures. Our equity research includes forensic quality-of-earnings
-            work, scenario-based valuation, and downloadable financial models
-            built for transparency.
-          </p>
-          <p
-            style={{
-              fontFamily: SERIF,
-              fontSize: 16,
-              lineHeight: 1.75,
-              color: v.muted,
-              margin: "0 0 32px",
-              maxWidth: 660,
-            }}
-          >
-            We publish on a structured weekly schedule:
+            {about.scheduleIntro}
           </p>
 
-          {/* Schedule */}
           <div
             style={{
               borderLeft: `2px solid ${v.accent}`,
-              paddingLeft: 24,
-              display: "flex",
-              flexDirection: "column",
+              display: 'flex',
+              flexDirection: 'column',
               gap: 10,
               marginBottom: 0,
+              paddingLeft: 24,
             }}
           >
-            {[
-              ["Monday", "Market Commentary"],
-              ["Tuesday", "Credit Analysis"],
-              ["Wednesday", "Sector Research"],
-              ["Friday", "Equity Commentary"],
-              ["Weekend", "Geopolitical and Macro Deep Dives"],
-            ].map(([day, topic]) => (
-              <div key={day} style={{ display: "flex", gap: 16, alignItems: "baseline" }}>
+            {about.scheduleItems.map((item) => (
+              <div key={`${item.day}-${item.topic}`} style={{ alignItems: 'baseline', display: 'flex', gap: 16 }}>
                 <span
                   style={{
-                    fontFamily: MONO,
-                    fontSize: 9,
-                    letterSpacing: "0.18em",
-                    textTransform: "uppercase",
                     color: v.accent,
                     flexShrink: 0,
+                    fontFamily: MONO,
+                    fontSize: 9,
+                    letterSpacing: '0.18em',
+                    textTransform: 'uppercase',
                     width: 80,
                   }}
                 >
-                  {day}
+                  {item.day}
                 </span>
                 <span
                   style={{
+                    color: v.ink,
                     fontFamily: SERIF,
                     fontSize: 15,
-                    color: v.ink,
                     lineHeight: 1.5,
                   }}
                 >
-                  {topic}
+                  {item.topic}
                 </span>
               </div>
             ))}
@@ -178,62 +161,42 @@ export default async function AboutPage() {
 
           <p
             style={{
+              color: v.muted,
               fontFamily: SERIF,
               fontSize: 15,
+              fontStyle: 'italic',
               lineHeight: 1.7,
-              color: v.muted,
               marginTop: 32,
-              fontStyle: "italic",
             }}
           >
-            All research is publicly available. All financial models are downloadable.
+            {about.researchAvailabilityNote}
           </p>
         </div>
 
-        {/* How we work */}
         <Section title="How we work">
-          <p>
-            Whiteprint operates at the intersection of traditional financial
-            analysis and modern research infrastructure. Our analytical process
-            is human-led and augmented by AI tooling — used for data extraction,
-            model stress-testing, and accelerating the research workflow. The
-            judgment, editorial decisions, and conclusions are ours.
-          </p>
-          <p>
-            Every published figure is traceable to a primary source. We do not
-            fabricate data, invent precision, or publish unverifiable claims.
-            Where uncertainty exists, we say so.
-          </p>
+          {about.howWeWork.map((paragraph, index) => (
+            <p key={`${paragraph}-${index}`}>{paragraph}</p>
+          ))}
         </Section>
 
-        {/* What we believe */}
         <Section title="What we believe">
-          <p>
-            Good research should be accessible, not gated. The quality of
-            analysis should not depend on the size of the institution producing
-            it. And the most valuable insight often comes from reading the
-            footnotes everyone else skips.
-          </p>
+          {about.whatWeBelieve.map((paragraph, index) => (
+            <p key={`${paragraph}-${index}`}>{paragraph}</p>
+          ))}
         </Section>
 
-        {/* Where we are */}
         <Section title="Where we are">
-          <p>
-            Based in the UAE with a global research focus. Our coverage spans
-            US and European equities, Federal Reserve and ECB policy, energy and
-            commodity markets, and cross-border geopolitical risk.
-          </p>
+          {about.whereWeAre.map((paragraph, index) => (
+            <p key={`${paragraph}-${index}`}>{paragraph}</p>
+          ))}
         </Section>
 
-        {/* Contact */}
         <Section title="Contact">
-          <p>
-            For research inquiries, collaboration, or press:
-          </p>
+          <p>{about.contactIntro}</p>
           <div
             style={{
-              display: "flex",
-              flexDirection: "column",
+              display: 'flex',
+              flexDirection: 'column',
               gap: 12,
               marginTop: 4,
             }}
@@ -241,130 +204,124 @@ export default async function AboutPage() {
             <div>
               <span
                 style={{
+                  color: v.subtle,
+                  display: 'block',
                   fontFamily: MONO,
                   fontSize: 9,
-                  letterSpacing: "0.18em",
-                  textTransform: "uppercase",
-                  color: v.subtle,
-                  display: "block",
+                  letterSpacing: '0.18em',
                   marginBottom: 4,
+                  textTransform: 'uppercase',
                 }}
               >
                 Email
               </span>
-              <span style={{ fontFamily: SERIF, fontSize: 15, color: v.ink }}>
+              <span style={{ color: v.ink, fontFamily: SERIF, fontSize: 15 }}>
                 {contactEmail}
               </span>
               <div style={{ marginTop: 10 }}>
                 <a
                   href={`mailto:${contactEmail}`}
                   style={{
+                    color: v.accent,
                     fontFamily: MONO,
                     fontSize: 9,
-                    letterSpacing: "0.16em",
-                    textTransform: "uppercase",
-                    color: v.accent,
-                    textDecoration: "none",
+                    letterSpacing: '0.16em',
+                    textDecoration: 'none',
+                    textTransform: 'uppercase',
                   }}
                 >
                   {settings.navCtaLabel}
                 </a>
               </div>
             </div>
-            <div>
-              <span
-                style={{
-                  fontFamily: MONO,
-                  fontSize: 9,
-                  letterSpacing: "0.18em",
-                  textTransform: "uppercase",
-                  color: v.subtle,
-                  display: "block",
-                  marginBottom: 4,
-                }}
-              >
-                LinkedIn
-              </span>
-              <a
-                href="https://www.linkedin.com/company/whiteprint-research/"
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{ fontFamily: SERIF, fontSize: 15, color: v.ink }}
-              >
-                Whiteprint Research
-              </a>
-            </div>
-            <div>
-              <span
-                style={{
-                  fontFamily: MONO,
-                  fontSize: 9,
-                  letterSpacing: "0.18em",
-                  textTransform: "uppercase",
-                  color: v.subtle,
-                  display: "block",
-                  marginBottom: 4,
-                }}
-              >
-                Instagram
-              </span>
-              <a
-                href="https://www.instagram.com/whiteprintresearch"
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{ fontFamily: SERIF, fontSize: 15, color: v.ink }}
-              >
-                @whiteprintresearch
-              </a>
-            </div>
+
+            {about.linkedinUrl ? (
+              <div>
+                <span
+                  style={{
+                    color: v.subtle,
+                    display: 'block',
+                    fontFamily: MONO,
+                    fontSize: 9,
+                    letterSpacing: '0.18em',
+                    marginBottom: 4,
+                    textTransform: 'uppercase',
+                  }}
+                >
+                  LinkedIn
+                </span>
+                <a
+                  href={about.linkedinUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{ color: v.ink, fontFamily: SERIF, fontSize: 15 }}
+                >
+                  {about.linkedinLabel}
+                </a>
+              </div>
+            ) : null}
+
+            {about.instagramUrl ? (
+              <div>
+                <span
+                  style={{
+                    color: v.subtle,
+                    display: 'block',
+                    fontFamily: MONO,
+                    fontSize: 9,
+                    letterSpacing: '0.18em',
+                    marginBottom: 4,
+                    textTransform: 'uppercase',
+                  }}
+                >
+                  Instagram
+                </span>
+                <a
+                  href={about.instagramUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{ color: v.ink, fontFamily: SERIF, fontSize: 15 }}
+                >
+                  {about.instagramLabel}
+                </a>
+              </div>
+            ) : null}
           </div>
-          <p style={{ marginTop: 20 }}>
-            We read everything. Response times vary with the publishing schedule.
-          </p>
+          <p style={{ marginTop: 20 }}>{about.responseNote}</p>
         </Section>
 
-        {/* Disclaimer */}
         <div
           style={{
-            marginTop: 60,
             borderTop: `1px solid ${v.borderLight}`,
+            marginTop: 60,
             paddingTop: 28,
           }}
         >
           <p
             style={{
+              color: v.subtle,
               fontFamily: MONO,
               fontSize: 10,
-              color: v.subtle,
+              letterSpacing: '0.03em',
               lineHeight: 1.8,
-              letterSpacing: "0.03em",
-              maxWidth: 660,
               margin: 0,
+              maxWidth: 660,
             }}
           >
-            Whiteprint Research is an independent publication. All content is
-            for informational and educational purposes only and does not
-            constitute investment advice, a recommendation, or a solicitation to
-            buy or sell any security. The views expressed represent Whiteprint
-            Research analysis as of the date of publication and are subject to
-            change without notice. Whiteprint Research is not a registered
-            investment adviser, broker-dealer, or financial institution. Readers
-            should conduct their own due diligence and consult a qualified
-            financial adviser before making investment decisions.
+            {about.disclaimer}
           </p>
           <p
             style={{
+              color: v.subtle,
               fontFamily: MONO,
               fontSize: 10,
-              color: v.subtle,
-              letterSpacing: "0.06em",
+              letterSpacing: '0.06em',
               marginTop: 16,
             }}
           >
-            © 2026 Whiteprint Research. All rights reserved.
+            {about.copyrightLine}
           </p>
         </div>
-
       </div>
     </div>
   )
@@ -381,26 +338,26 @@ function Section({
     <section
       style={{
         borderTop: `1px solid ${v.border}`,
-        paddingTop: 40,
         marginTop: 48,
+        paddingTop: 40,
       }}
     >
       <div
         style={{
-          display: "flex",
-          alignItems: "center",
+          alignItems: 'center',
+          display: 'flex',
           gap: 16,
           marginBottom: 24,
         }}
       >
         <span
           style={{
-            fontFamily: MONO,
-            fontSize: 9,
-            letterSpacing: "0.28em",
-            textTransform: "uppercase",
             color: v.subtle,
             flexShrink: 0,
+            fontFamily: MONO,
+            fontSize: 9,
+            letterSpacing: '0.28em',
+            textTransform: 'uppercase',
           }}
         >
           {title}
@@ -409,14 +366,14 @@ function Section({
       </div>
       <div
         style={{
+          color: v.muted,
+          display: 'flex',
+          flexDirection: 'column',
           fontFamily: SERIF,
           fontSize: 16,
-          lineHeight: 1.75,
-          color: v.muted,
-          maxWidth: 660,
-          display: "flex",
-          flexDirection: "column",
           gap: 16,
+          lineHeight: 1.75,
+          maxWidth: 660,
         }}
       >
         {children}

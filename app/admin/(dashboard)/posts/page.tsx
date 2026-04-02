@@ -1,5 +1,8 @@
 import Link from 'next/link'
-import { runLegacyMigrationTestAction } from '@/lib/admin/actions'
+import {
+  importFilesystemPostAction,
+  runLegacyMigrationTestAction,
+} from '@/lib/admin/actions'
 import { getPostsPageData } from '@/lib/admin/data'
 import { formatAdminDate, readPageMessage } from '@/lib/admin/messages'
 import styles from '@/app/admin/admin.module.css'
@@ -9,7 +12,7 @@ interface AdminPostsPageProps {
 }
 
 export default async function AdminPostsPage({ searchParams }: AdminPostsPageProps) {
-  const [message, { posts }] = await Promise.all([
+  const [message, { filesystemBacklog, posts }] = await Promise.all([
     readPageMessage(searchParams),
     getPostsPageData(),
   ])
@@ -19,10 +22,10 @@ export default async function AdminPostsPage({ searchParams }: AdminPostsPagePro
       <div className={styles.pageHeader}>
         <div>
           <p className={styles.eyebrow}>Posts</p>
-          <h1 className={styles.pageTitle}>Manage the research archive.</h1>
+          <h1 className={styles.pageTitle}>Manage the editorial archive.</h1>
           <p className={styles.pageIntro}>
-            This is the first fully CRUD-managed area. Everything else in the admin
-            is designed around this post model.
+            Database-backed posts are fully editable here. Filesystem posts now show up
+            as a migration backlog so we can bring the whole archive under admin control.
           </p>
         </div>
         <Link href="/admin/posts/new" className={styles.primaryButton}>
@@ -35,6 +38,45 @@ export default async function AdminPostsPage({ searchParams }: AdminPostsPagePro
           {message.text}
         </div>
       ) : null}
+
+      <div className={styles.panel}>
+        <div className={styles.panelHeader}>
+          <div>
+            <h2 className={styles.panelTitle}>Filesystem backlog</h2>
+            <p className={styles.panelIntro}>
+              These posts still exist as repository files and are not yet fully managed
+              through admin. Importing them creates the database record and suppresses
+              the public filesystem fallback.
+            </p>
+          </div>
+        </div>
+
+        {filesystemBacklog.length ? (
+          <div className={styles.list}>
+            {filesystemBacklog.map((post) => (
+              <div key={post.slug} className={styles.listItem}>
+                <div>
+                  <p className={styles.listItemTitle}>{post.title}</p>
+                  <p className={styles.listItemMeta}>
+                    {post.category} / {post.date} / {post.slug}
+                  </p>
+                  <p className={styles.listItemMeta}>{post.excerpt}</p>
+                </div>
+                <form action={importFilesystemPostAction}>
+                  <input type="hidden" name="slug" value={post.slug} />
+                  <button type="submit" className={styles.secondaryButton}>
+                    Import to admin
+                  </button>
+                </form>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className={styles.emptyState}>
+            No filesystem-only posts left. The live archive is fully flowing through admin.
+          </div>
+        )}
+      </div>
 
       <div className={styles.panel}>
         <div className={styles.panelHeader}>

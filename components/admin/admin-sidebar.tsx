@@ -5,8 +5,8 @@ import styles from '@/app/admin/admin.module.css'
 const navItems = [
   { href: '/admin', label: 'Overview' },
   { href: '/admin/posts', label: 'Posts' },
-  { href: '/admin/stances', label: 'Stances' },
-  { href: '/admin/in-progress', label: 'In Progress' },
+  { href: '/admin/stances', label: 'Coverage' },
+  { href: '/admin/in-progress', label: 'Pipeline' },
   { href: '/admin/models', label: 'Models' },
   { href: '/admin/homepage', label: 'Homepage' },
   { href: '/admin/settings', label: 'Settings' },
@@ -21,10 +21,10 @@ export function AdminSidebar({ email }: AdminSidebarProps) {
     <aside className={styles.sidebar}>
       <div className={styles.sidebarBrand}>
         <p className={styles.eyebrow}>Whiteprint admin</p>
-        <h1 className={styles.sidebarTitle}>Private publishing cockpit</h1>
+        <h1 className={styles.sidebarTitle}>Private editorial desk</h1>
         <p className={styles.sidebarIntro}>
-          Supabase-backed editorial controls for research, models, and homepage
-          sequencing.
+          Publishing controls for research, coverage, site copy, and the homepage
+          rollout.
         </p>
       </div>
 
