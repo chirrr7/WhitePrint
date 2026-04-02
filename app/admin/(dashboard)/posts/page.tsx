@@ -2,6 +2,7 @@ import Link from 'next/link'
 import {
   importFilesystemPostAction,
   runLegacyMigrationTestAction,
+  syncFilesystemArchiveAction,
 } from '@/lib/admin/actions'
 import { getPostsPageData } from '@/lib/admin/data'
 import { formatAdminDate, readPageMessage } from '@/lib/admin/messages'
@@ -28,9 +29,16 @@ export default async function AdminPostsPage({ searchParams }: AdminPostsPagePro
             as a migration backlog so we can bring the whole archive under admin control.
           </p>
         </div>
-        <Link href="/admin/posts/new" className={styles.primaryButton}>
-          New post
-        </Link>
+        <div className={styles.buttonRow}>
+          <form action={syncFilesystemArchiveAction}>
+            <button type="submit" className={styles.secondaryButton}>
+              Sync live archive
+            </button>
+          </form>
+          <Link href="/admin/posts/new" className={styles.primaryButton}>
+            New post
+          </Link>
+        </div>
       </div>
 
       {message ? (
@@ -45,10 +53,18 @@ export default async function AdminPostsPage({ searchParams }: AdminPostsPagePro
             <h2 className={styles.panelTitle}>Filesystem backlog</h2>
             <p className={styles.panelIntro}>
               These posts still exist as repository files and are not yet fully managed
-              through admin. Importing them creates the database record and suppresses
-              the public filesystem fallback.
+              through admin. The full archive sync preserves frontmatter, creates or
+              updates stance records when metadata exists, and suppresses the old
+              filesystem fallback.
             </p>
           </div>
+          {filesystemBacklog.length ? (
+            <form action={syncFilesystemArchiveAction}>
+              <button type="submit" className={styles.primaryButton}>
+                Sync all filesystem posts
+              </button>
+            </form>
+          ) : null}
         </div>
 
         {filesystemBacklog.length ? (

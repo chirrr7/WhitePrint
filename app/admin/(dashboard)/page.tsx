@@ -1,6 +1,6 @@
+import { EditorHelpGuide } from '@/components/admin/editor-help-guide'
 import Link from 'next/link'
 import { getDashboardData } from '@/lib/admin/data'
-import { formatAdminDate } from '@/lib/admin/messages'
 import styles from '@/app/admin/admin.module.css'
 
 export default async function AdminDashboardPage() {
@@ -58,6 +58,10 @@ export default async function AdminDashboardPage() {
           <p className={styles.statValue}>{dashboard.counts.inProgress}</p>
         </div>
         <div className={styles.statCard}>
+          <p className={styles.statLabel}>Models</p>
+          <p className={styles.statValue}>{dashboard.counts.models}</p>
+        </div>
+        <div className={styles.statCard}>
           <p className={styles.statLabel}>Filesystem backlog</p>
           <p className={styles.statValue}>{filesystemBacklog.length}</p>
         </div>
@@ -102,37 +106,7 @@ export default async function AdminDashboardPage() {
           </div>
         </div>
 
-        <div className={styles.panel}>
-          <div className={styles.panelHeader}>
-            <div>
-              <h2 className={styles.panelTitle}>Latest model uploads</h2>
-              <p className={styles.panelIntro}>
-                Recent files in Supabase Storage, mirrored into the models table.
-              </p>
-            </div>
-          </div>
-
-          {dashboard.latestModels.length ? (
-            <div className={styles.list}>
-              {dashboard.latestModels.map((model) => (
-                <div key={model.id} className={styles.listItem}>
-                  <div>
-                    <p className={styles.listItemTitle}>{model.title}</p>
-                    <p className={styles.listItemMeta}>Version {model.version}</p>
-                  </div>
-                  <div className={styles.stackedMeta}>
-                    <span className={styles.statusBadge} data-status="published">
-                      Uploaded
-                    </span>
-                    <span className={styles.mono}>{formatAdminDate(model.uploadedAt)}</span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className={styles.emptyState}>No model uploads yet.</div>
-          )}
-        </div>
+        <EditorHelpGuide title="Quick publishing guide" />
       </div>
     </div>
   )

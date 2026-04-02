@@ -52,6 +52,9 @@ export function StanceForm({ linkedPosts, message, mode, stance, topics }: Stanc
           <div className={styles.formGridTwo}>
             <label className={styles.field}>
               <span className={styles.label}>Internal title</span>
+              <p className={styles.fieldHint}>
+                Use the article title or a clear coverage label. This stays internal-facing.
+              </p>
               <input
                 className={styles.input}
                 type="text"
@@ -63,6 +66,9 @@ export function StanceForm({ linkedPosts, message, mode, stance, topics }: Stanc
             </label>
             <label className={styles.field}>
               <span className={styles.label}>Slug</span>
+              <p className={styles.fieldHint}>
+                Keep this aligned with the related post slug when possible.
+              </p>
               <input
                 className={styles.input}
                 type="text"
@@ -76,6 +82,9 @@ export function StanceForm({ linkedPosts, message, mode, stance, topics }: Stanc
           <div className={styles.formGridTwo}>
             <label className={styles.field}>
               <span className={styles.label}>Ticker</span>
+              <p className={styles.fieldHint}>
+                Required for public coverage cards and ticker displays.
+              </p>
               <input
                 className={styles.input}
                 type="text"
@@ -87,6 +96,9 @@ export function StanceForm({ linkedPosts, message, mode, stance, topics }: Stanc
             </label>
             <label className={styles.field}>
               <span className={styles.label}>Display name</span>
+              <p className={styles.fieldHint}>
+                This is the reader-facing name used across coverage surfaces.
+              </p>
               <input
                 className={styles.input}
                 type="text"
@@ -125,6 +137,9 @@ export function StanceForm({ linkedPosts, message, mode, stance, topics }: Stanc
           <div className={styles.formGridTwo}>
             <label className={styles.field}>
               <span className={styles.label}>Coverage category</span>
+              <p className={styles.fieldHint}>
+                Determines whether the coverage sits under Macro, Equity, or Market Notes.
+              </p>
               <select
                 className={styles.select}
                 name="coverage_category"
@@ -137,6 +152,9 @@ export function StanceForm({ linkedPosts, message, mode, stance, topics }: Stanc
             </label>
             <label className={styles.field}>
               <span className={styles.label}>Topic</span>
+              <p className={styles.fieldHint}>
+                Match the post topic so filters and archives stay aligned.
+              </p>
               <select
                 className={styles.select}
                 name="topic_id"
@@ -155,6 +173,9 @@ export function StanceForm({ linkedPosts, message, mode, stance, topics }: Stanc
           <div className={styles.formGridTwo}>
             <label className={styles.field}>
               <span className={styles.label}>Opinion</span>
+              <p className={styles.fieldHint}>
+                This is the directional Whiteprint stance shown on public coverage cards.
+              </p>
               <select
                 className={styles.select}
                 name="opinion"
@@ -167,6 +188,9 @@ export function StanceForm({ linkedPosts, message, mode, stance, topics }: Stanc
             </label>
             <label className={styles.field}>
               <span className={styles.label}>Conviction</span>
+              <p className={styles.fieldHint}>
+                Use this to communicate confidence level, not upside size.
+              </p>
               <select
                 className={styles.select}
                 name="conviction"
@@ -182,6 +206,9 @@ export function StanceForm({ linkedPosts, message, mode, stance, topics }: Stanc
           <div className={styles.formGridTwo}>
             <label className={styles.field}>
               <span className={styles.label}>Coverage status</span>
+              <p className={styles.fieldHint}>
+                Active, monitoring, or expired drives the public status badge.
+              </p>
               <select
                 className={styles.select}
                 name="coverage_status"
@@ -194,6 +221,9 @@ export function StanceForm({ linkedPosts, message, mode, stance, topics }: Stanc
             </label>
             <label className={styles.field}>
               <span className={styles.label}>Scenario type</span>
+              <p className={styles.fieldHint}>
+                Choose the metric readers should see for bear, base, and bull values.
+              </p>
               <select
                 className={styles.select}
                 name="scenario_type"
@@ -207,6 +237,9 @@ export function StanceForm({ linkedPosts, message, mode, stance, topics }: Stanc
 
           <label className={styles.field}>
             <span className={styles.label}>Summary</span>
+            <p className={styles.fieldHint}>
+              Short internal summary for admin lists and quick scanning.
+            </p>
             <textarea
               className={styles.textarea}
               name="summary"
@@ -218,6 +251,9 @@ export function StanceForm({ linkedPosts, message, mode, stance, topics }: Stanc
 
           <label className={styles.field}>
             <span className={styles.label}>Public thesis</span>
+            <p className={styles.fieldHint}>
+              This is the exact thesis line shown on the public coverage page.
+            </p>
             <textarea
               className={styles.textarea}
               name="thesis"
@@ -229,6 +265,9 @@ export function StanceForm({ linkedPosts, message, mode, stance, topics }: Stanc
 
           <label className={styles.field}>
             <span className={styles.label}>Tags</span>
+            <p className={styles.fieldHint}>
+              One tag per line or comma-separated. These power filters and search shortcuts.
+            </p>
             <textarea
               className={styles.textarea}
               name="tags"
@@ -298,6 +337,9 @@ export function StanceForm({ linkedPosts, message, mode, stance, topics }: Stanc
 
           <label className={styles.field}>
             <span className={styles.label}>Internal body / notes</span>
+            <p className={styles.fieldHint}>
+              Use this for working notes, scenario context, and anything not meant for readers.
+            </p>
             <textarea
               className={styles.textareaTall}
               name="body"

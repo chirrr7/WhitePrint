@@ -22,18 +22,13 @@ export interface DashboardData {
     archived: number
     drafts: number
     inProgress: number
+    models: number
     published: number
     stances: number
   }
   editorialHealth: {
     unmanagedFilesystemPosts: FilesystemBacklogPost[]
   }
-  latestModels: Array<{
-    id: number
-    title: string
-    uploadedAt: string
-    version: string
-  }>
 }
 
 export interface PostListItem {
@@ -188,21 +183,17 @@ export async function getDashboardData(): Promise<DashboardData> {
     publishedPosts,
     archivedPosts,
     allPosts,
+    models,
     stances,
     inProgress,
-    latestModels,
   ] = await Promise.all([
     supabase.from('posts').select('id', { count: 'exact', head: true }).eq('status', 'draft'),
     supabase.from('posts').select('id', { count: 'exact', head: true }).eq('status', 'published'),
     supabase.from('posts').select('id', { count: 'exact', head: true }).eq('status', 'archived'),
     supabase.from('posts').select('slug'),
+    supabase.from('models').select('id', { count: 'exact', head: true }),
     supabase.from('stances').select('id', { count: 'exact', head: true }),
     supabase.from('in_progress_items').select('id', { count: 'exact', head: true }),
-    supabase
-      .from('models')
-      .select('id, title, version, uploaded_at')
-      .order('uploaded_at', { ascending: false })
-      .limit(5),
   ])
 
   return {
@@ -210,6 +201,7 @@ export async function getDashboardData(): Promise<DashboardData> {
       archived: archivedPosts.count ?? 0,
       drafts: draftPosts.count ?? 0,
       inProgress: inProgress.count ?? 0,
+      models: models.count ?? 0,
       published: publishedPosts.count ?? 0,
       stances: stances.count ?? 0,
     },
@@ -218,12 +210,6 @@ export async function getDashboardData(): Promise<DashboardData> {
         (allPosts.data ?? []).map((post) => post.slug),
       ),
     },
-    latestModels: (latestModels.data ?? []).map((model) => ({
-      id: model.id,
-      title: model.title,
-      uploadedAt: model.uploaded_at,
-      version: model.version,
-    })),
   }
 }
 

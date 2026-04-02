@@ -9,9 +9,9 @@ import { getAuthenticatedUser, requireAdminIdentity } from '@/lib/admin/auth'
 import {
   getAllFilesystemPostSlugs,
   getFilesystemMigrationPostBySlug,
+  getFilesystemMigrationPosts,
   getLegacyMigrationPosts,
   hasFilesystemPostSlug,
-  getFilesystemPosts,
 } from '@/lib/posts'
 import { aboutDefaults } from '@/lib/site-settings'
 import type { Json } from '@/lib/supabase/database.types'
@@ -380,30 +380,99 @@ async function addSuppressedFilesystemSlug(slug: string) {
   return error
 }
 
+async function ensureCoverageRecordForMigrationPost({
+  migrationPost,
+  topicId,
+}: {
+  migrationPost: ReturnType<typeof getFilesystemMigrationPostBySlug>
+  topicId: number
+}) {
+  if (!migrationPost.ticker || !migrationPost.stance) {
+    return null
+  }
+
+  const supabase = await createClient()
+  const payload = {
+    base: migrationPost.base,
+    bear: migrationPost.bear,
+    body: '',
+    bull: migrationPost.bull,
+    conviction: migrationPost.conviction ?? 'medium',
+    coverage_category: migrationPost.category,
+    coverage_status: migrationPost.status ?? 'active',
+    name: migrationPost.name ?? migrationPost.title,
+    opinion: migrationPost.stance,
+    published_at: migrationPost.publishedAt,
+    scenario_type: migrationPost.scenarioType ?? 'price',
+    slug: migrationPost.slug,
+    status: 'published' as const,
+    summary: migrationPost.summary,
+    tags: migrationPost.tags,
+    thesis: migrationPost.stanceThesis ?? migrationPost.summary,
+    ticker: migrationPost.ticker,
+    title: migrationPost.title,
+    topic_id: topicId,
+  }
+
+  const { data: existingStance } = await supabase
+    .from('stances')
+    .select('id')
+    .eq('slug', migrationPost.slug)
+    .maybeSingle()
+
+  const stanceQuery = existingStance
+    ? supabase.from('stances').update(payload).eq('id', existingStance.id).select('id').single()
+    : supabase.from('stances').insert(payload).select('id').single()
+
+  const { data: savedStance, error } = await stanceQuery
+
+  if (error || !savedStance) {
+    throw new Error(error?.message || `Unable to sync coverage for "${migrationPost.title}".`)
+  }
+
+  return savedStance.id
+}
+
 async function importFilesystemPost(slug: string) {
   const migrationPost = getFilesystemMigrationPostBySlug(slug)
   const topicId = await ensureTopicForCategory(migrationPost.category)
+  const stanceId = await ensureCoverageRecordForMigrationPost({
+    migrationPost,
+    topicId,
+  })
   const supabase = await createClient()
+  const { data: existingPost } = await supabase
+    .from('posts')
+    .select('featured, homepage, id, linked_model_id, stance_id')
+    .eq('slug', migrationPost.slug)
+    .maybeSingle()
   const payload = {
     body: migrationPost.bodyMdx,
     body_mdx: migrationPost.bodyMdx,
-    featured: false,
-    homepage: false,
+    featured: existingPost?.featured ?? false,
+    homepage: existingPost?.homepage ?? false,
+    linked_model_id: existingPost?.linked_model_id ?? null,
     published_at: migrationPost.publishedAt,
     slug: migrationPost.slug,
+    stance_id: stanceId ?? existingPost?.stance_id ?? null,
     status: 'published' as const,
     summary: migrationPost.summary,
     title: migrationPost.title,
     topic_id: topicId,
   }
 
-  let { error } = await supabase.from('posts').upsert(payload, { onConflict: 'slug' })
+  const postQuery = existingPost
+    ? supabase.from('posts').update(payload).eq('id', existingPost.id).select('id').single()
+    : supabase.from('posts').insert(payload).select('id').single()
+
+  let { error } = await postQuery
 
   if (isMissingBodyMdxColumn(error)) {
     const { body_mdx: _bodyMdx, ...fallbackPayload } = payload
-    const fallbackResult = await supabase
-      .from('posts')
-      .upsert(fallbackPayload, { onConflict: 'slug' })
+    const fallbackQuery = existingPost
+      ? supabase.from('posts').update(fallbackPayload).eq('id', existingPost.id)
+      : supabase.from('posts').insert(fallbackPayload)
+    const fallbackResult = await fallbackQuery
     error = fallbackResult.error
   }
 
@@ -423,8 +492,23 @@ async function importFilesystemPost(slug: string) {
     slugs: [migrationPost.slug],
     topicIds: [topicId],
   })
+  revalidatePath('/admin')
+  revalidatePath('/admin/posts')
+  revalidatePath('/admin/stances')
+  revalidatePath('/research')
+  revalidatePath('/stances')
 
   return migrationPost
+}
+
+async function syncFilesystemArchivePosts() {
+  const migrationPosts = getFilesystemMigrationPosts()
+
+  for (const migrationPost of migrationPosts) {
+    await importFilesystemPost(migrationPost.slug)
+  }
+
+  return migrationPosts
 }
 
 async function revalidatePublicPostSurfaces({
@@ -439,8 +523,10 @@ async function revalidatePublicPostSurfaces({
     '/macro',
     '/equity',
     '/market-notes',
+    '/research',
     '/search',
     '/rss.xml',
+    '/stances',
   ])
 
   slugs.forEach((slug) => {
@@ -602,6 +688,29 @@ export async function importFilesystemPostAction(formData: FormData) {
         '/admin/posts',
         'error',
         error instanceof Error ? error.message : 'Unable to import filesystem post.',
+      ),
+    )
+  }
+}
+
+export async function syncFilesystemArchiveAction() {
+  await requireAdminIdentity()
+
+  try {
+    const migrationPosts = await syncFilesystemArchivePosts()
+    redirect(
+      withMessage(
+        '/admin/posts',
+        'success',
+        `Synced ${migrationPosts.length} filesystem post${migrationPosts.length === 1 ? '' : 's'} into admin with coverage metadata where available.`,
+      ),
+    )
+  } catch (error) {
+    redirect(
+      withMessage(
+        '/admin/posts',
+        'error',
+        error instanceof Error ? error.message : 'Unable to sync the filesystem archive.',
       ),
     )
   }

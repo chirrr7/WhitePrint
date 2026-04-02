@@ -106,6 +106,20 @@ export interface LegacyMigrationPost {
   title: string
 }
 
+export interface FilesystemMigrationPost extends LegacyMigrationPost {
+  base: number | null
+  bear: number | null
+  bull: number | null
+  conviction: PostConviction | null
+  name: string | null
+  scenarioType: PostScenarioType | null
+  stance: PostStance | null
+  stanceThesis: string | null
+  status: PostStatus | null
+  tags: string[]
+  ticker: string | null
+}
+
 interface PostSource {
   fullPath: string
   fileName: string
@@ -262,15 +276,39 @@ function buildFilesystemPostMeta(source: PostSource): PostMeta {
 }
 
 function buildLegacyMigrationPost(source: PostSource): LegacyMigrationPost {
+  const migrationPost = buildFilesystemMigrationPost(source)
+
+  return {
+    bodyMdx: migrationPost.bodyMdx,
+    category: migrationPost.category,
+    publishedAt: migrationPost.publishedAt,
+    slug: migrationPost.slug,
+    summary: migrationPost.summary,
+    title: migrationPost.title,
+  }
+}
+
+function buildFilesystemMigrationPost(source: PostSource): FilesystemMigrationPost {
   const { frontmatter } = readPostSourceData(source)
   const slugFromFile = source.fileName.replace(/\.(md|mdx)$/, "")
 
   return {
     bodyMdx: readRawPostSource(source),
+    base: frontmatter.base ?? null,
+    bear: frontmatter.bear ?? null,
+    bull: frontmatter.bull ?? null,
     category: frontmatter.category,
+    conviction: frontmatter.conviction ?? null,
+    name: frontmatter.name ?? null,
     publishedAt: new Date(`${frontmatter.date}T00:00:00.000Z`).toISOString(),
+    scenarioType: frontmatter.scenarioType ?? null,
     slug: frontmatter.slug ?? slugFromFile,
+    stance: frontmatter.stance ?? null,
+    stanceThesis: frontmatter.stanceThesis ?? null,
+    status: frontmatter.status ?? null,
     summary: frontmatter.excerpt,
+    tags: frontmatter.tags,
+    ticker: frontmatter.ticker ?? null,
     title: frontmatter.title,
   }
 }
@@ -721,14 +759,30 @@ export function getLegacyMigrationPosts(
   })
 }
 
-export function getFilesystemMigrationPostBySlug(slug: string): LegacyMigrationPost {
+export function getFilesystemMigrationPosts(slugs?: readonly string[]): FilesystemMigrationPost[] {
+  const sourceSlugs =
+    slugs ??
+    getFilesystemPostSources().map((source) => source.fileName.replace(/\.(md|mdx)$/, ""))
+
+  return sourceSlugs.map((slug) => {
+    const source = getFilesystemPostSourceBySlug(slug)
+
+    if (!source) {
+      throw new Error(`Could not find legacy post source for slug "${slug}".`)
+    }
+
+    return buildFilesystemMigrationPost(source)
+  })
+}
+
+export function getFilesystemMigrationPostBySlug(slug: string): FilesystemMigrationPost {
   const source = getFilesystemPostSourceBySlug(slug)
 
   if (!source) {
     throw new Error(`Could not find legacy post source for slug "${slug}".`)
   }
 
-  return buildLegacyMigrationPost(source)
+  return buildFilesystemMigrationPost(source)
 }
 
 export async function getAllPosts(): Promise<PostMeta[]> {
