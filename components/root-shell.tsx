@@ -52,7 +52,12 @@ export function RootShell({ children }: RootShellProps) {
 
   return (
     <>
-      <NextTopLoader color="var(--accent)" showSpinner={false} height={2} shadow="0 0 10px var(--accent),0 0 5px var(--accent)" />
+      <NextTopLoader 
+        color="var(--accent)" 
+        showSpinner={false} 
+        height={2} 
+        shadow="0 0 10px var(--accent),0 0 5px var(--accent)" 
+      />
       <div className={forceMobilePreview ? 'force-mobile-preview mobile-preview-shell' : undefined}>
         <div className={forceMobilePreview ? 'mobile-preview-phone' : undefined}>
           <div className="desktop-only">
