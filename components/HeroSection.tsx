@@ -9,17 +9,18 @@ const ANNOTATION_IDS = ["ann0", "ann1", "ann2", "ann3"] as const
 
 const timings = [
   { delay: 100, action: "document" },
-  { delay: 1500, action: "ann0" },
-  { delay: 1900, action: "note0" },
-  { delay: 2400, action: "ann1" },
-  { delay: 2800, action: "note1" },
-  { delay: 3000, action: "circle" },
-  { delay: 3400, action: "note2" },
-  { delay: 3800, action: "ann3" },
-  { delay: 4200, action: "note3" },
-  { delay: 5500, action: "dim" }, 
-  { delay: 6000, action: "hint" },
-  { delay: 6400, action: "replay" },
+  { delay: 500, action: "ann0" },
+  { delay: 700, action: "note0" },
+  { delay: 950, action: "ann1" },
+  { delay: 1150, action: "note1" },
+  { delay: 1350, action: "circle" },
+  { delay: 1550, action: "note2" },
+  { delay: 1750, action: "ann3" },
+  { delay: 1950, action: "note3" },
+  { delay: 2300, action: "dim" },
+  { delay: 2500, action: "tagline" },
+  { delay: 3000, action: "hint" },
+  { delay: 3400, action: "replay" },
 ] as const
 
 type ActionName = (typeof timings)[number]["action"]
@@ -50,7 +51,7 @@ const initialState: HeroState = {
   },
   showHint: false,
   showReplay: false,
-  showTagline: true, // Visible from the start for LCP
+  showTagline: false,
   dimDocument: false,
 }
 
