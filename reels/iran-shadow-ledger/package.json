@@ -1,0 +1,28 @@
+{
+  "name": "iran-shadow-ledger-reel",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "prepare:assets": "node scripts/prepare-assets.mjs",
+    "generate:voiceover": "node scripts/generate-voiceover.mjs",
+    "studio": "remotion studio src/index.ts",
+    "render": "remotion render src/index.ts IranShadowLedger out/iran-shadow-ledger.mp4 --codec=h264",
+    "render:preview": "remotion render src/index.ts IranShadowLedger out/iran-shadow-ledger-preview.mp4 --codec=h264 --scale=0.5"
+  },
+  "dependencies": {
+    "@fontsource/jetbrains-mono": "latest",
+    "@fontsource/playfair-display": "latest",
+    "@fontsource/source-serif-4": "latest",
+    "@remotion/cli": "latest",
+    "@remotion/media": "latest",
+    "mediabunny": "latest",
+    "react": "latest",
+    "react-dom": "latest",
+    "remotion": "latest"
+  },
+  "devDependencies": {
+    "@types/node": "latest",
+    "@types/react": "latest",
+    "typescript": "latest"
+  }
+}

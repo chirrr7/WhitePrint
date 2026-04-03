@@ -11,7 +11,7 @@ import {
   type PostStatus,
 } from "@/lib/post-meta"
 import type { Database } from "@/lib/supabase/database.types"
-import { createClient } from "@/lib/supabase/server"
+import { createPublicClient } from "@/lib/supabase/public"
 
 type StanceRow = Database["public"]["Tables"]["stances"]["Row"]
 
@@ -138,7 +138,7 @@ function mapPostsToStances(posts: PostMeta[]): Stance[] {
 }
 
 async function getPublishedLinkedPosts() {
-  const supabase = await createClient()
+  const supabase = createPublicClient()
   const { data, error } = await supabase
     .from("posts")
     .select("stance_id, slug, title, published_at, updated_at")
@@ -169,7 +169,7 @@ async function getPublishedLinkedPosts() {
 }
 
 async function getDatabaseStances(posts: PostMeta[]) {
-  const supabase = await createClient()
+  const supabase = createPublicClient()
   const { data, error } = await supabase
     .from("stances")
     .select("*")

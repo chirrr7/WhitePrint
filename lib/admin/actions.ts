@@ -1097,6 +1097,7 @@ export async function saveInProgressItemAction(formData: FormData) {
   const body = readString(formData, 'body')
   const status = inProgressStatusSchema.safeParse(readString(formData, 'status'))
   const priority = readOptionalNumber(formData, 'priority') ?? 0
+  const redacted = formData.get('redacted') === 'true'
 
   if (!title || !slug || !status.success) {
     redirect(
@@ -1108,6 +1109,7 @@ export async function saveInProgressItemAction(formData: FormData) {
   const payload = {
     body,
     priority,
+    redacted,
     slug,
     status: status.data,
     summary,

@@ -1,0 +1,52 @@
+{
+  "generatedAt": "2026-03-28T12:09:57.868Z",
+  "voiceId": "fIdR6vJWGZypitdCsqgC",
+  "modelId": "eleven_multilingual_v2",
+  "scenes": [
+    {
+      "sceneId": "opening-title",
+      "fileName": "01-opening-title.mp3",
+      "skipped": true
+    },
+    {
+      "sceneId": "sanctions",
+      "fileName": "02-sanctions.mp3",
+      "skipped": true
+    },
+    {
+      "sceneId": "parallel-state",
+      "fileName": "03-parallel-state.mp3",
+      "skipped": true
+    },
+    {
+      "sceneId": "yuan-flow",
+      "fileName": "04-yuan-flow.mp3",
+      "skipped": true
+    },
+    {
+      "sceneId": "parallel-system",
+      "fileName": "05-parallel-system.mp3",
+      "skipped": true
+    },
+    {
+      "sceneId": "ghost-fleet",
+      "fileName": "06-ghost-fleet.mp3",
+      "skipped": true
+    },
+    {
+      "sceneId": "china-shandong",
+      "fileName": "07-china-shandong.mp3",
+      "skipped": true
+    },
+    {
+      "sceneId": "first-strike",
+      "fileName": "08-first-strike.mp3",
+      "skipped": false
+    },
+    {
+      "sceneId": "strait-of-hormuz",
+      "fileName": "09-strait-of-hormuz.mp3",
+      "skipped": false
+    }
+  ]
+}

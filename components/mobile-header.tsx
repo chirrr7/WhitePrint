@@ -36,15 +36,14 @@ export function MobileHeader() {
           height: 44,
         }}
       >
-        <button
-          onClick={() => setOpen(!open)}
+        <Link
+          href={withMobilePreviewHref("/", forceMobilePreview)}
           style={{
-            background: "none",
-            border: "none",
-            cursor: "pointer",
-            padding: 0,
+            textDecoration: "none",
+            WebkitTapHighlightColor: "transparent",
+            display: "flex",
+            alignItems: "center",
           }}
-          aria-label={open ? "Close menu" : "Open menu"}
         >
           <span
             style={{
@@ -60,6 +59,28 @@ export function MobileHeader() {
               Research
             </em>
           </span>
+        </Link>
+
+        {/* Dedicated Menu Toggle */}
+        <button
+          onClick={() => setOpen(!open)}
+          style={{
+            marginLeft: "auto",
+            background: "none",
+            border: "none",
+            cursor: "pointer",
+            padding: "8px",
+            color: "var(--mobile-chrome-fg)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+          aria-label={open ? "Close menu" : "Open menu"}
+        >
+          <div style={{ width: 20, display: "flex", flexDirection: "column", gap: 4 }}>
+            <div style={{ height: 1.5, background: "currentColor", width: "100%" }} />
+            <div style={{ height: 1.5, background: "currentColor", width: "100%" }} />
+          </div>
         </button>
       </header>
 
@@ -117,6 +138,7 @@ export function MobileHeader() {
 
           <nav style={{ display: "flex", flexDirection: "column", gap: 32 }}>
             {[
+              { href: "/", label: "Home" },
               { href: "/about", label: "About" },
               { href: "/search", label: "Search" },
               { href: "/stances", label: "Coverage" },

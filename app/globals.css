@@ -85,80 +85,65 @@
   --mobile-coverage-intro-bg: rgba(255, 255, 255, 0.96);
 }
 
-@media (max-width: 768px) and (prefers-color-scheme: dark) {
-  :root {
-    color-scheme: dark;
-    --background: #0c0c0d;
-    --surface: #121212;
-    --foreground: #f5f2eb;
-    --card: #121212;
-    --card-foreground: #f5f2eb;
-    --popover: #121212;
-    --popover-foreground: #f5f2eb;
-    --primary: #f5f2eb;
-    --primary-foreground: #0c0c0d;
-    --secondary: #181716;
-    --secondary-foreground: #f5f2eb;
-    --muted: #181716;
-    --muted-foreground: #b8b0a3;
-    --accent: #d25448;
-    --accent-foreground: #0c0c0d;
-    --destructive: #d25448;
-    --destructive-foreground: #0c0c0d;
-    --border: #2d2a25;
-    --input: #2d2a25;
-    --ring: #f5f2eb;
-    --chart-1: oklch(0.88 0 0);
-    --chart-2: oklch(0.68 0 0);
-    --chart-3: oklch(0.5 0 0);
-    --chart-4: oklch(0.34 0 0);
-    --chart-5: oklch(0.24 0 0);
-    --sidebar: #121212;
-    --sidebar-foreground: #f5f2eb;
-    --sidebar-primary: #f5f2eb;
-    --sidebar-primary-foreground: #0c0c0d;
-    --sidebar-accent: #181716;
-    --sidebar-accent-foreground: #f5f2eb;
-    --sidebar-border: #2d2a25;
-    --sidebar-ring: #f5f2eb;
-    --mobile-chrome-bg: #080808;
-    --mobile-chrome-fg: #f5f2eb;
-    --mobile-chrome-muted: rgba(245, 242, 235, 0.5);
-    --mobile-chrome-subtle: rgba(245, 242, 235, 0.14);
-    --mobile-chrome-border: rgba(245, 242, 235, 0.08);
-    --mobile-page-bg: #0a0a0a;
-    --mobile-page-fg: #f5f2eb;
-    --mobile-page-muted: rgba(245, 242, 235, 0.42);
-    --mobile-page-subtle: rgba(245, 242, 235, 0.18);
-    --mobile-page-line: rgba(245, 242, 235, 0.06);
-    --mobile-overlay-bg: #080808;
-    --mobile-landing-bg: #080808;
-    --mobile-landing-fg: #f5f2eb;
-    --mobile-landing-muted: rgba(245, 242, 235, 0.58);
-    --mobile-landing-soft: rgba(245, 242, 235, 0.2);
-    --mobile-landing-border: rgba(245, 242, 235, 0.08);
-    --mobile-card-line-strong: rgba(245, 242, 235, 0.1);
-    --mobile-card-line-medium: rgba(245, 242, 235, 0.07);
-    --mobile-card-line-soft: rgba(245, 242, 235, 0.05);
-    --mobile-panel-bg: #141311;
-    --mobile-panel-alt-bg: #181614;
-    --mobile-panel-fg: #f5f2eb;
-    --mobile-panel-muted: #b8b0a3;
-    --mobile-panel-border: #2d2a25;
-    --mobile-panel-border-alt: #34302b;
-    --mobile-cta-bg: #f5f2eb;
-    --mobile-cta-fg: #111111;
-    --mobile-shadow: none;
-    --mobile-shadow-active: none;
-    --mobile-coverage-page-bg: #0b0b0b;
-    --mobile-coverage-hero-bg: #080808;
-    --mobile-coverage-hero-text: #f5f2eb;
-    --mobile-coverage-hero-muted: rgba(245, 242, 235, 0.72);
-    --mobile-coverage-panel-bg: rgba(255, 255, 255, 0.04);
-    --mobile-coverage-panel-border: rgba(255, 255, 255, 0.08);
-    --mobile-coverage-body-start: #0a0a0a;
-    --mobile-coverage-intro-bg: rgba(18, 18, 18, 0.96);
-  }
+
+
+/* Force dark mode via ?dark=1 query param */
+:root.force-dark {
+  color-scheme: dark;
+  --background: #0c0c0d;
+  --surface: #121212;
+  --foreground: #f5f2eb;
+  --card: #121212;
+  --card-foreground: #f5f2eb;
+  --popover: #121212;
+  --popover-foreground: #f5f2eb;
+  --primary: #f5f2eb;
+  --primary-foreground: #0c0c0d;
+  --secondary: #181716;
+  --secondary-foreground: #f5f2eb;
+  --muted: #181716;
+  --muted-foreground: #b8b0a3;
+  --accent: #d25448;
+  --accent-foreground: #0c0c0d;
+  --destructive: #d25448;
+  --destructive-foreground: #0c0c0d;
+  --border: #2d2a25;
+  --input: #2d2a25;
+  --ring: #f5f2eb;
+  --mobile-chrome-bg: #080808;
+  --mobile-chrome-fg: #f5f2eb;
+  --mobile-chrome-muted: rgba(245, 242, 235, 0.5);
+  --mobile-chrome-subtle: rgba(245, 242, 235, 0.14);
+  --mobile-chrome-border: rgba(245, 242, 235, 0.08);
+  --mobile-page-bg: #0a0a0a;
+  --mobile-page-fg: #f5f2eb;
+  --mobile-page-muted: rgba(245, 242, 235, 0.42);
+  --mobile-page-subtle: rgba(245, 242, 235, 0.18);
+  --mobile-page-line: rgba(245, 242, 235, 0.06);
+  --mobile-overlay-bg: #080808;
+  --mobile-landing-bg: #080808;
+  --mobile-landing-fg: #f5f2eb;
+  --mobile-landing-muted: rgba(245, 242, 235, 0.58);
+  --mobile-landing-soft: rgba(245, 242, 235, 0.2);
+  --mobile-landing-border: rgba(245, 242, 235, 0.08);
+  --mobile-panel-bg: #141311;
+  --mobile-panel-alt-bg: #181614;
+  --mobile-panel-fg: #f5f2eb;
+  --mobile-panel-muted: #b8b0a3;
+  --mobile-panel-border: #2d2a25;
+  --mobile-panel-border-alt: #34302b;
+  --mobile-cta-bg: #f5f2eb;
+  --mobile-cta-fg: #111111;
+  --mobile-shadow: none;
+  --mobile-shadow-active: none;
+  --mobile-coverage-page-bg: #0b0b0b;
+  --mobile-coverage-hero-bg: #080808;
+  --mobile-coverage-hero-text: #f5f2eb;
+  --mobile-coverage-hero-muted: rgba(245, 242, 235, 0.72);
+  --mobile-coverage-panel-bg: rgba(255, 255, 255, 0.04);
+  --mobile-coverage-panel-border: rgba(255, 255, 255, 0.08);
+  --mobile-coverage-body-start: #0a0a0a;
+  --mobile-coverage-intro-bg: rgba(18, 18, 18, 0.96);
 }
 
 @theme inline {
@@ -294,6 +279,22 @@ body::-webkit-scrollbar-thumb:hover {
 }
 .prose hr {
   @apply border-border my-8;
+}
+.prose table {
+  @apply w-full text-sm text-foreground overflow-x-auto block whitespace-nowrap;
+  border-collapse: collapse;
+}
+.prose thead {
+  @apply border-b border-border bg-secondary/50 text-foreground text-left;
+}
+.prose th, .prose td {
+  @apply p-3 border-b border-border;
+}
+.prose tbody tr:nth-child(even) {
+  @apply bg-muted/20;
+}
+.prose tbody tr:hover {
+  @apply bg-muted/40;
 }
 
 .wp-nav {
@@ -776,3 +777,39 @@ body::-webkit-scrollbar-thumb:hover {
     right: 32px;
   }
 }
+
+/* "Shooting Bullet" Loader for Desktop */
+@media (min-width: 769px) {
+  #nprogress .bar {
+    top: 50% !important;
+    height: 1px !important;
+    background: rgba(255, 255, 255, 0.1) !important;
+    box-shadow: none !important;
+    opacity: 0;
+    animation: nprogress-fade-in 0s linear 300ms forwards !important;
+  }
+  
+  #nprogress .bar::after {
+    content: "";
+    position: absolute;
+    right: 0px;
+    top: -5px;
+    width: 10px;
+    height: 10px;
+    background: var(--accent);
+    border-radius: 50%;
+    box-shadow: 0 0 10px var(--accent), 0 0 20px var(--accent);
+    transform: none !important;
+  }
+
+  /* Hide centered static bullet from previous version */
+  #nprogress::after {
+    display: none !important;
+  }
+}
+
+@keyframes nprogress-fade-in {
+  to { opacity: 1; }
+}
+
+

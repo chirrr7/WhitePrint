@@ -676,8 +676,7 @@
     max-width: 100vw !important;
   }
 
-  *:not(.mobile-article-viewer):not(.mobile-article-viewer *) {
-    max-width: 100vw;
+  *, *::before, *::after {
     box-sizing: border-box;
   }
 

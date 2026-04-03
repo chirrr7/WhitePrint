@@ -12,6 +12,7 @@ const playfair = Playfair_Display({
   weight: ['400', '600', '700', '900'],
   style: ['normal', 'italic'],
   variable: '--font-display',
+  display: 'swap',
 })
 
 const sourceSerif = Source_Serif_4({
@@ -19,12 +20,14 @@ const sourceSerif = Source_Serif_4({
   weight: ['300', '400'],
   style: ['normal', 'italic'],
   variable: '--font-serif',
+  display: 'swap',
 })
 
 const jetbrainsMono = JetBrains_Mono({
   subsets: ['latin'],
   weight: ['300', '400', '500'],
   variable: '--font-mono',
+  display: 'swap',
 })
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -74,6 +77,8 @@ export default function RootLayout({
     >
       <head>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link rel="manifest" href="/manifest.json" />
         <meta
           name="theme-color"

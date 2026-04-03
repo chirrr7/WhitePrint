@@ -1,0 +1,88 @@
+[
+  {
+    "id": "opening-title",
+    "kind": "title",
+    "minSeconds": 3.5,
+    "headlineLines": ["IRAN", "SHADOW", "LEDGER"],
+    "headlineColors": ["#239f40", "#f7f6f3", "#da0000"],
+    "voiceover": "Sanctions did not stop Iran's oil trade. They changed its shape."
+  },
+  {
+    "id": "sanctions",
+    "kind": "sanctions",
+    "minSeconds": 4.5,
+    "eyebrow": "Formal Dollar System",
+    "headlineLines": ["SANCTIONS"],
+    "supportLines": ["Payments blocked", "Routes rerouted"],
+    "voiceover": "Locked out of the formal dollar system, Iran built a parallel financial state."
+  },
+  {
+    "id": "parallel-state",
+    "kind": "parallel-state",
+    "minSeconds": 4.5,
+    "eyebrow": "Shadow Infrastructure",
+    "headlineLines": ["PARALLEL", "STATE"],
+    "supportLines": ["Foundations", "Front companies", "Quasi-state networks"],
+    "voiceover": "Power moved through foundations, front companies, and quasi-state networks outside Western surveillance."
+  },
+  {
+    "id": "yuan-flow",
+    "kind": "yuan-flow",
+    "minSeconds": 3.5,
+    "eyebrow": "Settlement Rail",
+    "headlineLines": ["YUAN,", "NOT DOLLARS"],
+    "voiceover": "A large share settled in yuan, not dollars."
+  },
+  {
+    "id": "parallel-system",
+    "kind": "parallel-system",
+    "minSeconds": 4.5,
+    "eyebrow": "Corporate Mesh",
+    "headlineLines": ["PARALLEL", "SYSTEM"],
+    "supportLines": ["Fronts", "Construction", "Conglomerates"],
+    "voiceover": "This was not one company or one shipment. It was a parallel system."
+  },
+  {
+    "id": "ghost-fleet",
+    "kind": "ghost-fleet",
+    "minSeconds": 5.5,
+    "eyebrow": "Sea Lane Ledger",
+    "headlineLines": ["1.3–1.6M", "BPD"],
+    "supportLines": ["400–430 dark tankers"],
+    "voiceover": "Iran moved roughly 1.3 to 1.6 million barrels a day through a ghost fleet of 400 to 430 dark tankers."
+  },
+  {
+    "id": "china-shandong",
+    "kind": "china-shandong",
+    "minSeconds": 5.0,
+    "eyebrow": "Receiving Basin",
+    "headlineLines": ["SHANDONG"],
+    "supportLines": ["Teapot refineries"],
+    "voiceover": "Those barrels routed into Chinese teapot refineries in Shandong."
+  },
+  {
+    "id": "first-strike",
+    "kind": "first-strike",
+    "minSeconds": 3.5,
+    "headlineLines": ["FIRST", "STRIKE"],
+    "voiceover": "Then came the first strike — giving Iran a reason to choke the global economy."
+  },
+  {
+    "id": "strait-of-hormuz",
+    "kind": "strait-of-hormuz",
+    "minSeconds": 5.0,
+    "eyebrow": "The Chokepoint",
+    "headlineLines": ["STRAIT OF", "HORMUZ"],
+    "supportLines": ["21% OF GLOBAL OIL SUPPLY", "39 KM AT NARROWEST"],
+    "voiceover": "Twenty percent of global oil moves through this strait. We find out the consequences in the next part."
+  },
+  {
+    "id": "end-title",
+    "kind": "end-title",
+    "minSeconds": 4.5,
+    "eyebrow": "Whiteprint Research",
+    "headlineLines": ["THE FIRST", "BODY OF EIGHT"],
+    "supportLines": ["8 BODY PROBLEM", "PART 2 · COMING SOON"],
+    "headlineColors": ["#f7f6f3", "#f7f6f3"]
+  }
+]

@@ -1,5 +1,6 @@
 import "server-only"
 
+import { unstable_cache } from "next/cache"
 import type { PostMeta } from "@/lib/post-meta"
 import { getAllPosts } from "@/lib/posts"
 import {
@@ -11,7 +12,7 @@ import {
   type HomepageSettings,
 } from "@/lib/site-settings"
 import { type Stance, getCoverageStances } from "@/lib/stances"
-import { createClient } from "@/lib/supabase/server"
+import { createPublicClient } from "@/lib/supabase/public"
 import type { Database, Json } from "@/lib/supabase/database.types"
 
 type DeskBriefRow = Database["public"]["Tables"]["desk_brief"]["Row"]
@@ -41,6 +42,7 @@ export interface PublicDocketItem {
   format: string | null
   hook: string | null
   id: string
+  redacted: boolean
   statusLabel: string | null
   statusTone: "active" | "drafting" | "research"
   subtitle: string | null
@@ -49,7 +51,7 @@ export interface PublicDocketItem {
 }
 
 async function getSiteSettingValue(key: string) {
-  const supabase = await createClient()
+  const supabase = createPublicClient()
   const { data, error } = await supabase.from("site_settings").select("value").eq("key", key).maybeSingle()
 
   if (error) {
@@ -118,7 +120,7 @@ function chooseLeadPost(posts: PostMeta[], settings: HomepageSettings) {
 }
 
 async function getDeskBriefItems(): Promise<PublicDeskBrief[]> {
-  const supabase = await createClient()
+  const supabase = createPublicClient()
   const { data, error } = await supabase
     .from("desk_brief")
     .select("id, label, badge, body, sort_order, visible")
@@ -159,8 +161,9 @@ function mapInProgressItem(item: InProgressRow): PublicDocketItem {
     categoryLabels: [],
     codename: item.slug.replace(/-/g, " ").toUpperCase(),
     format: null,
-    hook: item.summary || null,
+    hook: item.redacted ? null : (item.summary || null),
     id: `in-progress-${item.id}`,
+    redacted: item.redacted,
     statusLabel:
       normalizedStatus === "done"
         ? "Ready"
@@ -171,7 +174,7 @@ function mapInProgressItem(item: InProgressRow): PublicDocketItem {
         : normalizedStatus === "done"
           ? "drafting"
           : "research",
-    subtitle: item.summary || null,
+    subtitle: item.redacted ? null : (item.summary || null),
     title: item.title,
     updatedLabel: formatMonthLabel(item.updated_at),
   }
@@ -182,8 +185,9 @@ function mapLegacyPipelineItem(item: LegacyPipelineRow): PublicDocketItem {
     categoryLabels: (item.category ?? []) as string[],
     codename: item.codename,
     format: item.format,
-    hook: item.hook,
+    hook: item.redacted ? null : item.hook,
     id: `pipeline-${item.id}`,
+    redacted: item.redacted,
     statusLabel: item.status,
     statusTone:
       item.status_type === "active"
@@ -191,25 +195,31 @@ function mapLegacyPipelineItem(item: LegacyPipelineRow): PublicDocketItem {
         : item.status_type === "drafting"
           ? "drafting"
           : "research",
-    subtitle: item.subtitle,
+    subtitle: item.redacted ? null : item.subtitle,
     title: item.codename,
     updatedLabel: item.last_updated,
   }
 }
 
-export async function getPublicHomepageSettings() {
-  return normalizeHomepageSettings(await getSiteSettingValue("homepage"))
-}
+export const getPublicHomepageSettings = unstable_cache(
+  async () => normalizeHomepageSettings(await getSiteSettingValue("homepage")),
+  ["public-homepage-settings"],
+  { revalidate: 60 },
+)
 
-export async function getPublicGeneralSettings() {
-  return normalizeGeneralSettings(await getSiteSettingValue("general"))
-}
+export const getPublicGeneralSettings = unstable_cache(
+  async () => normalizeGeneralSettings(await getSiteSettingValue("general")),
+  ["public-general-settings"],
+  { revalidate: 60 },
+)
 
-export async function getPublicAboutSettings(): Promise<AboutSettings> {
-  return normalizeAboutSettings(await getSiteSettingValue("about"))
-}
+export const getPublicAboutSettings: () => Promise<AboutSettings> = unstable_cache(
+  async () => normalizeAboutSettings(await getSiteSettingValue("about")),
+  ["public-about-settings"],
+  { revalidate: 60 },
+)
 
-export async function getHomepageContentData(): Promise<HomepageContentData> {
+async function _getHomepageContentData(): Promise<HomepageContentData> {
   const [settings, posts, stances, deskBriefItems] = await Promise.all([
     getPublicHomepageSettings(),
     getAllPosts(),
@@ -243,11 +253,17 @@ export async function getHomepageContentData(): Promise<HomepageContentData> {
   }
 }
 
-export async function getPublicDocketItems(): Promise<PublicDocketItem[]> {
-  const supabase = await createClient()
+export const getHomepageContentData = unstable_cache(
+  _getHomepageContentData,
+  ["homepage-content-data"],
+  { revalidate: 60 },
+)
+
+async function _getPublicDocketItems(): Promise<PublicDocketItem[]> {
+  const supabase = createPublicClient()
   const { data: inProgressItems, error: inProgressError } = await supabase
     .from("in_progress_items")
-    .select("id, title, slug, summary, body, status, priority, updated_at")
+    .select("id, title, slug, summary, body, status, priority, redacted, updated_at")
     .order("priority", { ascending: false })
     .order("updated_at", { ascending: false })
 
@@ -273,3 +289,9 @@ export async function getPublicDocketItems(): Promise<PublicDocketItem[]> {
 
   return ((legacyItems ?? []) as LegacyPipelineRow[]).map(mapLegacyPipelineItem)
 }
+
+export const getPublicDocketItems = unstable_cache(
+  _getPublicDocketItems,
+  ["public-docket-items"],
+  { revalidate: 60 },
+)
