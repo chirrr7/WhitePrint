@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { Suspense } from 'react'
 import { JetBrains_Mono, Playfair_Display, Source_Serif_4 } from 'next/font/google'
+import { SpeedInsights } from '@vercel/speed-insights/next'
 import { RootShell } from '@/components/root-shell'
 import { getPublicGeneralSettings } from '@/lib/public-site'
 import { SEO_CONFIG } from '@/lib/seo.config'
@@ -96,6 +97,7 @@ export default function RootLayout({
         <Suspense fallback={<main>{children}</main>}>
           <RootShell>{children}</RootShell>
         </Suspense>
+        <SpeedInsights />
       </body>
     </html>
   )
