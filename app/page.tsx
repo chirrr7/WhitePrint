@@ -1,5 +1,4 @@
 import type { Metadata } from "next"
-import { headers } from "next/headers"
 import { HeroSection } from "@/components/HeroSection"
 import { MobileHome } from "@/components/mobile-home"
 import { PipelineDocket } from "@/components/PipelineDocket"
@@ -32,10 +31,7 @@ interface HomePageProps {
 export default async function HomePage({ searchParams }: HomePageProps) {
   const resolvedSearchParams = searchParams ? await searchParams : {}
   const forceMobilePreview = isMobilePreviewEnabled(resolvedSearchParams.mobile)
-  const userAgent = (await headers()).get("user-agent") ?? ""
-  const isMobileRequest = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Mobile/i.test(
-    userAgent,
-  )
+  
   const [generalSettings, homepageData] = await Promise.all([
     getPublicGeneralSettings(),
     getHomepageContentData(),
@@ -43,7 +39,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
 
   return (
     <>
-      {homepageData.leadPost && (isMobileRequest || forceMobilePreview) ? (
+      {homepageData.leadPost ? (
         <MobileHome
           briefs={homepageData.mobileBriefPosts}
           featured={homepageData.leadPost}
