@@ -140,6 +140,7 @@ export interface InProgressEditorData {
     body: string
     id: number
     priority: number
+    redacted: boolean
     slug: string
     status: string
     summary: string
@@ -476,7 +477,7 @@ export async function getInProgressEditorData(id?: number): Promise<InProgressEd
   const itemResult = id
     ? await supabase
         .from('in_progress_items')
-        .select('id, title, slug, summary, body, status, priority')
+        .select('id, title, slug, summary, body, status, priority, redacted')
         .eq('id', id)
         .maybeSingle()
     : { data: null }
@@ -487,6 +488,7 @@ export async function getInProgressEditorData(id?: number): Promise<InProgressEd
           body: itemResult.data.body ?? '',
           id: itemResult.data.id,
           priority: itemResult.data.priority ?? 0,
+          redacted: itemResult.data.redacted ?? false,
           slug: itemResult.data.slug,
           status: itemResult.data.status,
           summary: itemResult.data.summary,

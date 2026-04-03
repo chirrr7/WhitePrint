@@ -88,6 +88,21 @@ export function InProgressForm({ item, message, mode }: InProgressFormProps) {
           </div>
 
           <label className={styles.field}>
+            <span className={styles.label}>Redacted on public docket</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', paddingTop: '6px' }}>
+              <input
+                type="checkbox"
+                name="redacted"
+                value="true"
+                defaultChecked={item?.redacted ?? false}
+              />
+              <span style={{ fontSize: '13px', color: 'inherit', opacity: 0.6 }}>
+                Hide title and details from public — only status badge and codename will show.
+              </span>
+            </div>
+          </label>
+
+          <label className={styles.field}>
             <span className={styles.label}>Summary</span>
             <textarea
               className={styles.textarea}

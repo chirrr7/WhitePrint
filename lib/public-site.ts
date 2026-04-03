@@ -42,6 +42,7 @@ export interface PublicDocketItem {
   format: string | null
   hook: string | null
   id: string
+  redacted: boolean
   statusLabel: string | null
   statusTone: "active" | "drafting" | "research"
   subtitle: string | null
@@ -160,8 +161,9 @@ function mapInProgressItem(item: InProgressRow): PublicDocketItem {
     categoryLabels: [],
     codename: item.slug.replace(/-/g, " ").toUpperCase(),
     format: null,
-    hook: item.summary || null,
+    hook: item.redacted ? null : (item.summary || null),
     id: `in-progress-${item.id}`,
+    redacted: item.redacted,
     statusLabel:
       normalizedStatus === "done"
         ? "Ready"
@@ -172,7 +174,7 @@ function mapInProgressItem(item: InProgressRow): PublicDocketItem {
         : normalizedStatus === "done"
           ? "drafting"
           : "research",
-    subtitle: item.summary || null,
+    subtitle: item.redacted ? null : (item.summary || null),
     title: item.title,
     updatedLabel: formatMonthLabel(item.updated_at),
   }
@@ -183,8 +185,9 @@ function mapLegacyPipelineItem(item: LegacyPipelineRow): PublicDocketItem {
     categoryLabels: (item.category ?? []) as string[],
     codename: item.codename,
     format: item.format,
-    hook: item.hook,
+    hook: item.redacted ? null : item.hook,
     id: `pipeline-${item.id}`,
+    redacted: item.redacted,
     statusLabel: item.status,
     statusTone:
       item.status_type === "active"
@@ -192,7 +195,7 @@ function mapLegacyPipelineItem(item: LegacyPipelineRow): PublicDocketItem {
         : item.status_type === "drafting"
           ? "drafting"
           : "research",
-    subtitle: item.subtitle,
+    subtitle: item.redacted ? null : item.subtitle,
     title: item.codename,
     updatedLabel: item.last_updated,
   }
@@ -260,7 +263,7 @@ async function _getPublicDocketItems(): Promise<PublicDocketItem[]> {
   const supabase = createPublicClient()
   const { data: inProgressItems, error: inProgressError } = await supabase
     .from("in_progress_items")
-    .select("id, title, slug, summary, body, status, priority, updated_at")
+    .select("id, title, slug, summary, body, status, priority, redacted, updated_at")
     .order("priority", { ascending: false })
     .order("updated_at", { ascending: false })
 

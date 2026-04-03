@@ -75,6 +75,7 @@ export interface Database {
           created_at: string
           id: number
           priority: number
+          redacted: boolean
           slug: string
           status: string
           summary: string
@@ -86,6 +87,7 @@ export interface Database {
           created_at?: string
           id?: number
           priority?: number
+          redacted?: boolean
           slug: string
           status?: string
           summary?: string
@@ -97,6 +99,7 @@ export interface Database {
           created_at?: string
           id?: number
           priority?: number
+          redacted?: boolean
           slug?: string
           status?: string
           summary?: string
