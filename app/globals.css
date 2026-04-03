@@ -785,6 +785,8 @@ body::-webkit-scrollbar-thumb:hover {
     height: 1px !important;
     background: rgba(255, 255, 255, 0.1) !important;
     box-shadow: none !important;
+    opacity: 0;
+    animation: nprogress-fade-in 0s linear 300ms forwards !important;
   }
   
   #nprogress .bar::after {
@@ -805,4 +807,9 @@ body::-webkit-scrollbar-thumb:hover {
     display: none !important;
   }
 }
+
+@keyframes nprogress-fade-in {
+  to { opacity: 1; }
+}
+
 
