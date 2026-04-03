@@ -8,19 +8,18 @@ const NOTE_IDS = ["note0", "note1", "note2", "note3"] as const
 const ANNOTATION_IDS = ["ann0", "ann1", "ann2", "ann3"] as const
 
 const timings = [
-  { delay: 300, action: "document" },
-  { delay: 900, action: "ann0" },
-  { delay: 1500, action: "note0" },
-  { delay: 2200, action: "ann1" },
-  { delay: 3000, action: "note1" },
-  { delay: 3200, action: "circle" },
-  { delay: 3800, action: "note2" },
-  { delay: 4200, action: "ann3" },
-  { delay: 5000, action: "note3" },
-  { delay: 7000, action: "dim" },
-  { delay: 7500, action: "tagline" },
-  { delay: 8200, action: "hint" },
-  { delay: 8600, action: "replay" },
+  { delay: 100, action: "document" },
+  { delay: 1500, action: "ann0" },
+  { delay: 1900, action: "note0" },
+  { delay: 2400, action: "ann1" },
+  { delay: 2800, action: "note1" },
+  { delay: 3000, action: "circle" },
+  { delay: 3400, action: "note2" },
+  { delay: 3800, action: "ann3" },
+  { delay: 4200, action: "note3" },
+  { delay: 5500, action: "dim" }, 
+  { delay: 6000, action: "hint" },
+  { delay: 6400, action: "replay" },
 ] as const
 
 type ActionName = (typeof timings)[number]["action"]
@@ -51,7 +50,7 @@ const initialState: HeroState = {
   },
   showHint: false,
   showReplay: false,
-  showTagline: false,
+  showTagline: true, // Visible from the start for LCP
   dimDocument: false,
 }
 
