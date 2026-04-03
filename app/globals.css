@@ -778,31 +778,31 @@ body::-webkit-scrollbar-thumb:hover {
   }
 }
 
-/* Center Bullet Loader for Desktop */
+/* "Shooting Bullet" Loader for Desktop */
 @media (min-width: 769px) {
   #nprogress .bar {
-    display: none !important;
+    top: 50% !important;
+    height: 1px !important;
+    background: rgba(255, 255, 255, 0.1) !important;
+    box-shadow: none !important;
   }
   
-  #nprogress::after {
+  #nprogress .bar::after {
     content: "";
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    width: 12px;
-    height: 12px;
+    position: absolute;
+    right: 0px;
+    top: -5px;
+    width: 10px;
+    height: 10px;
     background: var(--accent);
     border-radius: 50%;
-    transform: translate(-50%, -50%);
-    z-index: 999999;
-    animation: desktop-bullet-pulse 1s ease-in-out infinite;
-    pointer-events: none;
-    box-shadow: 0 0 15px var(--accent);
+    box-shadow: 0 0 10px var(--accent), 0 0 20px var(--accent);
+    transform: none !important;
+  }
+
+  /* Hide centered static bullet from previous version */
+  #nprogress::after {
+    display: none !important;
   }
 }
 
-@keyframes desktop-bullet-pulse {
-  0% { transform: translate(-50%, -50%) scale(0.8); opacity: 0.4; }
-  50% { transform: translate(-50%, -50%) scale(1.4); opacity: 0.9; }
-  100% { transform: translate(-50%, -50%) scale(0.8); opacity: 0.4; }
-}
