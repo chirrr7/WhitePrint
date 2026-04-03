@@ -1,0 +1,128 @@
+
+> my-project@0.1.0 dev
+> next dev
+
+▲ Next.js 16.2.1 (Turbopack)
+- Local:         http://localhost:3000
+- Network:       http://192.168.1.21:3000
+- Environments: .env.local
+✓ Ready in 842ms
+
+ GET /?mobile=1 200 in 5.3s (next.js: 488ms, application-code: 4.9s)
+ GET /?mobile=1 200 in 2.5s (next.js: 14ms, application-code: 2.5s)
+ GET /stances?mobile=1 200 in 1662ms (next.js: 68ms, application-code: 1594ms)
+ GET /search?mobile=1 200 in 1378ms (next.js: 1096ms, application-code: 281ms)
+ GET /models?mobile=1 200 in 884ms (next.js: 637ms, application-code: 247ms)
+ GET /?mobile=1 200 in 2.2s (next.js: 8ms, application-code: 2.2s)
+ GET /?mobile=1 200 in 2.1s (next.js: 6ms, application-code: 2.1s)
+ GET /posts/the-eight-body-problem?mobile=1 200 in 2.5s (next.js: 1501ms, application-code: 1004ms)
+ GET /about?mobile=1 200 in 1445ms (next.js: 794ms, application-code: 652ms)
+ GET /?mobile=1 200 in 2.4s (next.js: 4ms, application-code: 2.4s)
+ GET /?mobile=1 200 in 2.1s (next.js: 8ms, application-code: 2.1s)
+ GET /?mobile=1 200 in 2.0s (next.js: 3ms, application-code: 2.0s)
+ GET /?mobile=1 200 in 2.2s (next.js: 3ms, application-code: 2.2s)
+ GET /?mobile=1 200 in 2.2s (next.js: 3ms, application-code: 2.2s)
+ GET /?mobile=1 200 in 2.1s (next.js: 3ms, application-code: 2.1s)
+ GET /?mobile=1 200 in 2.1s (next.js: 10ms, application-code: 2.1s)
+ GET /?mobile=1 200 in 1891ms (next.js: 6ms, application-code: 1885ms)
+ GET /?mobile=1 200 in 1569ms (next.js: 245ms, application-code: 1324ms)
+ GET /?mobile=1 200 in 793ms (next.js: 12ms, application-code: 780ms)
+ GET /?mobile=1 200 in 631ms (next.js: 9ms, application-code: 622ms)
+ GET /?mobile=1 200 in 630ms (next.js: 74ms, application-code: 557ms)
+ GET /?mobile=1 200 in 632ms (next.js: 34ms, application-code: 598ms)
+ GET /?mobile=1 200 in 632ms (next.js: 54ms, application-code: 578ms)
+✓ Compiled in 216ms
+ GET /?mobile=1 200 in 1094ms (next.js: 179ms, application-code: 915ms)
+ GET /?mobile=1 200 in 678ms (next.js: 9ms, application-code: 669ms)
+ GET /?mobile=1 200 in 634ms (next.js: 9ms, application-code: 625ms)
+ GET /?mobile=1 200 in 659ms (next.js: 26ms, application-code: 633ms)
+ GET /?mobile=1 200 in 659ms (next.js: 44ms, application-code: 616ms)
+ GET /?mobile=1 200 in 393ms (next.js: 102ms, application-code: 291ms)
+ GET /?mobile=1 200 in 144ms (next.js: 4ms, application-code: 140ms)
+✓ Compiled in 151ms
+ GET /?mobile=1 200 in 547ms (next.js: 136ms, application-code: 411ms)
+ GET /?mobile=1 200 in 145ms (next.js: 7ms, application-code: 138ms)
+✓ Compiled in 105ms
+✓ Compiled in 93ms
+ GET /posts/oracle-software-margins-infrastructure-capex?mobile=1 200 in 4.3s (next.js: 179ms, application-code: 4.1s)
+ GET /stances?mobile=1 200 in 7.3s (next.js: 448ms, application-code: 6.8s)
+ GET /?mobile=1 200 in 7.4s (next.js: 11ms, application-code: 7.4s)
+ GET /?mobile=1 200 in 3.3s (next.js: 10ms, application-code: 3.3s)
+ GET /posts/the-eight-body-problem?mobile=1 200 in 1073ms (next.js: 16ms, application-code: 1056ms)
+✓ Compiled in 112ms
+✓ Compiled in 80ms
+✓ Compiled in 81ms
+✓ Compiled in 90ms
+ GET /posts/the-eight-body-problem?mobile=1 200 in 2.3s (next.js: 253ms, application-code: 2.1s)
+ GET /posts/the-eight-body-problem?mobile=1 200 in 1584ms (next.js: 29ms, application-code: 1555ms)
+ GET /macro?mobile=1 200 in 3.1s (next.js: 1496ms, application-code: 1583ms)
+ GET /macro?mobile=1 200 in 1242ms (next.js: 5ms, application-code: 1237ms)
+ GET /?mobile=1 200 in 2.3s (next.js: 7ms, application-code: 2.3s)
+ GET /posts/private-credit-first-crack-wrapper?mobile=1 200 in 738ms (next.js: 16ms, application-code: 722ms)
+ GET /market-notes?mobile=1 200 in 1774ms (next.js: 566ms, application-code: 1208ms)
+ GET /?mobile=1 200 in 1985ms (next.js: 5ms, application-code: 1981ms)
+ GET /posts/oracle-software-margins-infrastructure-capex?mobile=1 200 in 1116ms (next.js: 23ms, application-code: 1093ms)
+✓ Compiled in 402ms
+ GET /posts/the-eight-body-problem?mobile=1 200 in 1707ms (next.js: 39ms, application-code: 1668ms)
+ GET /macro?mobile=1 200 in 1168ms (next.js: 7ms, application-code: 1161ms)
+ GET /posts/the-eight-body-problem?mobile=1 200 in 1757ms (next.js: 18ms, application-code: 1739ms)
+ GET /macro?mobile=1 200 in 1290ms (next.js: 4ms, application-code: 1287ms)
+ GET /?mobile=1 200 in 2.5s (next.js: 6ms, application-code: 2.4s)
+ GET /posts/oracle-software-margins-infrastructure-capex?mobile=1 200 in 868ms (next.js: 16ms, application-code: 852ms)
+✓ Compiled in 205ms
+ GET /?mobile=1 200 in 2.4s (next.js: 6ms, application-code: 2.4s)
+ GET /posts/the-eight-body-problem?mobile=1 200 in 1111ms (next.js: 14ms, application-code: 1096ms)
+ GET /posts/the-eight-body-problem?mobile=1 200 in 1340ms (next.js: 24ms, application-code: 1316ms)
+ GET /macro?mobile=1 200 in 1119ms (next.js: 4ms, application-code: 1115ms)
+ GET /?mobile=1 200 in 1978ms (next.js: 4ms, application-code: 1974ms)
+ GET /posts/eog-resources-the-base-case-is-priced-in?mobile=1 200 in 893ms (next.js: 14ms, application-code: 879ms)
+ GET /models?mobile=1 200 in 644ms (next.js: 207ms, application-code: 437ms)
+✓ Compiled in 21.2s
+✓ Finished writing to filesystem cache in 10.1s
+✓ Finished filesystem cache database compaction in 14.1s
+ GET / 200 in 6.6s (next.js: 578ms, application-code: 6.0s)
+✓ Finished writing to filesystem cache in 10.1s
+○ Compiling /admin ...
+✓ Finished writing to filesystem cache in 40s
+ GET /admin 200 in 2.3min (next.js: 93s, proxy.ts: 4.3s, application-code: 38.0s)
+ GET /research 200 in 9.3s (next.js: 1058ms, application-code: 8.3s)
+ GET /admin 307 in 6.7s (next.js: 287ms, proxy.ts: 162ms, application-code: 6.3s)
+○ Compiling /admin/login ...
+ GET /admin/login 200 in 29.3s (next.js: 26.4s, proxy.ts: 1312ms, application-code: 1560ms)
+○ Compiling /_not-found/page ...
+✓ Finished writing to filesystem cache in 11.2s
+ GET /admin/dashboard 404 in 49s (next.js: 24.3s, proxy.ts: 2.4s, application-code: 22.5s)
+✓ Finished filesystem cache database compaction in 13.7s
+ GET /admin/login 200 in 983ms (next.js: 11ms, proxy.ts: 12ms, application-code: 960ms)
+ GET /admin 307 in 8.0s (next.js: 3.6s, proxy.ts: 254ms, application-code: 4.1s)
+○ Compiling /admin/posts ...
+ GET /admin/posts 307 in 29.7s (next.js: 27.2s, proxy.ts: 88ms, application-code: 2.3s)
+ GET /admin/login 200 in 992ms (next.js: 30ms, proxy.ts: 33ms, application-code: 929ms)
+ GET /admin/overview 404 in 5.9s (next.js: 1766ms, proxy.ts: 877ms, application-code: 3.3s)
+ GET / 200 in 9.7s (next.js: 78ms, application-code: 9.6s)
+ GET /admin 307 in 8.5s (next.js: 114ms, proxy.ts: 220ms, application-code: 8.1s)
+ GET /admin/login 200 in 2.6s (next.js: 38ms, proxy.ts: 238ms, application-code: 2.3s)
+○ Compiling /admin/settings ...
+ GET /admin/login 200 in 1279ms (next.js: 14ms, proxy.ts: 15ms, application-code: 1249ms)
+ GET /admin/settings 307 in 45s (next.js: 42s, proxy.ts: 61ms, application-code: 2.7s)
+✓ Finished filesystem cache database compaction in 12.3s
+ GET / 200 in 6.4s (next.js: 246ms, application-code: 6.1s)
+✓ Compiled in 3.2s
+ GET /?mobile=1 200 in 3.9s (next.js: 119ms, application-code: 3.7s)
+ GET /stances?mobile=1 200 in 2.9s (next.js: 585ms, application-code: 2.4s)
+ GET /?mobile=1 200 in 2.2s (next.js: 6ms, application-code: 2.2s)
+ GET /posts/private-credit-first-crack-wrapper?mobile=1 200 in 1399ms (next.js: 487ms, application-code: 912ms)
+ GET /?mobile=1 200 in 2.7s (next.js: 9ms, application-code: 2.7s)
+ GET /posts/oracle-software-margins-infrastructure-capex?mobile=1 200 in 1081ms (next.js: 18ms, application-code: 1063ms)
+ GET /admin/login 200 in 1613ms (next.js: 45ms, proxy.ts: 6ms, application-code: 1561ms)
+ GET /admin 307 in 1957ms (next.js: 94ms, proxy.ts: 19ms, application-code: 1844ms)
+ GET /admin 200 in 1698ms (next.js: 5ms, proxy.ts: 309ms, application-code: 1384ms)
+ POST /admin/login 303 in 3.6s (next.js: 40ms, proxy.ts: 459ms, application-code: 3.1s)
+  └─ ƒ loginAction({}) in 1355ms lib/admin/actions.ts
+ GET /admin 200 in 860ms (next.js: 6ms, proxy.ts: 245ms, application-code: 610ms)
+ POST /admin 303 in 2.2s (next.js: 7ms, proxy.ts: 263ms, application-code: 1925ms)
+  └─ ƒ loginAction({}) in 1023ms lib/admin/actions.ts
+○ Compiling /admin/stances ...
+ GET /admin/stances 200 in 10.8s (next.js: 10.0s, proxy.ts: 274ms, application-code: 566ms)
+✓ Compiled in 1208ms
+[?25h

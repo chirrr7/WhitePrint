@@ -49,9 +49,9 @@ const scenarioToneClasses: Record<ScenarioTone, string> = {
 
 const disclaimerToneClasses: Record<StatTone, string> = {
   neutral: "border-l-foreground bg-background",
-  positive: "border-l-emerald-700 bg-emerald-50/60",
-  warning: "border-l-amber-700 bg-amber-50/60",
-  negative: "border-l-rose-700 bg-rose-50/60",
+  positive: "border-l-emerald-700 bg-emerald-50/60 dark:bg-emerald-500/10",
+  warning: "border-l-amber-700 bg-amber-50/60 dark:bg-amber-500/10",
+  negative: "border-l-rose-700 bg-rose-50/60 dark:bg-rose-500/10",
 }
 
 export function ResearchTable({

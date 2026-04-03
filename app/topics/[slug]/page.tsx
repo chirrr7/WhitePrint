@@ -8,7 +8,7 @@ interface TopicPageProps {
   params: Promise<{ slug: string }>
 }
 
-export const dynamic = "force-dynamic"
+export const revalidate = 60
 
 const sectionTopicRedirects = new Map([
   ["macro", "/macro"],

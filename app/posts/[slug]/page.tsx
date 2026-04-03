@@ -26,7 +26,7 @@ interface Props {
   searchParams?: Promise<Record<string, string | string[] | undefined>>
 }
 
-export const dynamic = "force-dynamic"
+export const revalidate = 60
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params

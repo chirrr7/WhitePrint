@@ -2,6 +2,7 @@
 
 import Link from "next/link"
 import { useCallback, useEffect, useRef, useState } from "react"
+import h from "./HeroSection.module.css"
 
 const NOTE_IDS = ["note0", "note1", "note2", "note3"] as const
 const ANNOTATION_IDS = ["ann0", "ann1", "ann2", "ann3"] as const
@@ -275,30 +276,34 @@ export function HeroSection() {
     setReplayKey((current) => current + 1)
   }
 
-  return (
-    <section className="wp-hero" id="hero" style={{ backgroundColor: "#0a0a0a" }}>
-      <div className="wp-hero-grain" />
-      <div className="wp-hero-rule" />
+  const docClass = [
+    h.doc,
+    state.visibleDocument ? h.docVisible : "",
+    state.dimDocument ? h.docDimmed : "",
+  ].filter(Boolean).join(" ")
 
-      <div className="wp-hero-inner">
-        <div className="wp-hero-doc-row">
-          <div
-            className={`wp-hero-doc${state.visibleDocument ? " doc-visible" : ""}${state.dimDocument ? " doc-dimmed" : ""}`}
-          >
-            <div className="wp-doc-header">
-              <span className="wp-doc-header-left">FORM 10-K · ORACLE CORPORATION · FY2024 · SELECTED EXCERPT</span>
-              <span className="wp-doc-header-right">NOTE 6 — PP&amp;E</span>
+  return (
+    <section className={h.hero} id="hero" style={{ backgroundColor: "#0a0a0a" }}>
+      <div className={h.grain} />
+      <div className={h.rule} />
+
+      <div className={h.inner}>
+        <div className={h.docRow}>
+          <div className={docClass}>
+            <div className={h.docHeader}>
+              <span className={h.docHeaderLeft}>FORM 10-K · ORACLE CORPORATION · FY2024 · SELECTED EXCERPT</span>
+              <span className={h.docHeaderRight}>NOTE 6 — PP&amp;E</span>
             </div>
 
-            <div className="wp-doc-body">
-              <p className="wp-doc-para">
+            <div className={h.docBody}>
+              <p className={h.docPara}>
                 Capital expenditures for fiscal 2024 were{" "}
                 <span
                   id="ann0"
                   ref={(node) => {
                     annRefs.current.ann0 = node
                   }}
-                  className={`wp-ann${state.activeAnnotations.ann0 ? " ann-active" : ""}`}
+                  className={`${h.ann}${state.activeAnnotations.ann0 ? ` ${h.annActive}` : ""}`}
                 >
                   $6,866 million
                 </span>
@@ -306,7 +311,7 @@ export function HeroSection() {
                 increase reflects continued investment in cloud data centers and network infrastructure.
               </p>
 
-              <p className="wp-doc-para">
+              <p className={h.docPara}>
                 In fiscal 2024, we completed a review of the estimated useful lives of certain server
                 equipment and{" "}
                 <span
@@ -314,7 +319,7 @@ export function HeroSection() {
                   ref={(node) => {
                     annRefs.current.ann1 = node
                   }}
-                  className={`wp-ann${state.activeAnnotations.ann1 ? " ann-active" : ""}`}
+                  className={`${h.ann}${state.activeAnnotations.ann1 ? ` ${h.annActive}` : ""}`}
                 >
                   extended the estimated useful life from four years to five years
                 </span>
@@ -322,14 +327,14 @@ export function HeroSection() {
                 billion.
               </p>
 
-              <p className="wp-doc-para">
+              <p className={h.docPara}>
                 As of May 31, 2024, we had data center lease commitments of approximately{" "}
                 <span
                   id="ann2"
                   ref={(node) => {
                     annRefs.current.ann2 = node
                   }}
-                  className={`wp-ann wp-ann-circle${state.activeAnnotations.ann2 ? " ann-active" : ""}`}
+                  className={`${h.ann} ${h.annCircle}${state.activeAnnotations.ann2 ? ` ${h.annActive}` : ""}`}
                 >
                   $261 billion
                 </span>{" "}
@@ -337,14 +342,14 @@ export function HeroSection() {
                 commitments have initial terms of 10 to 19 years.
               </p>
 
-              <p className="wp-doc-para">
+              <p className={h.docPara}>
                 Free cash flow for fiscal 2024 was{" "}
                 <span
                   id="ann3"
                   ref={(node) => {
                     annRefs.current.ann3 = node
                   }}
-                  className={`wp-ann${state.activeAnnotations.ann3 ? " ann-active" : ""}`}
+                  className={`${h.ann}${state.activeAnnotations.ann3 ? ` ${h.annActive}` : ""}`}
                 >
                   $(394) million
                 </span>
@@ -353,36 +358,36 @@ export function HeroSection() {
             </div>
           </div>
 
-          <div ref={notePanelRef} className="wp-note-panel" aria-hidden="true">
+          <div ref={notePanelRef} className={h.notePanel} aria-hidden="true">
             {NOTE_IDS.map((noteId) => (
               <div
                 key={noteId}
                 id={noteId}
-                className={`wp-mnote${state.visibleNotes[noteId] ? " note-visible" : ""}`}
+                className={`${h.mnote}${state.visibleNotes[noteId] ? ` ${h.noteVisible}` : ""}`}
                 style={{ top: `${notePositions[noteId]}px` }}
               >
-                <div className="wp-mnote-line" />
-                <div className="wp-mnote-text">{noteCopy[noteId]}</div>
+                <div className={h.mnoteLine} />
+                <div className={h.mnoteText}>{noteCopy[noteId]}</div>
               </div>
             ))}
           </div>
         </div>
 
-        <div className={`wp-hero-tagline${state.showTagline ? " tagline-visible" : ""}`}>
-          <div className="wp-tagline-eyebrow">WHITEPRINT RESEARCH</div>
-          <h1 className="wp-tagline-headline">
+        <div className={`${h.tagline}${state.showTagline ? ` ${h.taglineVisible}` : ""}`}>
+          <div className={h.taglineEyebrow}>WHITEPRINT RESEARCH</div>
+          <h1 className={h.taglineHeadline}>
             We read
             <br />
             <em>the footnotes.</em>
           </h1>
-          <p className="wp-tagline-sub">
+          <p className={h.taglineSub}>
             Independent equity, macro, and forensic research. No house view. No affiliation.
           </p>
-          <div className="wp-tagline-actions">
-            <Link href="/research" className="wp-tagline-cta-primary">
+          <div className={h.taglineActions}>
+            <Link href="/research" className={h.ctaPrimary}>
               Browse Research
             </Link>
-            <Link href="/#pipeline" className="wp-tagline-cta-secondary">
+            <Link href="/#pipeline" className={h.ctaSecondary}>
               What&apos;s in progress →
             </Link>
           </div>
@@ -391,397 +396,16 @@ export function HeroSection() {
 
       <button
         type="button"
-        className={`wp-replay-btn${state.showReplay ? " btn-visible" : ""}`}
+        className={`${h.replayBtn}${state.showReplay ? ` ${h.btnVisible}` : ""}`}
         onClick={handleReplay}
       >
         ↺ Replay
       </button>
 
-      <Link href="/#pipeline" className={`wp-scroll-hint${state.showHint ? " hint-visible" : ""}`}>
-        <span className="wp-scroll-line" />
-        <span className="wp-scroll-label">scroll</span>
+      <Link href="/#pipeline" className={`${h.scrollHint}${state.showHint ? ` ${h.hintVisible}` : ""}`}>
+        <span className={h.scrollLine} />
+        <span className={h.scrollLabel}>scroll</span>
       </Link>
-
-      <style jsx>{`
-        .wp-hero {
-          position: relative;
-          display: flex;
-          flex-direction: column;
-          justify-content: center;
-          align-items: center;
-          min-height: 100vh;
-          overflow: hidden;
-          background: var(--dark);
-          padding: 100px 48px 80px;
-        }
-
-        .wp-hero-grain {
-          position: absolute;
-          inset: 0;
-          z-index: 1;
-          opacity: 0.035;
-          pointer-events: none;
-          background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n' x='0' y='0'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
-        }
-
-        .wp-hero-rule {
-          position: absolute;
-          right: 0;
-          bottom: 0;
-          left: 0;
-          z-index: 5;
-          height: 2px;
-          background: var(--accent);
-        }
-
-        .wp-hero-inner {
-          position: relative;
-          z-index: 2;
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          width: 100%;
-          max-width: 960px;
-        }
-
-        .wp-hero-doc-row {
-          display: flex;
-          align-items: flex-start;
-          gap: 0;
-          width: 100%;
-        }
-
-        .wp-hero-doc {
-          position: relative;
-          flex: 1;
-          min-width: 0;
-          padding: 32px 36px;
-          opacity: 0;
-          background: rgba(255, 255, 255, 0.025);
-          border: 1px solid rgba(255, 255, 255, 0.06);
-          transition: opacity 0.9s ease, filter 1.2s ease;
-        }
-
-        .wp-hero-doc.doc-visible {
-          opacity: 1;
-        }
-
-        .wp-hero-doc.doc-dimmed {
-          opacity: 0.1;
-          filter: blur(0.5px);
-        }
-
-        .wp-doc-header {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          padding-bottom: 16px;
-          margin-bottom: 20px;
-          border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-        }
-
-        .wp-doc-header-left,
-        .wp-doc-header-right {
-          font-family: var(--font-mono-family), monospace;
-          font-size: 7.5px;
-          text-transform: uppercase;
-        }
-
-        .wp-doc-header-left {
-          color: rgba(255, 255, 255, 0.18);
-          letter-spacing: 0.22em;
-        }
-
-        .wp-doc-header-right {
-          color: rgba(255, 255, 255, 0.12);
-          letter-spacing: 0.18em;
-        }
-
-        .wp-doc-body {
-          color: rgba(255, 255, 255, 0.28);
-          font-family: var(--font-serif-family), Georgia, serif;
-          font-size: 12px;
-          font-weight: 300;
-          line-height: 1.95;
-        }
-
-        .wp-doc-para {
-          margin: 0 0 14px;
-        }
-
-        .wp-doc-para:last-child {
-          margin-bottom: 0;
-        }
-
-        .wp-ann {
-          position: relative;
-          color: rgba(255, 255, 255, 0.5);
-          transition: color 0.35s ease;
-        }
-
-        .wp-ann::after {
-          content: "";
-          position: absolute;
-          bottom: -1px;
-          left: 0;
-          width: 100%;
-          height: 1.5px;
-          background: var(--accent);
-          transform: scaleX(0);
-          transform-origin: left center;
-          transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
-        }
-
-        .wp-ann.ann-active {
-          color: rgba(255, 255, 255, 0.82);
-        }
-
-        .wp-ann.ann-active::after {
-          transform: scaleX(1);
-        }
-
-        .wp-ann-circle {
-          position: relative;
-        }
-
-        .wp-note-panel {
-          position: relative;
-          flex-shrink: 0;
-          width: 200px;
-          min-height: 200px;
-          padding-left: 16px;
-        }
-
-        .wp-mnote {
-          position: absolute;
-          left: 0;
-          display: flex;
-          align-items: flex-start;
-          opacity: 0;
-          transform: translateX(-10px);
-          transition: opacity 0.5s ease, transform 0.5s ease;
-          pointer-events: none;
-          white-space: nowrap;
-        }
-
-        .wp-mnote.note-visible {
-          opacity: 1;
-          transform: translateX(0);
-        }
-
-        .wp-mnote-line {
-          width: 22px;
-          height: 1px;
-          flex-shrink: 0;
-          margin-top: 9px;
-          margin-right: 8px;
-          background: var(--accent);
-        }
-
-        .wp-mnote-text {
-          color: var(--accent);
-          font-family: var(--font-mono-family), monospace;
-          font-size: 9px;
-          line-height: 1.6;
-          letter-spacing: 0.05em;
-        }
-
-        .wp-hero-tagline {
-          position: absolute;
-          inset: 0;
-          z-index: 10;
-          display: flex;
-          flex-direction: column;
-          justify-content: center;
-          align-items: center;
-          padding: 0 48px;
-          opacity: 0;
-          pointer-events: none;
-          text-align: center;
-          transform: translateY(16px);
-          transition: opacity 1s ease, transform 1s ease;
-        }
-
-        .wp-hero-tagline.tagline-visible {
-          opacity: 1;
-          pointer-events: auto;
-          transform: translateY(0);
-        }
-
-        .wp-tagline-eyebrow {
-          margin-bottom: 28px;
-          color: rgba(255, 255, 255, 0.22);
-          font-family: var(--font-mono-family), monospace;
-          font-size: 8px;
-          letter-spacing: 0.32em;
-          text-transform: uppercase;
-        }
-
-        .wp-tagline-headline {
-          margin: 0 0 28px;
-          color: rgba(255, 255, 255, 0.96);
-          font-family: var(--font-display-family), Georgia, serif;
-          font-size: clamp(44px, 7vw, 80px);
-          font-weight: 700;
-          line-height: 1;
-          letter-spacing: -0.04em;
-        }
-
-        .wp-tagline-headline em {
-          color: var(--accent);
-          font-style: italic;
-          font-weight: 600;
-        }
-
-        .wp-tagline-sub {
-          max-width: 440px;
-          margin: 0 0 36px;
-          color: rgba(255, 255, 255, 0.35);
-          font-family: var(--font-serif-family), Georgia, serif;
-          font-size: 14px;
-          font-weight: 300;
-          line-height: 1.7;
-        }
-
-        .wp-tagline-actions {
-          display: flex;
-          align-items: center;
-          gap: 20px;
-        }
-
-        .wp-tagline-cta-primary {
-          display: inline-block;
-          padding: 10px 22px;
-          color: var(--dark);
-          background: rgba(250, 249, 247, 0.92);
-          font-family: var(--font-mono-family), monospace;
-          font-size: 9px;
-          letter-spacing: 0.16em;
-          text-decoration: none;
-          text-transform: uppercase;
-          transition: background 0.2s ease;
-        }
-
-        .wp-tagline-cta-primary:hover {
-          background: #fff;
-        }
-
-        .wp-tagline-cta-secondary {
-          padding-bottom: 1px;
-          color: rgba(255, 255, 255, 0.35);
-          border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-          font-family: var(--font-mono-family), monospace;
-          font-size: 9px;
-          letter-spacing: 0.16em;
-          text-decoration: none;
-          text-transform: uppercase;
-          transition: color 0.2s ease, border-color 0.2s ease;
-        }
-
-        .wp-tagline-cta-secondary:hover {
-          color: rgba(255, 255, 255, 0.7);
-          border-bottom-color: rgba(255, 255, 255, 0.35);
-        }
-
-        .wp-scroll-hint {
-          position: absolute;
-          bottom: 28px;
-          left: 50%;
-          z-index: 10;
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          gap: 6px;
-          opacity: 0;
-          text-decoration: none;
-          transform: translateX(-50%);
-          transition: opacity 0.6s ease;
-        }
-
-        .wp-scroll-hint.hint-visible {
-          opacity: 1;
-        }
-
-        .wp-scroll-line {
-          position: relative;
-          display: block;
-          width: 1px;
-          height: 32px;
-          overflow: hidden;
-          background: rgba(255, 255, 255, 0.12);
-        }
-
-        .wp-scroll-line::after {
-          content: "";
-          position: absolute;
-          top: -100%;
-          left: 0;
-          width: 100%;
-          height: 100%;
-          background: rgba(255, 255, 255, 0.4);
-          animation: scrollDrop 1.8s ease-in-out infinite;
-        }
-
-        .wp-scroll-label {
-          color: rgba(255, 255, 255, 0.18);
-          font-family: var(--font-mono-family), monospace;
-          font-size: 7px;
-          letter-spacing: 0.2em;
-          text-transform: uppercase;
-        }
-
-        .wp-replay-btn {
-          position: absolute;
-          right: 48px;
-          bottom: 28px;
-          z-index: 10;
-          opacity: 0;
-          padding: 0;
-          color: rgba(255, 255, 255, 0.18);
-          background: transparent;
-          border: none;
-          cursor: pointer;
-          font-family: var(--font-mono-family), monospace;
-          font-size: 8px;
-          letter-spacing: 0.14em;
-          text-transform: uppercase;
-          transition: color 0.2s ease, opacity 0.6s ease;
-        }
-
-        .wp-replay-btn.btn-visible {
-          opacity: 1;
-        }
-
-        .wp-replay-btn:hover {
-          color: rgba(255, 255, 255, 0.5);
-        }
-
-        @keyframes scrollDrop {
-          0% {
-            top: -100%;
-          }
-
-          100% {
-            top: 100%;
-          }
-        }
-
-        @media (max-width: 1200px) {
-          .wp-hero {
-            padding-right: 32px;
-            padding-left: 32px;
-          }
-
-          .wp-hero-tagline {
-            padding-right: 32px;
-            padding-left: 32px;
-          }
-
-          .wp-replay-btn {
-            right: 32px;
-          }
-        }
-      `}</style>
     </section>
   )
 }

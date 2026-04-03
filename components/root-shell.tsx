@@ -2,6 +2,7 @@
 
 import { Analytics } from '@vercel/analytics/next'
 import { usePathname, useSearchParams } from 'next/navigation'
+import { useState, useEffect } from 'react'
 import { Footer } from '@/components/Footer'
 import { MobileHeader } from '@/components/mobile-header'
 import { MobileNav } from '@/components/mobile-nav'
@@ -15,8 +16,29 @@ interface RootShellProps {
 export function RootShell({ children }: RootShellProps) {
   const pathname = usePathname()
   const searchParams = useSearchParams()
+  const [mounted, setMounted] = useState(false)
   const isAdminRoute = pathname.startsWith('/admin')
-  const forceMobilePreview = searchParams.get('mobile') === '1'
+  
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  const forceMobilePreview = mounted && searchParams.get('mobile') === '1'
+  const forceDark = mounted && searchParams.get('dark') === '1'
+
+  useEffect(() => {
+    if (forceDark) {
+      document.documentElement.classList.add('force-dark', 'dark')
+      document.documentElement.style.colorScheme = 'dark'
+    } else {
+      document.documentElement.classList.remove('force-dark', 'dark')
+      document.documentElement.style.colorScheme = ''
+    }
+    return () => {
+      document.documentElement.classList.remove('force-dark', 'dark')
+      document.documentElement.style.colorScheme = ''
+    }
+  }, [forceDark])
 
   if (isAdminRoute) {
     return (

@@ -9,7 +9,7 @@ import { isMobilePreviewEnabled } from "@/lib/mobile-preview"
 import { getPublicGeneralSettings, getHomepageContentData } from "@/lib/public-site"
 import { SEO_CONFIG } from "@/lib/seo.config"
 
-export const dynamic = "force-dynamic"
+export const revalidate = 60
 
 export async function generateMetadata(): Promise<Metadata> {
   const settings = await getPublicGeneralSettings()
