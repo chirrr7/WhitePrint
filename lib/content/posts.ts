@@ -5,6 +5,8 @@ import matter from "gray-matter"
 import { compileMDX } from "next-mdx-remote/rsc"
 import { createClient as createSupabaseClient } from "@supabase/supabase-js"
 import remarkGfm from "remark-gfm"
+import remarkMath from "remark-math"
+import rehypeKatex from "rehype-katex"
 import { z } from "zod"
 import { articleBodyComponents, postBodyComponents } from "@/components/post-body"
 import {
@@ -719,18 +721,24 @@ async function getPublishedDatabasePostBySlug(
 async function compilePostSource(
   source: string,
   components: typeof articleBodyComponents | typeof postBodyComponents,
-) {
-  const compiled = await compileMDX({
-    source,
-    components,
-    options: {
-      mdxOptions: {
-        remarkPlugins: [remarkGfm],
+): Promise<ReactNode> {
+  try {
+    const compiled = await compileMDX({
+      source,
+      components,
+      options: {
+        mdxOptions: {
+          remarkPlugins: [remarkGfm, remarkMath],
+          rehypePlugins: [rehypeKatex],
+        },
       },
-    },
-  })
+    })
 
-  return compiled.content
+    return compiled.content
+  } catch (error) {
+    console.error("MDX compilation failed.", error)
+    return null
+  }
 }
 
 export function getFilesystemPosts(): PostMeta[] {

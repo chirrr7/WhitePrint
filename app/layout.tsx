@@ -6,6 +6,7 @@ import { getPublicGeneralSettings } from '@/lib/public-site'
 import { SEO_CONFIG } from '@/lib/seo.config'
 import './globals.css'
 import '@/styles/mobile.css'
+import 'katex/dist/katex.min.css'
 
 const playfair = Playfair_Display({
   subsets: ['latin'],
