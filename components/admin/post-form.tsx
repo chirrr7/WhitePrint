@@ -410,48 +410,8 @@ function ArticleTab({ post, topics, stances, models, mode }: ArticleTabProps) {
         <input type="hidden" name="title" value={title} readOnly />
       </div>
 
-      {/* Editor area with left gutter */}
+      {/* Editor area */}
       <div style={{ position: 'relative', display: 'flex', background: S.bg }}>
-        {/* Gutter */}
-        <div
-          style={{
-            width: 40,
-            flexShrink: 0,
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            paddingTop: 24,
-            gap: 6,
-            opacity: gutterHover ? 1 : 0,
-            transition: 'opacity 0.15s',
-          }}
-          onMouseEnter={() => setGutterHover(true)}
-          onMouseLeave={() => setGutterHover(false)}
-        >
-          {(['p', 'h2', 'hr', 'table'] as const).map((type) => (
-            <button
-              key={type}
-              type="button"
-              title={type}
-              onMouseDown={(e) => e.preventDefault()}
-              onClick={() => insertBlock(type)}
-              style={{
-                background: S.surfaceB,
-                border: `1px solid ${S.border}`,
-                color: S.muted,
-                fontFamily: S.mono,
-                fontSize: 8,
-                letterSpacing: '0.1em',
-                padding: '3px 5px',
-                cursor: 'pointer',
-                textTransform: 'uppercase',
-              }}
-            >
-              {type === 'p' ? '¶' : type === 'hr' ? '—' : type.toUpperCase()}
-            </button>
-          ))}
-        </div>
-
         {/* Editable content area */}
         <div
           style={{
@@ -459,47 +419,36 @@ function ArticleTab({ post, topics, stances, models, mode }: ArticleTabProps) {
             maxWidth: 720,
             margin: '0 auto',
             paddingRight: 40,
+            paddingLeft: 40,
           }}
-          onMouseEnter={() => setGutterHover(true)}
-          onMouseLeave={() => setGutterHover(false)}
         >
-          <div
-            ref={editorRef}
-            contentEditable
-            suppressContentEditableWarning
-            onInput={onEditorInput}
-            onBlur={saveSelection}
-            onMouseUp={saveSelection}
-            onKeyUp={saveSelection}
-            data-placeholder="Start writing…"
+          <textarea
+            value={bodyHtml}
+            onChange={(e) => {
+              setBodyHtml(e.target.value)
+              setWc(wordCount(e.target.value))
+            }}
+            placeholder="Start writing…"
             style={{
               fontFamily: S.mono,
               fontSize: 13,
               lineHeight: 1.95,
               color: S.ink,
-              background: S.bg,
+              background: 'transparent',
+              border: 'none',
               outline: 'none',
-              minHeight: 480,
+              width: '100%',
+              minHeight: 600,
               padding: '24px 0 64px',
-              wordBreak: 'break-word',
-              whiteSpace: 'pre-wrap',
+              resize: 'vertical',
             }}
-            dangerouslySetInnerHTML={{ __html: post?.body_mdx ?? post?.body ?? '' }}
+            spellCheck={false}
           />
         </div>
       </div>
 
       {/* Hidden body_mdx input to submit with form */}
       <input type="hidden" name="body_mdx" value={bodyHtml} readOnly />
-
-      {/* Floating toolbar */}
-      <FloatToolbar
-        show={toolbar.show}
-        top={toolbar.top}
-        left={toolbar.left}
-        savedRange={savedRange}
-        editorRef={editorRef}
-      />
 
       {/* Remaining metadata in a compact panel */}
       <div
