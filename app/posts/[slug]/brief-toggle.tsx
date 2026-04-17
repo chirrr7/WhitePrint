@@ -12,7 +12,7 @@ interface BriefToggleProps {
 }
 
 export function BriefToggle({ brief, postTitle, postSlug }: BriefToggleProps) {
-  const [expanded, setExpanded] = useState(false)
+  const [expanded, setExpanded] = useState(true)
 
   const verdictColors: Record<string, string> = {
     SHORT: '#b83025',
@@ -23,6 +23,14 @@ export function BriefToggle({ brief, postTitle, postSlug }: BriefToggleProps) {
     'LONG VOL': '#2d7a4f',
   }
   const vColor = verdictColors[brief.verdict?.toUpperCase() ?? ''] ?? tokens.accent
+
+  function scrollToArticle() {
+    const el = document.getElementById('article-body')
+    if (el) {
+      const top = el.getBoundingClientRect().top + window.scrollY - 80
+      window.scrollTo({ top, behavior: 'smooth' })
+    }
+  }
 
   return (
     <div>
@@ -99,33 +107,31 @@ export function BriefToggle({ brief, postTitle, postSlug }: BriefToggleProps) {
 
       {/* Expanded */}
       {expanded && (
-        <div>
-          <div
-            style={{
-              display: 'flex',
-              justifyContent: 'flex-end',
-              marginBottom: 6,
-            }}
-          >
+        <div style={{ position: 'relative' }}>
+          <TheBrief brief={brief} postTitle={postTitle} postSlug={postSlug} variant="article" />
+          <div style={{ background: tokens.bg, paddingBottom: 16 }}>
             <button
+              onClick={scrollToArticle}
               type="button"
-              onClick={() => setExpanded(false)}
               style={{
-                background: 'none',
-                border: 'none',
-                color: tokens.muted,
+                width: '100%',
+                background: tokens.surface,
+                border: `1px solid ${tokens.border}`,
+                color: tokens.ink,
                 fontFamily: tokens.fontMono,
-                fontSize: 9,
-                letterSpacing: '0.1em',
+                fontSize: 10,
+                letterSpacing: '0.14em',
                 textTransform: 'uppercase',
+                padding: '18px',
                 cursor: 'pointer',
-                padding: 0,
+                transition: 'background 0.2s ease',
               }}
+              onMouseEnter={(e) => (e.currentTarget.style.background = '#1a1a1a')}
+              onMouseLeave={(e) => (e.currentTarget.style.background = tokens.surface)}
             >
-              Collapse ↑
+              Read Full Article ↓
             </button>
           </div>
-          <TheBrief brief={brief} postTitle={postTitle} postSlug={postSlug} variant="article" />
         </div>
       )}
     </div>
