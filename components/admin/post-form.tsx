@@ -225,15 +225,44 @@ interface ArticleTabProps {
 }
 
 function ArticleTab({ post, topics, stances, models, mode }: ArticleTabProps) {
-  const editorRef = useRef<HTMLDivElement | null>(null)
-  const savedRange = useRef<Range | null>(null)
+  const textareaRef = useRef<HTMLTextAreaElement | null>(null)
   const titleRef = useRef<HTMLDivElement | null>(null)
 
-  const [toolbar, setToolbar] = useState({ show: false, top: 0, left: 0 })
   const [wc, setWc] = useState(0)
   const [titleFocused, setTitleFocused] = useState(false)
   const [bodyHtml, setBodyHtml] = useState(post?.body_mdx ?? post?.body ?? '')
   const [title, setTitle] = useState(post?.title ?? '')
+
+  function execTextarea(wrapperLeft: string, wrapperRight: string) {
+    if (!textareaRef.current) return
+    const el = textareaRef.current
+    const start = el.selectionStart
+    const end = el.selectionEnd
+    const selected = el.value.slice(start, end)
+    const before = el.value.slice(0, start)
+    const after = el.value.slice(end)
+    const replacement = wrapperLeft + selected + wrapperRight
+
+    const newHtml = before + replacement + after
+    setBodyHtml(newHtml)
+    setWc(wordCount(newHtml))
+    
+    setTimeout(() => {
+      el.focus()
+      el.setSelectionRange(start + wrapperLeft.length, end + wrapperLeft.length)
+    }, 0)
+  }
+
+  const toolbarBtn: React.CSSProperties = {
+    background: 'transparent',
+    border: `1px solid ${S.border}`,
+    color: S.ink,
+    fontFamily: S.mono,
+    fontSize: 10,
+    padding: '4px 8px',
+    cursor: 'pointer',
+    borderRadius: 2,
+  }
 
   // Sync word count when editor changes
   function onEditorInput() {
@@ -410,7 +439,17 @@ function ArticleTab({ post, topics, stances, models, mode }: ArticleTabProps) {
         <input type="hidden" name="title" value={title} readOnly />
       </div>
 
-      {/* Editor area */}
+      {/* Editor area with toolbar */}
+      <div style={{ background: S.surfaceB, borderBottom: `1px solid ${S.border}`, padding: '8px 16px', display: 'flex', gap: 6 }}>
+        <button type="button" onClick={() => execTextarea('**', '**')} style={toolbarBtn}>B</button>
+        <button type="button" onClick={() => execTextarea('*', '*')} style={{...toolbarBtn, fontStyle: 'italic'}}>I</button>
+        <button type="button" onClick={() => execTextarea('### ', '')} style={toolbarBtn}>H3</button>
+        <button type="button" onClick={() => execTextarea('>', '')} style={toolbarBtn}>Quote</button>
+        <button type="button" onClick={() => execTextarea('```\n', '\n```')} style={toolbarBtn}>Code</button>
+        <div style={{ width: 1, height: 16, background: S.border, margin: 'auto 6px' }} />
+        <button type="button" onClick={() => execTextarea('<span style="color:#b83025">', '</span>')} style={{...toolbarBtn, color: '#b83025'}}>Red</button>
+        <button type="button" onClick={() => execTextarea('<span style="color:#2d7a4f">', '</span>')} style={{...toolbarBtn, color: '#2d7a4f'}}>Green</button>
+      </div>
       <div style={{ position: 'relative', display: 'flex', background: S.bg }}>
         {/* Editable content area */}
         <div
@@ -423,6 +462,8 @@ function ArticleTab({ post, topics, stances, models, mode }: ArticleTabProps) {
           }}
         >
           <textarea
+            ref={textareaRef}
+            name="body_mdx"
             value={bodyHtml}
             onChange={(e) => {
               setBodyHtml(e.target.value)
@@ -446,9 +487,6 @@ function ArticleTab({ post, topics, stances, models, mode }: ArticleTabProps) {
           />
         </div>
       </div>
-
-      {/* Hidden body_mdx input to submit with form */}
-      <input type="hidden" name="body_mdx" value={bodyHtml} readOnly />
 
       {/* Remaining metadata in a compact panel */}
       <div
