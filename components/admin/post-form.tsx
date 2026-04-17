@@ -484,7 +484,7 @@ function ArticleTab({ post, topics, stances, models, mode }: ArticleTabProps) {
               wordBreak: 'break-word',
               whiteSpace: 'pre-wrap',
             }}
-            dangerouslySetInnerHTML={{ __html: bodyHtml }}
+            dangerouslySetInnerHTML={{ __html: post?.body_mdx ?? post?.body ?? '' }}
           />
         </div>
       </div>
