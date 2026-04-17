@@ -119,70 +119,76 @@ function ResearchDropdown({ theme }: { theme: NavTheme }) {
         <div
           style={{
             position: "absolute",
-            top: "calc(100% + 12px)",
+            top: "100%",
             left: "50%",
             transform: "translateX(-50%)",
-            minWidth: 180,
-            background: isDark ? "rgba(10,10,10,0.97)" : "rgba(250,249,247,0.98)",
-            border: "1px solid rgba(245,242,235,0.08)",
-            backdropFilter: "blur(16px)",
-            WebkitBackdropFilter: "blur(16px)",
+            paddingTop: 12,
             zIndex: 300,
-            padding: "4px 0",
           }}
         >
-          {researchLinks.map((link) => {
-            const active = pathname.startsWith(link.href)
-            return (
-              <Link
-                key={link.href}
-                href={link.href}
-                onClick={() => setOpen(false)}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 10,
-                  padding: "10px 16px",
-                  textDecoration: "none",
-                  transition: "background 0.12s ease",
-                  background: active ? "rgba(245,242,235,0.04)" : "transparent",
-                }}
-                onMouseEnter={(e) => {
-                  (e.currentTarget as HTMLAnchorElement).style.background = "rgba(245,242,235,0.06)"
-                }}
-                onMouseLeave={(e) => {
-                  (e.currentTarget as HTMLAnchorElement).style.background = active
-                    ? "rgba(245,242,235,0.04)"
-                    : "transparent"
-                }}
-              >
-                <span
+          <div
+            style={{
+              minWidth: 180,
+              background: isDark ? "rgba(10,10,10,0.97)" : "rgba(250,249,247,0.98)",
+              border: "1px solid rgba(245,242,235,0.08)",
+              backdropFilter: "blur(16px)",
+              WebkitBackdropFilter: "blur(16px)",
+              padding: "4px 0",
+            }}
+          >
+            {researchLinks.map((link) => {
+              const active = pathname.startsWith(link.href)
+              return (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  onClick={() => setOpen(false)}
                   style={{
-                    display: "inline-block",
-                    width: 3,
-                    height: 12,
-                    background: link.accent,
-                    flexShrink: 0,
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 10,
+                    padding: "10px 16px",
+                    textDecoration: "none",
+                    transition: "background 0.12s ease",
+                    background: active ? "rgba(245,242,235,0.04)" : "transparent",
                   }}
-                />
-                <span
-                  style={{
-                    fontFamily: "'JetBrains Mono', monospace",
-                    fontSize: 9,
-                    letterSpacing: "0.14em",
-                    textTransform: "uppercase",
-                    color: active
-                      ? link.accent
-                      : isDark
-                        ? "rgba(245,242,235,0.65)"
-                        : "rgba(15,15,15,0.7)",
+                  onMouseEnter={(e) => {
+                    (e.currentTarget as HTMLAnchorElement).style.background = "rgba(245,242,235,0.06)"
+                  }}
+                  onMouseLeave={(e) => {
+                    (e.currentTarget as HTMLAnchorElement).style.background = active
+                      ? "rgba(245,242,235,0.04)"
+                      : "transparent"
                   }}
                 >
-                  {link.label}
-                </span>
-              </Link>
-            )
-          })}
+                  <span
+                    style={{
+                      display: "inline-block",
+                      width: 3,
+                      height: 12,
+                      background: link.accent,
+                      flexShrink: 0,
+                    }}
+                  />
+                  <span
+                    style={{
+                      fontFamily: "'JetBrains Mono', monospace",
+                      fontSize: 9,
+                      letterSpacing: "0.14em",
+                      textTransform: "uppercase",
+                      color: active
+                        ? link.accent
+                        : isDark
+                          ? "rgba(245,242,235,0.65)"
+                          : "rgba(15,15,15,0.7)",
+                    }}
+                  >
+                    {link.label}
+                  </span>
+                </Link>
+              )
+            })}
+          </div>
         </div>
       )}
     </div>

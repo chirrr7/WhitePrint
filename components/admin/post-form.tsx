@@ -473,8 +473,8 @@ function ArticleTab({ post, topics, stances, models, mode }: ArticleTabProps) {
             onKeyUp={saveSelection}
             data-placeholder="Start writing…"
             style={{
-              fontFamily: S.serif,
-              fontSize: 15,
+              fontFamily: S.mono,
+              fontSize: 13,
               lineHeight: 1.95,
               color: S.ink,
               background: S.bg,
@@ -482,6 +482,7 @@ function ArticleTab({ post, topics, stances, models, mode }: ArticleTabProps) {
               minHeight: 480,
               padding: '24px 0 64px',
               wordBreak: 'break-word',
+              whiteSpace: 'pre-wrap',
             }}
             dangerouslySetInnerHTML={{ __html: bodyHtml }}
           />
