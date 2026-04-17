@@ -1,0 +1,780 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>WhitePrint Brief — Formats & Builder</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600;1,700&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet" />
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; border-radius: 0 !important; }
+    html, body { height: 100%; background: #0a0a0a; color: #f5f2eb; overflow: hidden; }
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: rgba(245,242,235,0.12); }
+    input, textarea, select { outline: none; font-family: inherit; }
+    button { cursor: pointer; font-family: inherit; }
+    @keyframes fade-up { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:translateY(0); } }
+    @keyframes pulse-dot { 0%,100% { opacity:1; } 50% { opacity:0.4; } }
+    .fade-up { animation: fade-up 0.3s ease both; }
+  </style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { useState, useCallback, useRef } = React;
+
+const MONO  = { fontFamily: "'JetBrains Mono', monospace" };
+const SERIF = { fontFamily: "'Playfair Display', Georgia, serif" };
+const ACCENT = '#b83025';
+
+// ─── DESIGN TOKENS ────────────────────────────────────────────────────────────
+const T = {
+  bg:       '#0a0a0a',
+  surface:  '#111110',
+  surfaceB: '#161514',
+  ink:      '#f5f2eb',
+  muted:    'rgba(245,242,235,0.45)',
+  subtle:   'rgba(245,242,235,0.2)',
+  faint:    'rgba(245,242,235,0.05)',
+  border:   'rgba(245,242,235,0.08)',
+  accent:   ACCENT,
+};
+
+// Light tokens (for preview pane)
+const L = {
+  bg:      '#faf9f7',
+  surface: '#ffffff',
+  ink:     '#0f0f0f',
+  muted:   'rgba(15,15,15,0.48)',
+  subtle:  'rgba(15,15,15,0.2)',
+  faint:   'rgba(15,15,15,0.04)',
+  border:  '#e2e0db',
+  accent:  ACCENT,
+};
+
+// ─── RESEARCH TYPE CONFIG ─────────────────────────────────────────────────────
+const TYPES = {
+  equity: {
+    label: 'Equity',
+    tag:   'Forensic Equity',
+    proofLabel: 'Filing Reference',
+    proofPlaceholder: 'e.g. 10-K FY2024, Note 6 — PP&E',
+    valueLabel: 'Key Line / Figure',
+    valuePlaceholder: 'e.g. "$6,866M capex vs $1,347M in FY2022"',
+    valueNote: 'The specific fact from the filing — no full quote needed, just the number or phrase.',
+    signalVerb: 'Filed',
+    color: '#b83025',
+    example: {
+      ticker: 'ORCL', name: 'Oracle Corporation',
+      title: 'The Infrastructure Bet Nobody\'s Pricing',
+      verdict: 'SHORT',
+      counts: [
+        { num:'I', title:'Capex 10× in Three Years', signal:'High Signal', claim:'Capex grew from $1.3B in FY2022 to $6.9B in FY2024 — a step-change driven entirely by signed commitments, not demand.', src:'10-K FY2024, Note 6', value:'$6,866M vs $1,347M (FY2022)', note:'Commitment-driven capex precedes revenue by 18–36 months. Not in consensus.' },
+        { num:'II', title:'Useful-Life Extension', signal:'High Signal', claim:'Oracle extended server useful life from 4 to 5 years, mechanically adding $1.2B to FY2024 operating income.', src:'10-K FY2024, Note 1', value:'+$1.2B op. income, one-time, non-cash', note:'Models extrapolating FY2024 margins are wrong by $1.2B. This will not repeat.' },
+        { num:'III', title:'$261B Off-Balance Sheet', signal:'Critical', claim:'Unsigned data center lease commitments of $261B do not appear on the balance sheet — 11× FY2024 revenue.', src:'10-K FY2024, Note 9', value:'$261B, terms 10–19 years, not on BS', note:'When leases commence: liabilities rise, depreciation rises. FCF impaired for a decade.' },
+      ],
+      conclusion: 'Management smoothing earnings through accounting changes while committing to a decade of infrastructure spend. Market prices Oracle as software. The 10-K describes construction.',
+    },
+  },
+  macro: {
+    label: 'Macro',
+    tag:   'Macro Research',
+    proofLabel: 'Data Source',
+    proofPlaceholder: 'e.g. BLS CPI Release, Mar 2024 · FRED · Fed H.15',
+    valueLabel: 'Key Figure',
+    valuePlaceholder: 'e.g. "CPI 3.2% YoY, core 3.8%"',
+    valueNote: 'The number from the release you already looked up. No sourcing overhead.',
+    signalVerb: 'Data as of',
+    color: '#7a6040',
+    example: {
+      ticker: 'DXY', name: 'US Dollar Index',
+      title: 'Dollar Weakness: Structural, Not Cyclical',
+      verdict: 'SHORT',
+      counts: [
+        { num:'I', title:'Real Rate Premium Collapsing', signal:'High Signal', claim:'The US 10-year real yield advantage over G7 peers has compressed 180bps since Oct 2023 — the dollar\'s primary support is eroding.', src:'Fed H.15 · Blomberg TIPS, Mar 2024', value:'US real yield: 1.8% → G7 avg: 1.2% (+60bps vs −120bps in 2022)', note:'Dollar historically lags real yield moves by 3–6 months. The move has started.' },
+        { num:'II', title:'Current Account Deficit Widening', signal:'High Signal', claim:'The US current account deficit widened to 3.2% of GDP in Q4 2023 — the structural dollar short is rebuilding.', src:'BEA Current Account, Q4 2023', value:'−$219B Q4 2023, widest since 2021', note:'Sustained deficits above 3% of GDP have historically preceded multi-year dollar bear markets.' },
+        { num:'III', title:'Fed Pivot Confirmed', signal:'High Signal', claim:'March FOMC minutes confirmed three cuts in 2024 dot plot. Carry trade unwind will accelerate dollar selling.', src:'FOMC Minutes, Mar 20, 2024', value:'3 cuts in 2024 dot plot, unanimous', note:'EUR/USD targeting 1.15 over 12 months. Positioning still net-long dollar — room to run.' },
+      ],
+      conclusion: 'Three independent signals pointing the same direction: real yield compression, current account deterioration, and a confirmed pivot. This is structural dollar weakness, not a tactical dip.',
+    },
+  },
+  opds: {
+    label: 'OPDS',
+    tag:   'Quant / Options',
+    proofLabel: 'Signal',
+    proofPlaceholder: 'e.g. IV/RV spread · Skew percentile · Flow data',
+    valueLabel: 'Computed Value',
+    valuePlaceholder: 'e.g. "30d IV: 28%, 30d RV: 16% → 12 vol pts rich"',
+    valueNote: 'Your model output or computed metric. This IS the proof — no external sourcing needed.',
+    signalVerb: 'Computed',
+    color: '#3d5f8a',
+    example: {
+      ticker: 'SPX', name: 'S&P 500 Options',
+      title: 'Front-Month Vol Rich: Selling the Overpriced Hedge',
+      verdict: 'SHORT VOL',
+      counts: [
+        { num:'I', title:'IV/RV Spread at Extreme', signal:'High Signal', claim:'30-day implied vol is trading 12 points above realized — the richest premium in 14 months, driven by macro fear, not fundamental risk.', src:'IV/RV Model, Apr 18 2024', value:'IV 28% · RV 16% · Spread +12 vols (94th pct)', note:'Historically, spreads above 10 vol points mean-revert within 20 trading days 78% of the time.' },
+        { num:'II', title:'Put Skew at 3-Year High', signal:'High Signal', claim:'25-delta put skew is at the 91st percentile of its 3-year range — the market is paying up for tail protection that is historically overpriced here.', src:'Skew Model, Apr 18 2024', value:'25Δ put skew: 4.8 vols · 91st pct', note:'Skew at these levels has preceded vol normalization in 15 of 18 comparable episodes.' },
+        { num:'III', title:'Contango Steepening', signal:'Moderate', claim:'1M vs 3M vol term structure has steepened to 3.2 vols in contango — front-month is being bid by short-term hedgers, creating a structural selling opportunity.', src:'Term Structure, Apr 18 2024', value:'1M/3M spread: +3.2 vols (contango)', note:'Rolling short front-month options in this regime has produced positive carry in 19 of 24 months.' },
+      ],
+      conclusion: 'Three converging signals: IV/RV spread, put skew, and term structure all indicate front-month options are systematically overpriced. The trade: sell front-month downside, delta-hedge, target premium decay.',
+    },
+  },
+};
+
+// ─── MINI BRIEF CARD (for comparison strip) ───────────────────────────────────
+function MiniBriefCard({ typeKey, isActive, onClick }) {
+  const cfg = TYPES[typeKey];
+  const ex  = cfg.example;
+  const [open, setOpen] = useState(0);
+
+  return (
+    <div
+      onClick={onClick}
+      style={{
+        flex: 1, border: `1px solid ${isActive ? T.accent + '60' : T.border}`,
+        background: isActive ? T.faint : 'transparent',
+        transition: 'all 0.2s', cursor: 'pointer',
+        display: 'flex', flexDirection: 'column',
+      }}
+    >
+      {/* Type badge */}
+      <div style={{ padding: '10px 14px', borderBottom: `1px solid ${T.border}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <span style={{ ...MONO, fontSize: 7.5, letterSpacing: '0.14em', textTransform: 'uppercase', color: cfg.color }}>
+          {cfg.label}
+        </span>
+        <span style={{ ...MONO, fontSize: 6.5, letterSpacing: '0.12em', textTransform: 'uppercase', color: isActive ? T.accent : T.subtle, opacity: 1 }}>
+          {isActive ? '← active' : 'click to load →'}
+        </span>
+      </div>
+
+      {/* Memo strip */}
+      <div style={{ padding: '10px 14px', borderBottom: `1px solid ${T.border}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: T.faint }}>
+        <span style={{ ...MONO, fontSize: 6.5, letterSpacing: '0.1em', textTransform: 'uppercase', color: T.muted }}>{ex.ticker} · {ex.name}</span>
+        <div style={{ padding: '3px 8px', background: T.accent }}>
+          <span style={{ ...MONO, fontSize: 6.5, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#fff' }}>{ex.verdict}</span>
+        </div>
+      </div>
+
+      {/* What "proof" looks like */}
+      <div style={{ padding: '10px 14px', flex: 1 }}>
+        <div style={{ ...MONO, fontSize: 6.5, letterSpacing: '0.12em', textTransform: 'uppercase', color: T.subtle, marginBottom: 8 }}>
+          Proof type: <span style={{ color: cfg.color }}>{cfg.proofLabel}</span>
+        </div>
+
+        {ex.counts.slice(0, 2).map((c, i) => (
+          <div key={i} style={{ marginBottom: 8, padding: '8px 10px', border: `1px solid ${T.border}`, background: T.faint }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
+              <span style={{ ...MONO, fontSize: 6, letterSpacing: '0.1em', textTransform: 'uppercase', color: T.subtle }}>Count {c.num}</span>
+              <span style={{ ...MONO, fontSize: 6, letterSpacing: '0.1em', textTransform: 'uppercase', color: T.muted }}>{c.signal}</span>
+            </div>
+            <div style={{ ...SERIF, fontSize: 10.5, fontWeight: 600, color: T.ink, marginBottom: 4 }}>{c.title}</div>
+            {/* The proof block */}
+            <div style={{ display: 'flex', gap: 6, alignItems: 'flex-start' }}>
+              <div style={{ width: 1.5, background: cfg.color, flexShrink: 0, alignSelf: 'stretch', minHeight: 12 }} />
+              <div>
+                <span style={{ ...MONO, fontSize: 6, letterSpacing: '0.08em', textTransform: 'uppercase', color: cfg.color }}>
+                  {c.src}
+                </span>
+                <div style={{ ...MONO, fontSize: 7, letterSpacing: '0.04em', color: T.muted, marginTop: 2 }}>{c.value}</div>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ─── BRIEF BUILDER FORM ───────────────────────────────────────────────────────
+const SIGNALS = ['High Signal', 'Critical', 'Moderate', 'Watch'];
+const VERDICTS_BY_TYPE = {
+  equity: ['SHORT', 'LONG', 'NEUTRAL', 'WATCH'],
+  macro:  ['SHORT', 'LONG', 'NEUTRAL', 'WATCH'],
+  opds:   ['SHORT VOL', 'LONG VOL', 'LONG SKEW', 'SHORT SKEW', 'NEUTRAL'],
+};
+
+function makeCount() {
+  return { title: '', signal: 'High Signal', claim: '', src: '', value: '', note: '' };
+}
+
+function BriefBuilder({ typeKey, onTypeChange, onFormChange, formData }) {
+  const cfg = TYPES[typeKey];
+
+  const update = (key, val) => onFormChange({ ...formData, [key]: val });
+  const updateCount = (i, key, val) => {
+    const counts = [...formData.counts];
+    counts[i] = { ...counts[i], [key]: val };
+    onFormChange({ ...formData, counts });
+  };
+  const addCount = () => {
+    if (formData.counts.length < 5) onFormChange({ ...formData, counts: [...formData.counts, makeCount()] });
+  };
+  const removeCount = (i) => {
+    const counts = formData.counts.filter((_, idx) => idx !== i);
+    onFormChange({ ...formData, counts });
+  };
+
+  const field = (label, key, placeholder, multiline = false, note = '') => (
+    <div style={{ marginBottom: 16 }}>
+      <label style={{ ...MONO, fontSize: 7, letterSpacing: '0.14em', textTransform: 'uppercase', color: T.muted, display: 'block', marginBottom: 6 }}>
+        {label}
+      </label>
+      {multiline ? (
+        <textarea
+          value={formData[key] || ''}
+          onChange={e => update(key, e.target.value)}
+          placeholder={placeholder}
+          rows={2}
+          style={{
+            width: '100%', background: T.faint, border: `1px solid ${T.border}`,
+            color: T.ink, padding: '8px 10px', resize: 'vertical',
+            ...SERIF, fontSize: 12, lineHeight: 1.6,
+            '::placeholder': { color: T.subtle },
+          }}
+        />
+      ) : (
+        <input
+          value={formData[key] || ''}
+          onChange={e => update(key, e.target.value)}
+          placeholder={placeholder}
+          style={{
+            width: '100%', background: T.faint, border: `1px solid ${T.border}`,
+            color: T.ink, padding: '8px 10px',
+            ...SERIF, fontSize: 12,
+          }}
+        />
+      )}
+      {note && <div style={{ ...MONO, fontSize: 6.5, letterSpacing: '0.06em', color: T.subtle, marginTop: 5, lineHeight: 1.6 }}>{note}</div>}
+    </div>
+  );
+
+  return (
+    <div style={{ height: '100%', overflowY: 'auto', padding: '28px 32px' }}>
+      {/* Header */}
+      <div style={{ marginBottom: 24 }}>
+        <div style={{ ...MONO, fontSize: 7, letterSpacing: '0.2em', textTransform: 'uppercase', color: T.accent, marginBottom: 8 }}>
+          Brief Builder
+        </div>
+        <div style={{ ...SERIF, fontSize: 20, fontWeight: 700, color: T.ink, letterSpacing: '-0.02em' }}>
+          Create a New Brief
+        </div>
+        <div style={{ ...SERIF, fontSize: 11.5, color: T.muted, marginTop: 6, fontStyle: 'italic' }}>
+          ~15 minutes · 3–4 counts · no extra sourcing required
+        </div>
+      </div>
+
+      {/* Type selector */}
+      <div style={{ marginBottom: 24 }}>
+        <div style={{ ...MONO, fontSize: 7, letterSpacing: '0.14em', textTransform: 'uppercase', color: T.muted, marginBottom: 8 }}>
+          Research Type
+        </div>
+        <div style={{ display: 'flex', gap: 1 }}>
+          {Object.entries(TYPES).map(([k, cfg]) => (
+            <button
+              key={k}
+              onClick={() => onTypeChange(k)}
+              style={{
+                flex: 1, padding: '9px 14px',
+                background: typeKey === k ? cfg.color : T.faint,
+                border: `1px solid ${typeKey === k ? cfg.color : T.border}`,
+                color: typeKey === k ? '#fff' : T.muted,
+                ...MONO, fontSize: 8, letterSpacing: '0.12em', textTransform: 'uppercase',
+                transition: 'all 0.15s',
+              }}
+            >
+              {cfg.label}
+            </button>
+          ))}
+        </div>
+
+        {/* Type hint */}
+        <div style={{
+          marginTop: 8, padding: '8px 12px',
+          background: T.faint, border: `1px solid ${T.border}`,
+          display: 'flex', alignItems: 'flex-start', gap: 8
+        }}>
+          <div style={{ width: 1.5, background: TYPES[typeKey].color, flexShrink: 0, alignSelf: 'stretch' }} />
+          <div>
+            <div style={{ ...MONO, fontSize: 6.5, letterSpacing: '0.08em', color: TYPES[typeKey].color, marginBottom: 3 }}>
+              Proof source for {TYPES[typeKey].label}
+            </div>
+            <div style={{ ...MONO, fontSize: 6.5, letterSpacing: '0.05em', color: T.muted, lineHeight: 1.7 }}>
+              {typeKey === 'equity' && 'SEC filings, proxy statements, earnings releases. You paste the filing name — no full quote required, just the key fact.'}
+              {typeKey === 'macro' && 'Fed releases, BLS data, BEA, FRED, IMF. You already noted these numbers researching the piece — just reference the source and figure.'}
+              {typeKey === 'opds' && 'Your own model outputs. IV/RV spreads, skew percentiles, term structure readings. You computed these — the number IS the proof. Zero extra work.'}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div style={{ height: 1, background: T.border, marginBottom: 24 }} />
+
+      {/* Core fields */}
+      <div style={{ marginBottom: 6 }}>
+        <div style={{ ...MONO, fontSize: 7, letterSpacing: '0.14em', textTransform: 'uppercase', color: T.muted, marginBottom: 14 }}>
+          § 1 — Core Details
+        </div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 16 }}>
+          <div>
+            <label style={{ ...MONO, fontSize: 7, letterSpacing: '0.14em', textTransform: 'uppercase', color: T.muted, display: 'block', marginBottom: 6 }}>
+              Ticker / Subject
+            </label>
+            <input
+              value={formData.ticker || ''}
+              onChange={e => update('ticker', e.target.value.toUpperCase())}
+              placeholder='ORCL'
+              style={{ width: '100%', background: T.faint, border: `1px solid ${T.border}`, color: T.ink, padding: '8px 10px', ...MONO, fontSize: 13, letterSpacing: '0.1em' }}
+            />
+          </div>
+          <div>
+            <label style={{ ...MONO, fontSize: 7, letterSpacing: '0.14em', textTransform: 'uppercase', color: T.muted, display: 'block', marginBottom: 6 }}>
+              Verdict
+            </label>
+            <select
+              value={formData.verdict || ''}
+              onChange={e => update('verdict', e.target.value)}
+              style={{ width: '100%', background: T.faint, border: `1px solid ${T.border}`, color: T.ink, padding: '8px 10px', ...MONO, fontSize: 9, letterSpacing: '0.1em', textTransform: 'uppercase' }}
+            >
+              <option value=''>Select verdict</option>
+              {(VERDICTS_BY_TYPE[typeKey] || []).map(v => <option key={v} value={v}>{v}</option>)}
+            </select>
+          </div>
+        </div>
+
+        {field('Title / Headline', 'title', 'e.g. The Infrastructure Bet Nobody\'s Pricing', false)}
+        {field('One-Line Conclusion', 'conclusion', 'The short version of your verdict — this appears at the bottom of every Brief.', true)}
+      </div>
+
+      <div style={{ height: 1, background: T.border, margin: '24px 0' }} />
+
+      {/* Counts */}
+      <div>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
+          <div style={{ ...MONO, fontSize: 7, letterSpacing: '0.14em', textTransform: 'uppercase', color: T.muted }}>
+            § 2 — Counts ({formData.counts.length}/5)
+          </div>
+          {formData.counts.length < 5 && (
+            <button
+              onClick={addCount}
+              style={{ padding: '5px 12px', background: 'transparent', border: `1px solid ${T.border}`, color: T.muted, ...MONO, fontSize: 7, letterSpacing: '0.1em', textTransform: 'uppercase', transition: 'all 0.15s' }}
+            >
+              + Add Count
+            </button>
+          )}
+        </div>
+
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+          {formData.counts.map((count, i) => (
+            <CountBuilder
+              key={i}
+              index={i}
+              count={count}
+              typeKey={typeKey}
+              cfg={cfg}
+              onChange={(key, val) => updateCount(i, key, val)}
+              onRemove={() => removeCount(i)}
+              canRemove={formData.counts.length > 1}
+            />
+          ))}
+        </div>
+      </div>
+
+      {/* Publish */}
+      <div style={{ marginTop: 24, display: 'flex', gap: 8 }}>
+        <button style={{
+          flex: 1, padding: '12px', background: T.accent, border: 'none', color: '#fff',
+          ...MONO, fontSize: 8.5, letterSpacing: '0.14em', textTransform: 'uppercase',
+        }}>
+          Publish Brief
+        </button>
+        <button style={{
+          padding: '12px 18px', background: 'transparent', border: `1px solid ${T.border}`, color: T.muted,
+          ...MONO, fontSize: 8, letterSpacing: '0.12em', textTransform: 'uppercase',
+        }}>
+          Save Draft
+        </button>
+      </div>
+
+      {/* Estimated time */}
+      <div style={{ marginTop: 12, textAlign: 'center' }}>
+        <span style={{ ...MONO, fontSize: 6.5, letterSpacing: '0.08em', color: T.subtle }}>
+          {typeKey === 'equity' ? 'Est. 20–30 min — filing references required' :
+           typeKey === 'macro'  ? 'Est. 15–20 min — data points you already have' :
+                                  'Est. 10–15 min — model outputs, no external sourcing'}
+        </span>
+      </div>
+    </div>
+  );
+}
+
+const ROMAN = ['I','II','III','IV','V'];
+
+function CountBuilder({ index, count, typeKey, cfg, onChange, onRemove, canRemove }) {
+  const [expanded, setExpanded] = useState(index === 0);
+
+  return (
+    <div style={{ border: `1px solid ${expanded ? T.accent + '40' : T.border}`, transition: 'border-color 0.2s' }}>
+      {/* Header */}
+      <div
+        onClick={() => setExpanded(!expanded)}
+        style={{
+          padding: '12px 14px', display: 'flex', alignItems: 'center', gap: 12,
+          background: expanded ? T.faint : 'transparent', cursor: 'pointer',
+          transition: 'background 0.15s',
+        }}
+      >
+        <div style={{
+          width: 26, height: 26, border: `1px solid ${expanded ? T.accent : T.border}`,
+          display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+          ...SERIF, fontSize: 11, fontStyle: 'italic', fontWeight: 700,
+          color: expanded ? T.accent : T.ink, transition: 'all 0.2s',
+        }}>
+          {ROMAN[index]}
+        </div>
+        <div style={{ flex: 1 }}>
+          <div style={{ ...MONO, fontSize: 6.5, letterSpacing: '0.1em', textTransform: 'uppercase', color: T.subtle, marginBottom: 3 }}>
+            Count {ROMAN[index]}
+          </div>
+          <div style={{ ...SERIF, fontSize: 12.5, color: count.title ? T.ink : T.subtle, fontStyle: count.title ? 'normal' : 'italic' }}>
+            {count.title || 'Untitled count — click to expand'}
+          </div>
+        </div>
+        <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+          {canRemove && (
+            <button
+              onClick={e => { e.stopPropagation(); onRemove(); }}
+              style={{ background: 'none', border: 'none', color: T.subtle, ...MONO, fontSize: 9, padding: '2px 4px' }}
+            >×</button>
+          )}
+          <span style={{ ...MONO, fontSize: 11, color: T.subtle }}>{expanded ? '−' : '+'}</span>
+        </div>
+      </div>
+
+      {/* Fields */}
+      {expanded && (
+        <div className="fade-up" style={{ padding: '16px 14px 14px' }}>
+          {/* Title + Signal row */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 160px', gap: 10, marginBottom: 14 }}>
+            <div>
+              <label style={{ ...MONO, fontSize: 6.5, letterSpacing: '0.12em', textTransform: 'uppercase', color: T.muted, display: 'block', marginBottom: 5 }}>Count Title</label>
+              <input
+                value={count.title}
+                onChange={e => onChange('title', e.target.value)}
+                placeholder='e.g. Capex 10× in Three Years'
+                style={{ width:'100%', background:T.faint, border:`1px solid ${T.border}`, color:T.ink, padding:'7px 10px', ...SERIF, fontSize:12 }}
+              />
+            </div>
+            <div>
+              <label style={{ ...MONO, fontSize: 6.5, letterSpacing: '0.12em', textTransform: 'uppercase', color: T.muted, display: 'block', marginBottom: 5 }}>Signal Level</label>
+              <select
+                value={count.signal}
+                onChange={e => onChange('signal', e.target.value)}
+                style={{ width:'100%', background:T.faint, border:`1px solid ${T.border}`, color:T.ink, padding:'7px 10px', ...MONO, fontSize:8, letterSpacing:'0.08em', textTransform:'uppercase' }}
+              >
+                {SIGNALS.map(s => <option key={s} value={s}>{s}</option>)}
+              </select>
+            </div>
+          </div>
+
+          {/* Claim */}
+          <div style={{ marginBottom: 14 }}>
+            <label style={{ ...MONO, fontSize: 6.5, letterSpacing: '0.12em', textTransform: 'uppercase', color: T.muted, display: 'block', marginBottom: 5 }}>
+              Your Claim
+              <span style={{ ...MONO, fontSize: 5.5, color: T.subtle, marginLeft: 8, textTransform: 'none', letterSpacing: '0.04em' }}>one sentence — what you believe and why</span>
+            </label>
+            <textarea
+              value={count.claim}
+              onChange={e => onChange('claim', e.target.value)}
+              placeholder='e.g. Capex grew 10× from FY2022 to FY2024, driven entirely by signed commitments ahead of demand.'
+              rows={2}
+              style={{ width:'100%', background:T.faint, border:`1px solid ${T.border}`, color:T.ink, padding:'7px 10px', resize:'vertical', ...SERIF, fontSize:12, lineHeight:1.65 }}
+            />
+          </div>
+
+          {/* Proof block — changes by type */}
+          <div style={{ padding: '12px', background: T.faint, border: `1px solid ${T.border}`, marginBottom: 14 }}>
+            <div style={{ ...MONO, fontSize: 6.5, letterSpacing: '0.1em', textTransform: 'uppercase', color: cfg.color, marginBottom: 10 }}>
+              Proof — {cfg.proofLabel}
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+              <div>
+                <label style={{ ...MONO, fontSize: 6, letterSpacing: '0.1em', textTransform: 'uppercase', color: T.subtle, display: 'block', marginBottom: 5 }}>Source</label>
+                <input
+                  value={count.src}
+                  onChange={e => onChange('src', e.target.value)}
+                  placeholder={cfg.proofPlaceholder}
+                  style={{ width:'100%', background:'transparent', border:`1px solid ${T.border}`, color:T.ink, padding:'6px 8px', ...MONO, fontSize:9 }}
+                />
+              </div>
+              <div>
+                <label style={{ ...MONO, fontSize: 6, letterSpacing: '0.1em', textTransform: 'uppercase', color: T.subtle, display: 'block', marginBottom: 5 }}>{cfg.valueLabel}</label>
+                <input
+                  value={count.value}
+                  onChange={e => onChange('value', e.target.value)}
+                  placeholder={cfg.valuePlaceholder}
+                  style={{ width:'100%', background:'transparent', border:`1px solid ${T.border}`, color:T.ink, padding:'6px 8px', ...MONO, fontSize:9 }}
+                />
+              </div>
+            </div>
+            <div style={{ ...MONO, fontSize: 6, letterSpacing: '0.05em', color: T.subtle, marginTop: 8, lineHeight: 1.65 }}>
+              {cfg.valueNote}
+            </div>
+          </div>
+
+          {/* Interpretation */}
+          <div>
+            <label style={{ ...MONO, fontSize: 6.5, letterSpacing: '0.12em', textTransform: 'uppercase', color: T.muted, display: 'block', marginBottom: 5 }}>
+              Your Interpretation
+              <span style={{ ...MONO, fontSize: 5.5, color: T.subtle, marginLeft: 8, textTransform: 'none', letterSpacing: '0.04em' }}>what it means — 1–2 sentences</span>
+            </label>
+            <textarea
+              value={count.note}
+              onChange={e => onChange('note', e.target.value)}
+              placeholder='e.g. Commitment-driven capex precedes revenue by 18–36 months. This is not in consensus.'
+              rows={2}
+              style={{ width:'100%', background:T.faint, border:`1px solid ${T.border}`, color:T.ink, padding:'7px 10px', resize:'vertical', ...SERIF, fontSize:12, lineHeight:1.65 }}
+            />
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── BRIEF PREVIEW PANE ───────────────────────────────────────────────────────
+function BriefPreview({ typeKey, formData }) {
+  const [openCount, setOpenCount] = useState(null);
+  const cfg = TYPES[typeKey];
+  const data = formData;
+
+  const hasContent = data.ticker || data.title;
+
+  return (
+    <div style={{ height: '100%', overflowY: 'auto', background: L.bg }}>
+      {/* Preview label */}
+      <div style={{
+        position: 'sticky', top: 0, zIndex: 10,
+        background: 'rgba(250,249,247,0.95)', backdropFilter: 'blur(8px)',
+        padding: '10px 24px', borderBottom: `1px solid ${L.border}`,
+        display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+      }}>
+        <span style={{ ...MONO, fontSize: 7, letterSpacing: '0.14em', textTransform: 'uppercase', color: L.muted }}>Live Preview</span>
+        <span style={{ ...MONO, fontSize: 6.5, letterSpacing: '0.1em', textTransform: 'uppercase', color: TYPES[typeKey].color }}>
+          {cfg.label}
+        </span>
+      </div>
+
+      {!hasContent ? (
+        <div style={{ padding: '48px 24px', textAlign: 'center' }}>
+          <div style={{ ...SERIF, fontSize: 14, color: L.muted, fontStyle: 'italic', lineHeight: 1.7 }}>
+            Start filling in the form and your Brief will appear here.
+          </div>
+        </div>
+      ) : (
+        <div>
+          {/* Hero */}
+          <div style={{ background: '#0a0a0a', padding: '28px 24px 24px', position: 'relative' }}>
+            <div style={{ ...MONO, fontSize: 7, letterSpacing: '0.16em', textTransform: 'uppercase', color: ACCENT, marginBottom: 10 }}>
+              The Brief · {cfg.tag}
+            </div>
+            <h1 style={{ ...SERIF, fontSize: 18, fontWeight: 700, color: 'rgba(245,242,235,0.95)', lineHeight: 1.3, letterSpacing: '-0.02em', marginBottom: 14 }}>
+              {data.title || 'Untitled Brief'}
+            </h1>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <span style={{ ...MONO, fontSize: 6.5, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(245,242,235,0.35)' }}>
+                {data.ticker || '—'} · Whiteprint Research
+              </span>
+            </div>
+            <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 2, background: ACCENT }} />
+          </div>
+
+          {/* Memo strip */}
+          <div style={{ background: L.faint, padding: '10px 16px', borderBottom: `1px solid ${L.border}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <span style={{ ...MONO, fontSize: 6.5, letterSpacing: '0.08em', textTransform: 'uppercase', color: L.muted }}>
+              {data.ticker ? `WP-2024-${data.ticker}` : 'WP-2024-—'}
+            </span>
+            {data.verdict && (
+              <div style={{ padding: '3px 10px', background: ACCENT }}>
+                <span style={{ ...MONO, fontSize: 6.5, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#fff' }}>
+                  {data.verdict}
+                </span>
+              </div>
+            )}
+          </div>
+
+          {/* Counts */}
+          <div style={{ background: L.surface }}>
+            {data.counts.filter(c => c.title).map((count, i) => {
+              const isOpen = openCount === i;
+              return (
+                <div key={i} style={{ borderBottom: `1px solid ${L.border}` }}>
+                  <button
+                    onClick={() => setOpenCount(isOpen ? null : i)}
+                    style={{
+                      width: '100%', display: 'flex', alignItems: 'center', gap: 12,
+                      padding: '14px 16px', background: isOpen ? L.faint : L.surface,
+                      border: 'none', cursor: 'pointer', textAlign: 'left', transition: 'background 0.15s',
+                    }}
+                  >
+                    <div style={{
+                      width: 28, height: 28, border: `1px solid ${isOpen ? ACCENT : L.border}`,
+                      display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+                      ...SERIF, fontSize: 11, fontStyle: 'italic', fontWeight: 700,
+                      color: isOpen ? ACCENT : L.ink,
+                    }}>{ROMAN[i]}</div>
+                    <div style={{ flex: 1 }}>
+                      <div style={{ ...MONO, fontSize: 6, letterSpacing: '0.1em', textTransform: 'uppercase', color: count.signal === 'Critical' ? ACCENT : L.muted, marginBottom: 3 }}>
+                        {count.signal}
+                      </div>
+                      <div style={{ ...SERIF, fontSize: 13, fontWeight: 600, color: L.ink, letterSpacing: '-0.01em' }}>
+                        {count.title}
+                      </div>
+                    </div>
+                    <span style={{ ...MONO, fontSize: 12, color: L.subtle }}>{isOpen ? '−' : '+'}</span>
+                  </button>
+
+                  {isOpen && (
+                    <div className="fade-up" style={{ padding: '0 16px 16px 56px' }}>
+                      {count.claim && (
+                        <p style={{ ...SERIF, fontSize: 12, lineHeight: 1.85, color: L.ink, opacity: 0.68, marginBottom: 12 }}>
+                          {count.claim}
+                        </p>
+                      )}
+                      {(count.src || count.value) && (
+                        <div style={{ padding: '10px 12px', background: L.faint, border: `1px solid ${L.border}`, marginBottom: 10 }}>
+                          {count.src && <div style={{ ...MONO, fontSize: 6.5, letterSpacing: '0.08em', textTransform: 'uppercase', color: TYPES[typeKey].color, marginBottom: 5 }}>{count.src}</div>}
+                          {count.value && <div style={{ ...MONO, fontSize: 8, letterSpacing: '0.06em', color: L.ink, opacity: 0.75 }}>{count.value}</div>}
+                        </div>
+                      )}
+                      {count.note && (
+                        <div style={{ display: 'flex', gap: 10 }}>
+                          <div style={{ width: 2, background: ACCENT, flexShrink: 0 }} />
+                          <p style={{ ...SERIF, fontSize: 11.5, lineHeight: 1.8, color: L.ink, opacity: 0.65 }}>{count.note}</p>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Conclusion */}
+          {data.conclusion && (
+            <div style={{ padding: '16px', background: L.surface, borderTop: `2px solid ${ACCENT}`, margin: '1px 0' }}>
+              <div style={{ ...MONO, fontSize: 6.5, letterSpacing: '0.14em', textTransform: 'uppercase', color: ACCENT, marginBottom: 8 }}>Conclusion</div>
+              <p style={{ ...SERIF, fontSize: 12.5, lineHeight: 1.88, color: L.ink, opacity: 0.68 }}>{data.conclusion}</p>
+            </div>
+          )}
+
+          {data.verdict && (
+            <div style={{ padding: '14px 16px', background: L.bg }}>
+              <button style={{
+                width: '100%', padding: '12px', background: '#0a0a0a',
+                border: 'none', ...MONO, fontSize: 8, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#fff',
+              }}>
+                Read Full Analysis →
+              </button>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── APP ──────────────────────────────────────────────────────────────────────
+function makeDefaultForm(typeKey) {
+  const ex = TYPES[typeKey].example;
+  return {
+    ticker:     ex.ticker,
+    verdict:    ex.verdict,
+    title:      ex.title,
+    conclusion: ex.conclusion,
+    counts:     ex.counts.map(c => ({
+      title: c.title, signal: c.signal, claim: c.claim, src: c.src, value: c.value, note: c.note,
+    })),
+  };
+}
+
+function App() {
+  const [typeKey, setTypeKey] = useState('equity');
+  const [activeFormatKey, setActiveFormatKey] = useState('equity');
+  const [formData, setFormData] = useState(() => makeDefaultForm('equity'));
+
+  const handleTypeChange = (key) => {
+    setTypeKey(key);
+    setActiveFormatKey(key);
+    setFormData(makeDefaultForm(key));
+  };
+
+  const handleFormatClick = (key) => {
+    setActiveFormatKey(key);
+    setTypeKey(key);
+    setFormData(makeDefaultForm(key));
+  };
+
+  return (
+    <div style={{ height: '100vh', display: 'flex', flexDirection: 'column', background: T.bg }}>
+      {/* Top bar */}
+      <div style={{
+        height: 48, display: 'flex', alignItems: 'center', padding: '0 32px',
+        borderBottom: `1px solid ${T.border}`, flexShrink: 0,
+        justifyContent: 'space-between',
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 24 }}>
+          <span style={{ ...SERIF, fontSize: 14, fontWeight: 700, color: T.ink }}>
+            Whiteprint <em style={{ color: ACCENT }}>Research</em>
+          </span>
+          <div style={{ width: 1, height: 14, background: T.border }} />
+          <span style={{ ...MONO, fontSize: 7, letterSpacing: '0.14em', textTransform: 'uppercase', color: T.accent }}>
+            Brief Formats & Builder
+          </span>
+        </div>
+        <span style={{ ...MONO, fontSize: 7, letterSpacing: '0.1em', textTransform: 'uppercase', color: T.subtle }}>Admin</span>
+      </div>
+
+      {/* Format comparison strip */}
+      <div style={{ padding: '12px 24px', borderBottom: `1px solid ${T.border}`, flexShrink: 0 }}>
+        <div style={{ ...MONO, fontSize: 6.5, letterSpacing: '0.14em', textTransform: 'uppercase', color: T.subtle, marginBottom: 8 }}>
+          Brief format by research type — click to load into builder
+        </div>
+        <div style={{ display: 'flex', gap: 6, height: 200 }}>
+          {Object.keys(TYPES).map(k => (
+            <MiniBriefCard key={k} typeKey={k} isActive={activeFormatKey === k} onClick={() => handleFormatClick(k)} />
+          ))}
+        </div>
+      </div>
+
+      {/* Builder + Preview */}
+      <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
+        {/* Builder */}
+        <div style={{ flex: 1, borderRight: `1px solid ${T.border}`, overflow: 'hidden' }}>
+          <BriefBuilder
+            typeKey={typeKey}
+            onTypeChange={handleTypeChange}
+            onFormChange={setFormData}
+            formData={formData}
+          />
+        </div>
+
+        {/* Preview */}
+        <div style={{ width: 360, flexShrink: 0, overflow: 'hidden' }}>
+          <BriefPreview typeKey={typeKey} formData={formData} />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>

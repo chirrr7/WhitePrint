@@ -2,42 +2,95 @@ import Link from 'next/link'
 import { getStancesPageData } from '@/lib/admin/data'
 import { formatAdminDate, readPageMessage } from '@/lib/admin/messages'
 import styles from '@/app/admin/admin.module.css'
+import { sectionAccent } from '@/lib/tokens'
 
 interface AdminStancesPageProps {
   searchParams: Promise<Record<string, string | string[] | undefined>>
 }
 
-function formatCategoryLabel(value: string) {
-  switch (value) {
-    case 'macro':
-      return 'Macro'
-    case 'market-notes':
-      return 'Market Notes'
+type StatusFilter = 'active' | 'closed' | 'all'
+
+const FILTER_TABS: Array<{ key: StatusFilter; label: string }> = [
+  { key: 'active', label: 'Active' },
+  { key: 'closed', label: 'Closed' },
+  { key: 'all', label: 'All' },
+]
+
+function directionFor(opinion: string): 'long' | 'short' | 'neutral' {
+  if (opinion === 'constructive') return 'long'
+  if (opinion === 'cautious') return 'short'
+  return 'neutral'
+}
+
+function directionLabel(direction: 'long' | 'short' | 'neutral'): string {
+  return direction.charAt(0).toUpperCase() + direction.slice(1)
+}
+
+function convictionPercent(conviction: string): number {
+  switch (conviction) {
+    case 'high':
+      return 90
+    case 'medium':
+      return 60
+    case 'low':
+      return 30
     default:
-      return 'Equity Research'
+      return 50
   }
 }
 
+function sectionAccentClass(category: string): string {
+  switch (category) {
+    case 'macro':
+      return styles.sectionAccentMacro
+    case 'market-notes':
+      return styles.sectionAccentMarketNotes
+    case 'quant':
+      return styles.sectionAccentQuant
+    default:
+      return styles.sectionAccentEquity
+  }
+}
+
+function readString(
+  params: Record<string, string | string[] | undefined>,
+  key: string,
+): string {
+  const value = params[key]
+  if (Array.isArray(value)) return value[0] ?? ''
+  return value ?? ''
+}
+
 export default async function AdminStancesPage({ searchParams }: AdminStancesPageProps) {
-  const [message, { stances }] = await Promise.all([
+  const [resolvedParams, message, { stances }] = await Promise.all([
+    searchParams,
     readPageMessage(searchParams),
     getStancesPageData(),
   ])
 
+  const filterRaw = readString(resolvedParams, 'filter').toLowerCase()
+  const activeFilter: StatusFilter =
+    (FILTER_TABS.find((t) => t.key === filterRaw)?.key ?? 'active') as StatusFilter
+
+  const filtered = stances.filter((stance) => {
+    if (activeFilter === 'all') return true
+    const isActive = stance.coverageStatus === 'active' && stance.status === 'published'
+    return activeFilter === 'active' ? isActive : !isActive
+  })
+
   return (
     <div className={styles.pageStack}>
       <div className={styles.pageHeader}>
-        <div>
+        <div className={styles.pageHeaderInner}>
           <p className={styles.eyebrow}>Coverage</p>
-          <h1 className={styles.pageTitle}>Manage public stance records.</h1>
+          <h1 className={styles.pageTitle}>Stances</h1>
           <p className={styles.pageIntro}>
-            Coverage records now power the public coverage page, homepage ticker, and
-            stance strip directly. Posts can link back into them, but the coverage view
-            is no longer derived from post frontmatter.
+            Public stance records. Each card drives the coverage page, ticker, and
+            stance strip.
           </p>
         </div>
         <Link href="/admin/stances/new" className={styles.primaryButton}>
-          New coverage record
+          + New Stance
         </Link>
       </div>
 
@@ -47,57 +100,77 @@ export default async function AdminStancesPage({ searchParams }: AdminStancesPag
         </div>
       ) : null}
 
-      <div className={styles.panel}>
-        <div className={styles.panelHeader}>
-          <div>
-            <h2 className={styles.panelTitle}>Saved coverage</h2>
-            <p className={styles.panelIntro}>
-              These are the database-backed records driving the public coverage experience.
-            </p>
-          </div>
-        </div>
+      <nav className={styles.filterTabs} aria-label="Filter stances">
+        {FILTER_TABS.map((tab) => {
+          const href = tab.key === 'active' ? '?' : `?filter=${tab.key}`
+          const isActive = activeFilter === tab.key
+          return (
+            <Link
+              key={tab.key}
+              href={href}
+              className={`${styles.filterTab} ${isActive ? styles.filterTabActive : ''}`}
+            >
+              {tab.label}
+            </Link>
+          )
+        })}
+      </nav>
 
-        {stances.length ? (
-          <div className={styles.list}>
-            {stances.map((stance) => (
-              <div key={stance.id} className={styles.listItem}>
-                <div>
-                  <p className={styles.listItemTitle}>
-                    {stance.ticker || 'TBD'} · {stance.name || stance.title}
-                  </p>
-                  <p className={styles.listItemMeta}>
-                    {formatCategoryLabel(stance.coverageCategory)} · {stance.opinion} ·{' '}
-                    {stance.conviction} · {stance.coverageStatus}
-                  </p>
-                  <p className={styles.listItemMeta}>
-                    {stance.thesis || stance.summary || stance.slug}
-                  </p>
-                  <p className={styles.listItemMeta}>
-                    Tags: {stance.tags.length ? stance.tags.join(', ') : 'No tags yet'}
-                  </p>
-                  <p className={styles.listItemMeta}>
-                    Linked posts:{' '}
-                    {stance.linkedPostLabels.length
-                      ? stance.linkedPostLabels.join(', ')
-                      : 'No posts linked yet'}
-                  </p>
-                </div>
-                <div className={styles.stackedMeta}>
-                  <span className={styles.statusBadge} data-status={stance.status}>
-                    {stance.status}
+      {filtered.length ? (
+        <div className={styles.stanceGrid}>
+          {filtered.map((stance) => {
+            const direction = directionFor(stance.opinion)
+            const convictionPct = convictionPercent(stance.conviction)
+            const accent = sectionAccent[stance.coverageCategory] ?? '#b83025'
+
+            return (
+              <Link
+                key={stance.id}
+                href={`/admin/stances/${stance.id}`}
+                className={styles.stanceCard}
+              >
+                <p className={styles.stanceTicker}>{stance.ticker || 'TBD'}</p>
+                <h3 className={styles.stanceName}>{stance.name || stance.title}</h3>
+
+                <div className={styles.stanceMetaRow}>
+                  <span className={styles.directionBadge} data-direction={direction}>
+                    {directionLabel(direction)}
                   </span>
-                  <span className={styles.mono}>{formatAdminDate(stance.updatedAt)}</span>
-                  <Link href={`/admin/stances/${stance.id}`} className={styles.secondaryButton}>
-                    Edit
-                  </Link>
+                  <span
+                    className={`${styles.typeTag} ${sectionAccentClass(stance.coverageCategory)}`}
+                    style={{ color: accent }}
+                  >
+                    {stance.coverageCategory.replace('-', ' ')}
+                  </span>
                 </div>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <div className={styles.emptyState}>No coverage records saved yet.</div>
-        )}
-      </div>
+
+                <div className={styles.convictionWrap}>
+                  <div className={styles.convictionLabel}>
+                    <span>Conviction</span>
+                    <span>{stance.conviction} / {convictionPct}%</span>
+                  </div>
+                  <div className={styles.convictionBar}>
+                    <div
+                      className={styles.convictionFill}
+                      style={{ width: `${convictionPct}%` }}
+                    />
+                  </div>
+                </div>
+
+                <p className={styles.listItemMeta}>
+                  Filed {formatAdminDate(stance.updatedAt)}
+                </p>
+              </Link>
+            )
+          })}
+        </div>
+      ) : (
+        <div className={styles.emptyState}>
+          {stances.length
+            ? 'No stances match this filter.'
+            : 'No coverage records saved yet.'}
+        </div>
+      )}
     </div>
   )
 }

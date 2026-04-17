@@ -14,8 +14,8 @@ export function InProgressForm({ item, message, mode }: InProgressFormProps) {
   return (
     <div className={styles.pageStack}>
       <div className={styles.pageHeader}>
-        <div>
-          <p className={styles.eyebrow}>In progress</p>
+        <div className={styles.pageHeaderInner}>
+          <p className={styles.eyebrow}>Pipeline</p>
           <h1 className={styles.pageTitle}>
             {mode === 'create' ? 'New work item' : 'Edit work item'}
           </h1>
@@ -36,108 +36,112 @@ export function InProgressForm({ item, message, mode }: InProgressFormProps) {
       ) : null}
 
       <form action={saveInProgressItemAction} className={styles.panel}>
-        {item ? <input type="hidden" name="id" value={String(item.id)} /> : null}
+        <div className={styles.panelPadded}>
+          {item ? <input type="hidden" name="id" value={String(item.id)} /> : null}
 
-        <div className={styles.formGrid}>
-          <div className={styles.formGridTwo}>
-            <label className={styles.field}>
-              <span className={styles.label}>Title</span>
-              <input
-                className={styles.input}
-                type="text"
-                name="title"
-                defaultValue={item?.title ?? ''}
-                required
-              />
-            </label>
-            <label className={styles.field}>
-              <span className={styles.label}>Slug</span>
-              <input
-                className={styles.input}
-                type="text"
-                name="slug"
-                defaultValue={item?.slug ?? ''}
-                placeholder="energy-shipping-lanes"
-              />
-            </label>
-          </div>
+          <div className={styles.formGrid}>
+            <div className={styles.formGridTwo}>
+              <label className={styles.field}>
+                <span className={styles.label}>Title</span>
+                <input
+                  className={styles.input}
+                  type="text"
+                  name="title"
+                  defaultValue={item?.title ?? ''}
+                  required
+                />
+              </label>
+              <label className={styles.field}>
+                <span className={styles.label}>Slug</span>
+                <input
+                  className={styles.input}
+                  type="text"
+                  name="slug"
+                  defaultValue={item?.slug ?? ''}
+                  placeholder="energy-shipping-lanes"
+                />
+              </label>
+            </div>
 
-          <div className={styles.formGridTwo}>
-            <label className={styles.field}>
-              <span className={styles.label}>Status</span>
-              <select
-                className={styles.select}
-                name="status"
-                defaultValue={item?.status ?? 'active'}
-              >
-                <option value="backlog">Backlog</option>
-                <option value="active">Active</option>
-                <option value="blocked">Blocked</option>
-                <option value="done">Done</option>
-              </select>
-            </label>
-            <label className={styles.field}>
-              <span className={styles.label}>Priority</span>
-              <input
-                className={styles.input}
-                type="number"
-                name="priority"
-                defaultValue={String(item?.priority ?? 0)}
-              />
-            </label>
-          </div>
+            <div className={styles.formGridTwo}>
+              <label className={styles.field}>
+                <span className={styles.label}>Stage</span>
+                <select
+                  className={styles.select}
+                  name="status"
+                  defaultValue={item?.status ?? 'active'}
+                >
+                  <option value="backlog">Backlog — idea</option>
+                  <option value="active">Active — research/drafting</option>
+                  <option value="blocked">Blocked — review gap</option>
+                  <option value="done">Done — ready to publish</option>
+                </select>
+              </label>
+              <label className={styles.field}>
+                <span className={styles.label}>Priority</span>
+                <input
+                  className={styles.input}
+                  type="number"
+                  name="priority"
+                  defaultValue={String(item?.priority ?? 0)}
+                />
+                <p className={styles.fieldHint}>
+                  Higher numbers sort to the top of the public docket.
+                </p>
+              </label>
+            </div>
 
-          <label className={styles.field}>
-            <span className={styles.label}>Redacted on public docket</span>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', paddingTop: '6px' }}>
+            <label className={styles.checkboxCard}>
               <input
                 type="checkbox"
                 name="redacted"
                 value="true"
                 defaultChecked={item?.redacted ?? false}
               />
-              <span style={{ fontSize: '13px', color: 'inherit', opacity: 0.6 }}>
-                Hide title and details from public — only status badge and codename will show.
-              </span>
-            </div>
-          </label>
+              <div>
+                <span className={styles.checkboxTitle}>Redact title on public docket</span>
+                <span className={styles.checkboxHint}>
+                  Readers will see a blur-block placeholder instead of the title.
+                </span>
+              </div>
+            </label>
 
-          <label className={styles.field}>
-            <span className={styles.label}>Summary</span>
-            <textarea
-              className={styles.textarea}
-              name="summary"
-              rows={4}
-              defaultValue={item?.summary ?? ''}
-              placeholder="Short note that explains the angle and why it matters."
-            />
-          </label>
+            <label className={styles.field}>
+              <span className={styles.label}>Summary</span>
+              <textarea
+                className={styles.textarea}
+                name="summary"
+                rows={4}
+                defaultValue={item?.summary ?? ''}
+                placeholder="Short note that explains the angle and why it matters."
+              />
+            </label>
 
-          <label className={styles.field}>
-            <span className={styles.label}>Internal notes</span>
-            <textarea
-              className={styles.textareaTall}
-              name="body"
-              rows={12}
-              defaultValue={item?.body ?? ''}
-              placeholder="Working notes, reporting tasks, source gaps, or handoff context."
-            />
-          </label>
-        </div>
+            <label className={styles.field}>
+              <span className={styles.label}>Internal notes</span>
+              <textarea
+                className={styles.textareaTall}
+                name="body"
+                rows={12}
+                defaultValue={item?.body ?? ''}
+                placeholder="Working notes, reporting tasks, source gaps, or handoff context."
+              />
+            </label>
+          </div>
 
-        <div className={styles.buttonRow}>
-          <button type="submit" className={styles.primaryButton}>
-            {mode === 'create' ? 'Create work item' : 'Save changes'}
-          </button>
-          <Link href="/admin/in-progress" className={styles.secondaryButton}>
-            Cancel
-          </Link>
+          <div className={styles.buttonRow}>
+            <button type="submit" className={styles.primaryButton}>
+              {mode === 'create' ? 'Create work item' : 'Save changes'}
+            </button>
+            <Link href="/admin/in-progress" className={styles.secondaryButton}>
+              Cancel
+            </Link>
+          </div>
         </div>
       </form>
 
       {mode === 'edit' && item ? (
         <form action={deleteInProgressItemAction} className={styles.panel}>
-          <input type="hidden" name="id" value={String(item.id)} />
           <div className={styles.panelHeader}>
             <div>
               <h2 className={styles.panelTitle}>Danger zone</h2>
@@ -147,9 +151,12 @@ export function InProgressForm({ item, message, mode }: InProgressFormProps) {
               </p>
             </div>
           </div>
-          <button type="submit" className={styles.dangerButton}>
-            Delete work item
-          </button>
+          <div className={styles.panelPadded}>
+            <input type="hidden" name="id" value={String(item.id)} />
+            <button type="submit" className={styles.dangerButton}>
+              Delete work item
+            </button>
+          </div>
         </form>
       ) : null}
     </div>

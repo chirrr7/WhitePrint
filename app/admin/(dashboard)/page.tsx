@@ -1,112 +1,222 @@
-import { EditorHelpGuide } from '@/components/admin/editor-help-guide'
 import Link from 'next/link'
 import { getDashboardData } from '@/lib/admin/data'
+import { createClient } from '@/lib/supabase/server'
 import styles from '@/app/admin/admin.module.css'
+
+interface RecentPostRow {
+  id: number
+  title: string
+  slug: string
+  status: string
+  updated_at: string
+  body: string | null
+}
+
+interface ActiveStanceRow {
+  id: number
+  title: string | null
+  name: string | null
+  ticker: string | null
+  slug: string
+  conviction: string | null
+  opinion: string | null
+  coverage_status: string | null
+}
+
+const convictionToPercent = (c: string | null): number => {
+  switch ((c ?? 'medium').toLowerCase()) {
+    case 'high':
+      return 90
+    case 'medium':
+      return 60
+    case 'low':
+      return 30
+    default:
+      return 50
+  }
+}
+
+const wordCount = (text: string | null): number => {
+  if (!text) return 0
+  return text.trim().split(/\s+/).filter(Boolean).length
+}
+
+const formatDate = (iso: string | null): string => {
+  if (!iso) return '—'
+  const d = new Date(iso)
+  if (Number.isNaN(d.getTime())) return '—'
+  return d.toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' })
+}
 
 export default async function AdminDashboardPage() {
   const dashboard = await getDashboardData()
-  const filesystemBacklog = dashboard.editorialHealth.unmanagedFilesystemPosts
+  const supabase = await createClient()
+
+  const [recentPostsResult, activeStancesResult, publishedBodiesResult] = await Promise.all([
+    supabase
+      .from('posts')
+      .select('id, title, slug, status, updated_at, body')
+      .order('updated_at', { ascending: false })
+      .limit(6),
+    supabase
+      .from('stances')
+      .select('id, title, name, ticker, slug, conviction, opinion, coverage_status')
+      .eq('coverage_status', 'active')
+      .order('updated_at', { ascending: false })
+      .limit(6),
+    supabase.from('posts').select('body').eq('status', 'published'),
+  ])
+
+  const recentPosts: RecentPostRow[] = (recentPostsResult.data as RecentPostRow[] | null) ?? []
+  const activeStances: ActiveStanceRow[] =
+    (activeStancesResult.data as ActiveStanceRow[] | null) ?? []
+
+  const publishedBodies = (publishedBodiesResult.data ?? []) as { body: string | null }[]
+  const avgWords =
+    publishedBodies.length > 0
+      ? Math.round(
+          publishedBodies.reduce((sum, row) => sum + wordCount(row.body), 0) /
+            publishedBodies.length,
+        )
+      : 0
 
   return (
     <div className={styles.pageStack}>
-      <div className={styles.heroCard}>
-        <p className={styles.eyebrow}>Overview</p>
-        <h1 className={styles.pageTitle}>Editorial control room.</h1>
-        <p className={styles.pageIntro}>
-          Posts, coverage, pipeline items, homepage sequencing, and brand copy now
-          run through the same admin system. This view is tuned for the redesign push:
-          it shows what is managed cleanly and what still needs migration attention.
-        </p>
+      <header className={styles.pageHeader}>
+        <div className={styles.pageHeaderInner}>
+          <p className={styles.eyebrow}>Dashboard</p>
+          <h1 className={styles.h1}>Editorial control room</h1>
+        </div>
         <div className={styles.quickLinks}>
-          <Link href="/admin/posts/new" className={styles.primaryButton}>
+          <Link href="/admin/posts/new" className={`${styles.btn} ${styles.btnPrimary}`}>
             New post
           </Link>
-          <Link href="/admin/stances/new" className={styles.secondaryButton}>
-            New coverage
-          </Link>
-          <Link href="/admin/in-progress/new" className={styles.secondaryButton}>
-            New work item
-          </Link>
-          <Link href="/admin/models" className={styles.secondaryButton}>
-            Upload model
-          </Link>
-          <Link href="/admin/settings" className={styles.secondaryButton}>
-            Edit site copy
+          <Link href="/admin/stances/new" className={`${styles.btn} ${styles.btnGhost}`}>
+            New stance
           </Link>
         </div>
-      </div>
+      </header>
 
       <div className={styles.statsGrid}>
-        <div className={styles.statCard}>
-          <p className={styles.statLabel}>Draft posts</p>
-          <p className={styles.statValue}>{dashboard.counts.drafts}</p>
+        <div className={styles.stat}>
+          <p className={styles.statNum}>{dashboard.counts.published}</p>
+          <p className={styles.statLabel}>Published</p>
         </div>
-        <div className={styles.statCard}>
-          <p className={styles.statLabel}>Published posts</p>
-          <p className={styles.statValue}>{dashboard.counts.published}</p>
+        <div className={styles.stat}>
+          <p className={styles.statNum}>{activeStances.length}</p>
+          <p className={styles.statLabel}>Active stances</p>
         </div>
-        <div className={styles.statCard}>
-          <p className={styles.statLabel}>Archived posts</p>
-          <p className={styles.statValue}>{dashboard.counts.archived}</p>
+        <div className={styles.stat}>
+          <p className={styles.statNum}>{dashboard.counts.drafts}</p>
+          <p className={styles.statLabel}>Drafts</p>
         </div>
-        <div className={styles.statCard}>
-          <p className={styles.statLabel}>Stances</p>
-          <p className={styles.statValue}>{dashboard.counts.stances}</p>
-        </div>
-        <div className={styles.statCard}>
-          <p className={styles.statLabel}>In progress</p>
-          <p className={styles.statValue}>{dashboard.counts.inProgress}</p>
-        </div>
-        <div className={styles.statCard}>
-          <p className={styles.statLabel}>Models</p>
-          <p className={styles.statValue}>{dashboard.counts.models}</p>
-        </div>
-        <div className={styles.statCard}>
-          <p className={styles.statLabel}>Filesystem backlog</p>
-          <p className={styles.statValue}>{filesystemBacklog.length}</p>
+        <div className={styles.stat}>
+          <p className={styles.statNum}>{avgWords.toLocaleString()}</p>
+          <p className={styles.statLabel}>Avg word count</p>
         </div>
       </div>
 
-      <div className={styles.splitGrid}>
-        <div className={styles.panel}>
+      <div className={styles.grid2}>
+        <section className={styles.panel}>
           <div className={styles.panelHeader}>
-            <div>
-              <h2 className={styles.panelTitle}>Launch readiness</h2>
-              <p className={styles.panelIntro}>
-                The redesign is safest when every public editorial surface flows through
-                admin. This is the remaining migration and publishing checklist.
-              </p>
-            </div>
+            <h2 className={styles.h2}>Recent posts</h2>
+            <Link href="/admin/posts" className={styles.eyebrow} style={{ color: '#b83025' }}>
+              View all →
+            </Link>
           </div>
+          {recentPosts.length === 0 ? (
+            <div className={styles.emptyState}>No posts yet</div>
+          ) : (
+            <div className={styles.tableWrap}>
+              <table className={styles.table}>
+                <thead>
+                  <tr>
+                    <th>Title</th>
+                    <th>Status</th>
+                    <th>Updated</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {recentPosts.map((post) => (
+                    <tr key={post.id} className={styles.tableRow}>
+                      <td className={styles.tableCell}>
+                        <Link
+                          href={`/admin/posts/${post.id}`}
+                          className={styles.rowLink}
+                        >
+                          <p className={styles.tableTitle}>{post.title}</p>
+                          <p className={styles.tableSubtitle}>{post.slug}</p>
+                        </Link>
+                      </td>
+                      <td className={styles.tableCell}>
+                        <span
+                          className={`${styles.badge} ${
+                            post.status === 'published' ? styles.badgePublished : styles.badgeDraft
+                          }`}
+                        >
+                          {post.status}
+                        </span>
+                      </td>
+                      <td className={`${styles.tableCell} ${styles.mono}`}>
+                        {formatDate(post.updated_at)}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </section>
 
-          <div className={styles.list}>
-            <div className={styles.noteCard}>
-              <h3 className={styles.noteTitle}>Admin-managed now</h3>
-              <p className={styles.noteBody}>
-                Posts, coverage records, homepage settings, the public pipeline docket,
-                and About page copy are all editable from admin.
-              </p>
-            </div>
-            <div className={styles.noteCard}>
-              <h3 className={styles.noteTitle}>Still to migrate</h3>
-              <p className={styles.noteBody}>
-                {filesystemBacklog.length
-                  ? `${filesystemBacklog.length} filesystem post${filesystemBacklog.length === 1 ? '' : 's'} still need to be imported into admin.`
-                  : 'No filesystem-only posts remain. The current public archive is on the shared publishing path.'}
-              </p>
-              <div className={styles.buttonRow}>
-                <Link href="/admin/posts" className={styles.secondaryButton}>
-                  Review posts backlog
-                </Link>
-                <Link href="/admin/homepage" className={styles.secondaryButton}>
-                  Review homepage
-                </Link>
-              </div>
-            </div>
+        <section className={styles.panel}>
+          <div className={styles.panelHeader}>
+            <h2 className={styles.h2}>Active stances</h2>
+            <Link href="/admin/stances" className={styles.eyebrow} style={{ color: '#b83025' }}>
+              View all →
+            </Link>
           </div>
-        </div>
-
-        <EditorHelpGuide title="Quick publishing guide" />
+          {activeStances.length === 0 ? (
+            <div className={styles.emptyState}>No active stances</div>
+          ) : (
+            <div className={styles.list}>
+              {activeStances.map((stance) => {
+                const ticker = stance.ticker || stance.slug.toUpperCase()
+                const direction = (stance.opinion ?? 'neutral').toLowerCase()
+                const isLong =
+                  direction === 'long' || direction === 'bullish' || direction === 'positive'
+                const isShort =
+                  direction === 'short' || direction === 'bearish' || direction === 'negative'
+                const pct = convictionToPercent(stance.conviction)
+                return (
+                  <Link
+                    key={stance.id}
+                    href={`/admin/stances/${stance.id}`}
+                    className={`${styles.listItem} ${styles.rowLink}`}
+                  >
+                    <div className={styles.listItemHead}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                        <span className={styles.ticker}>{ticker}</span>
+                        <span className={styles.listItemMeta}>
+                          {stance.title ?? stance.name ?? ''}
+                        </span>
+                      </div>
+                      <span
+                        className={
+                          isLong ? styles.badgeLong : isShort ? styles.badgeShort : styles.badge
+                        }
+                      >
+                        {direction}
+                      </span>
+                    </div>
+                    <div className={styles.convictionBar}>
+                      <div className={styles.convictionFill} style={{ width: `${pct}%` }} />
+                    </div>
+                  </Link>
+                )
+              })}
+            </div>
+          )}
+        </section>
       </div>
     </div>
   )

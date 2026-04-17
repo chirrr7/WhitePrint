@@ -63,6 +63,10 @@
     display: flex !important;
   }
 
+  main {
+    padding-bottom: 72px;
+  }
+
   .mobile-preview-shell {
     padding: 0;
     background: transparent;

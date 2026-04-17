@@ -729,7 +729,7 @@ async function compilePostSource(
       options: {
         mdxOptions: {
           remarkPlugins: [remarkGfm, remarkMath],
-          rehypePlugins: [rehypeKatex],
+          rehypePlugins: [[rehypeKatex, { output: 'html' }]],
         },
       },
     })

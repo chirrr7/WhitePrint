@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { saveInProgressItemAction } from '@/lib/admin/actions'
 import { getInProgressPageData } from '@/lib/admin/data'
 import { formatAdminDate, readPageMessage } from '@/lib/admin/messages'
 import styles from '@/app/admin/admin.module.css'
@@ -18,16 +19,16 @@ export default async function AdminInProgressPage({
   return (
     <div className={styles.pageStack}>
       <div className={styles.pageHeader}>
-        <div>
-          <p className={styles.eyebrow}>In progress</p>
-          <h1 className={styles.pageTitle}>Keep the pipeline visible.</h1>
+        <div className={styles.pageHeaderInner}>
+          <p className={styles.eyebrow}>Pipeline</p>
+          <h1 className={styles.pageTitle}>In progress</h1>
           <p className={styles.pageIntro}>
-            Backlog, active pieces, blocked work, and finished-but-not-yet-published
-            items can all live here.
+            Work items the editorial desk is pushing through backlog, research,
+            drafting, review, and ready-to-publish.
           </p>
         </div>
         <Link href="/admin/in-progress/new" className={styles.primaryButton}>
-          New work item
+          + Add Item
         </Link>
       </div>
 
@@ -37,40 +38,85 @@ export default async function AdminInProgressPage({
         </div>
       ) : null}
 
+      <div className={styles.infoBanner}>
+        These items appear on the public homepage. Redacted titles show as blur
+        blocks to readers.
+      </div>
+
       <div className={styles.panel}>
-          <div className={styles.panelHeader}>
-            <div>
-              <h2 className={styles.panelTitle}>Pipeline ledger</h2>
-              <p className={styles.panelIntro}>
-                What the team is working through now, and what readers may see on the
-                homepage docket.
-              </p>
-            </div>
-          </div>
-          {items.length ? (
-            <div className={styles.list}>
-              {items.map((item) => (
-                <div key={item.id} className={styles.listItem}>
-                  <div>
-                    <p className={styles.listItemTitle}>{item.title}</p>
-                    <p className={styles.listItemMeta}>{item.summary || item.slug}</p>
-                    <p className={styles.listItemMeta}>Priority: {item.priority}</p>
-                  </div>
-                  <div className={styles.stackedMeta}>
-                    <span className={styles.statusBadge} data-status={item.status}>
-                      {item.status}
+        {items.length ? (
+          <div className={styles.list}>
+            {items.map((item) => (
+              <div key={item.id} className={styles.pipelineRow}>
+                <div style={{ display: 'grid', gap: 6 }}>
+                  {item.redacted ? (
+                    <span className={styles.redactedBlocks} aria-label="Redacted title">
+                      <span className={styles.redactedBlock} />
+                      <span className={styles.redactedBlock} style={{ width: 28 }} />
+                      <span className={styles.redactedBlock} style={{ width: 38 }} />
+                      <span className={styles.redactedBlock} style={{ width: 22 }} />
                     </span>
-                    <span className={styles.mono}>{formatAdminDate(item.updatedAt)}</span>
-                    <Link href={`/admin/in-progress/${item.id}`} className={styles.secondaryButton}>
-                      Edit
-                    </Link>
-                  </div>
+                  ) : (
+                    <h3 className={styles.pipelineTitle}>{item.title}</h3>
+                  )}
+                  <p className={styles.listItemMeta}>
+                    {item.slug} · priority {item.priority} · updated{' '}
+                    {formatAdminDate(item.updatedAt)}
+                  </p>
                 </div>
-              ))}
-            </div>
-          ) : (
-            <div className={styles.emptyState}>No in-progress items saved yet.</div>
-          )}
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 10,
+                    flexWrap: 'wrap',
+                    justifyContent: 'flex-end',
+                  }}
+                >
+                  <span className={styles.statusBadge} data-status={item.status}>
+                    {item.status}
+                  </span>
+
+                  <form action={saveInProgressItemAction}>
+                    <input type="hidden" name="id" value={String(item.id)} />
+                    <input type="hidden" name="title" value={item.title} />
+                    <input type="hidden" name="slug" value={item.slug} />
+                    <input type="hidden" name="summary" value={item.summary ?? ''} />
+                    <input type="hidden" name="status" value={item.status} />
+                    <input
+                      type="hidden"
+                      name="priority"
+                      value={String(item.priority ?? 0)}
+                    />
+                    {/* Toggle: if currently redacted, submit without value (unchecked = false);
+                        if not redacted, submit redacted=true. */}
+                    {item.redacted ? null : (
+                      <input type="hidden" name="redacted" value="true" />
+                    )}
+                    <button
+                      type="submit"
+                      className={`${styles.redactToggle} ${
+                        item.redacted ? styles.redactToggleActive : ''
+                      }`}
+                      aria-pressed={item.redacted}
+                    >
+                      {item.redacted ? 'Redacted' : 'Redact title'}
+                    </button>
+                  </form>
+
+                  <Link
+                    href={`/admin/in-progress/${item.id}`}
+                    className={styles.secondaryButton}
+                  >
+                    Edit
+                  </Link>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className={styles.emptyState}>No pipeline items yet.</div>
+        )}
       </div>
     </div>
   )

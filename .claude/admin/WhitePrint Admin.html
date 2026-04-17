@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Whiteprint Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600;1,700&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet" />
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+  <script type="text/babel" src="admin-ui.jsx"></script>
+  <script type="text/babel" src="admin-editor.jsx"></script>
+  <script type="text/babel" src="admin-pages.jsx"></script>
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; border-radius: 0 !important; }
+    html, body { height: 100%; background: #0a0a0a; color: #f5f2eb; }
+    ::-webkit-scrollbar { width: 7px; height: 7px; }
+    ::-webkit-scrollbar-track { background: #0a0a0a; }
+    ::-webkit-scrollbar-thumb { background: rgba(245,242,235,0.1); }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(245,242,235,0.18); }
+    input, textarea, select, button { font-family: inherit; }
+    select option { background: #161514; }
+    @keyframes fade-up { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:translateY(0); } }
+    .fade-up { animation: fade-up 0.25s ease both; }
+    @keyframes grain-shift {
+      0%   { transform:translate(0,0); }
+      25%  { transform:translate(-1px,1px); }
+      50%  { transform:translate(1px,-1px); }
+      75%  { transform:translate(-1px,-1px); }
+      100% { transform:translate(0,0); }
+    }
+  </style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { useState } = React;
+
+function App() {
+  const [authed, setAuthed]     = useState(false);
+  const [page,   setPage]       = useState('dashboard');
+  const [editPost, setEditPost] = useState(null);
+
+  // Persist page in sessionStorage
+  React.useEffect(() => {
+    const saved = sessionStorage.getItem('wp-admin-page');
+    if (saved && authed) setPage(saved);
+  }, [authed]);
+
+  React.useEffect(() => {
+    sessionStorage.setItem('wp-admin-page', page);
+  }, [page]);
+
+  const handleLogout = () => { setAuthed(false); setPage('dashboard'); };
+
+  if (!authed) {
+    return <window.LoginPage onLogin={() => setAuthed(true)} />;
+  }
+
+  const renderPage = () => {
+    switch (page) {
+      case 'dashboard':  return <window.DashboardPage setPage={setPage} setEditPost={setEditPost} />;
+      case 'posts':      return <window.PostsPage setPage={setPage} setEditPost={setEditPost} />;
+      case 'new-post':   return <window.PostEditor post={null} onSave={(d) => { console.log('saved', d); setPage('posts'); }} onCancel={() => setPage('posts')} />;
+      case 'edit-post':  return <window.PostEditor post={editPost} onSave={(d) => { console.log('saved', d); setPage('posts'); }} onCancel={() => setPage('posts')} />;
+      case 'stances':    return <window.StancesPage setPage={setPage} />;
+      case 'models':     return <window.ModelsPage />;
+      case 'pipeline':   return <window.PipelinePage />;
+      case 'settings':   return <window.SettingsPage />;
+      default:           return <window.DashboardPage setPage={setPage} setEditPost={setEditPost} />;
+    }
+  };
+
+  // Full-page editor (no sidebar)
+  if (page === 'new-post' || page === 'edit-post') {
+    return (
+      <div style={{ height:'100vh', overflow:'hidden', background: window.AT.bg }}>
+        {renderPage()}
+      </div>
+    );
+  }
+
+  return (
+    <window.AdminShell page={page} setPage={setPage} onLogout={handleLogout}>
+      <div className="fade-up" key={page}>
+        {renderPage()}
+      </div>
+    </window.AdminShell>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>

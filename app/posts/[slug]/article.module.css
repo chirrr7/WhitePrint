@@ -27,7 +27,7 @@
 
 /* ── Progress bar ── */
 .progress {
-  background: var(--accent);
+  background: #b83025;
   z-index: 99;
   width: 0%;
   height: 2px;

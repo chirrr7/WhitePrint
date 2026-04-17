@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>WhitePrint — Mobile Reader POV</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet" />
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+  <script type="text/babel" src="ios-frame.jsx"></script>
+  <style>
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+    html, body { height:100%; background:#0a0a0a; overflow-x:auto; overflow-y:auto; }
+    ::-webkit-scrollbar { width:5px; height:5px; }
+    ::-webkit-scrollbar-thumb { background:rgba(255,255,255,0.1); }
+    input[type=range] { -webkit-appearance:none; height:2px; outline:none; cursor:pointer; }
+    input[type=range]::-webkit-slider-thumb { -webkit-appearance:none; width:12px; height:12px; border-radius:50%; cursor:pointer; }
+    @keyframes pulse-dot { 0%,100%{opacity:1}50%{opacity:.4} }
+    @keyframes fade-up { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:translateY(0)} }
+  </style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { useState, useRef } = React;
+const MONO  = { fontFamily:"'JetBrains Mono', monospace" };
+const SERIF = { fontFamily:"'Playfair Display', Georgia, serif" };
+const SYS   = { fontFamily:"-apple-system, system-ui, sans-serif" };
+
+// ─── SECTION PALETTE ─────────────────────────────────────────
+const S = {
+  equity:      { accent:'#b83025', bg:'#faf9f7', ink:'#0f0f0f', muted:'rgba(15,15,15,.48)', border:'#e2e0db', faint:'rgba(15,15,15,.04)' },
+  macro:       { accent:'#8a6c3a', bg:'#faf8f4', ink:'#0f0f0f', muted:'rgba(15,15,15,.48)', border:'#e8e0d4', faint:'rgba(15,15,15,.04)' },
+  quant:       { accent:'#2d6ab8', bg:'#f7f9fc', ink:'#0a0d14', muted:'rgba(10,13,20,.48)', border:'#dce4f0', faint:'rgba(45,106,184,.05)' },
+  notes:       { accent:'#2d7a4f', bg:'#f7faf8', ink:'#0a100c', muted:'rgba(10,16,12,.48)', border:'#dce8e2', faint:'rgba(45,122,79,.04)' },
+};
+
+// ─── SVG ICONS (nav tabs) ─────────────────────────────────────
+const NavIcons = {
+  home: (c) => (
+    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+      <path d="M3 9L10 3L17 9V17H13V12H7V17H3V9Z" stroke={c} strokeWidth="1.4" strokeLinejoin="round" fill="none"/>
+    </svg>
+  ),
+  equity: (c) => (
+    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+      <rect x="2" y="12" width="3" height="6" stroke={c} strokeWidth="1.4"/>
+      <rect x="7" y="8" width="3" height="10" stroke={c} strokeWidth="1.4"/>
+      <rect x="12" y="4" width="3" height="14" stroke={c} strokeWidth="1.4"/>
+      <line x1="2" y1="18" x2="17" y2="18" stroke={c} strokeWidth="1.4"/>
+    </svg>
+  ),
+  macro: (c) => (
+    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+      <circle cx="10" cy="10" r="7" stroke={c} strokeWidth="1.4"/>
+      <ellipse cx="10" cy="10" rx="3.5" ry="7" stroke={c} strokeWidth="1.4"/>
+      <line x1="3" y1="10" x2="17" y2="10" stroke={c} strokeWidth="1.4"/>
+    </svg>
+  ),
+  quant: (c) => (
+    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+      <path d="M4 5H7L9.5 15L11.5 7L13.5 12H16" stroke={c} strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+  ),
+  notes: (c) => (
+    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+      <rect x="4" y="2" width="12" height="16" stroke={c} strokeWidth="1.4"/>
+      <line x1="7" y1="7" x2="13" y2="7" stroke={c} strokeWidth="1.4"/>
+      <line x1="7" y1="10" x2="13" y2="10" stroke={c} strokeWidth="1.4"/>
+      <line x1="7" y1="13" x2="10" y2="13" stroke={c} strokeWidth="1.4"/>
+    </svg>
+  ),
+};
+
+const NAV_TABS = [
+  { id:'home',   label:'Home',   icon:NavIcons.home,   accent:'#0f0f0f' },
+  { id:'equity', label:'Equity', icon:NavIcons.equity, accent:S.equity.accent },
+  { id:'macro',  label:'Macro',  icon:NavIcons.macro,  accent:S.macro.accent },
+  { id:'quant',  label:'Quant',  icon:NavIcons.quant,  accent:S.quant.accent },
+  { id:'notes',  label:'Notes',  icon:NavIcons.notes,  accent:S.notes.accent },
+];
+
+// ─── BOTTOM NAV BAR ───────────────────────────────────────────
+function BottomNav({ active, onTab, bg='#fff' }) {
+  return (
+    <div style={{
+      position:'absolute', bottom:0, left:0, right:0, height:72,
+      background: `rgba(${bg==='#fff'?'255,255,255':'250,249,247'},.95)`,
+      backdropFilter:'blur(16px)', WebkitBackdropFilter:'blur(16px)',
+      borderTop:'0.5px solid rgba(0,0,0,0.1)',
+      display:'flex', alignItems:'flex-start', justifyContent:'space-around',
+      padding:'10px 0 0', zIndex:50,
+    }}>
+      {NAV_TABS.map(tab => {
+        const isActive = active === tab.id;
+        const col = isActive ? tab.accent : 'rgba(0,0,0,0.3)';
+        return (
+          <button key={tab.id} onClick={() => onTab(tab.id)} style={{
+            display:'flex', flexDirection:'column', alignItems:'center', gap:3,
+            background:'none', border:'none', cursor:'pointer', padding:'0 6px',
+          }}>
+            {tab.icon(col)}
+            <span style={{ ...MONO, fontSize:8, letterSpacing:'0.04em', color:col }}>{tab.label}</span>
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+// ─── SHARED: TOP NAV WITHIN PHONE ────────────────────────────
+function TopBar({ title, accent, bg, right }) {
+  return (
+    <div style={{
+      position:'sticky', top:0, zIndex:30, height:44,
+      display:'flex', alignItems:'center', justifyContent:'space-between',
+      padding:'0 16px',
+      background:`rgba(${bg==='#faf9f7'?'250,249,247':'250,249,247'},.96)`,
+      backdropFilter:'blur(10px)', borderBottom:'0.5px solid rgba(0,0,0,0.07)',
+    }}>
+      <span style={{ ...SERIF, fontSize:14, fontWeight:700, color:'#0f0f0f' }}>
+        WP <em style={{ color:accent }}>Research</em>
+      </span>
+      {right || <span style={{ ...MONO, fontSize:7, letterSpacing:'0.12em', textTransform:'uppercase', color:accent }}>{title}</span>}
+    </div>
+  );
+}
+
+// ─── MONO LABEL ───────────────────────────────────────────────
+function ML({ children, color, size=7, style={} }) {
+  return <span style={{ ...MONO, fontSize:size, letterSpacing:'0.12em', textTransform:'uppercase', color, ...style }}>{children}</span>;
+}
+
+// ─── 1. EQUITY LANDING ────────────────────────────────────────
+function EquityScreen({ onNav }) {
+  const C = S.equity;
+  return (
+    <div style={{ background:C.bg, height:'100%', position:'relative' }}>
+      <div style={{ height:'100%', overflowY:'auto', paddingBottom:72 }}>
+        <div style={{ height:62, background:C.bg }} />
+        <TopBar title="Equity" accent={C.accent} bg={C.bg} />
+        <div style={{ padding:'20px 18px 6px' }}>
+          <ML color={C.accent} size={6.5} style={{ display:'block', marginBottom:8 }}>Forensic Equity Research</ML>
+          <h1 style={{ ...SERIF, fontSize:24, fontWeight:700, color:C.ink, letterSpacing:'-0.025em', lineHeight:1.2, marginBottom:10 }}>
+            We read <em style={{ color:C.accent }}>the footnotes.</em>
+          </h1>
+          <p style={{ ...SERIF, fontSize:12, lineHeight:1.7, color:C.muted, marginBottom:18, fontStyle:'italic' }}>
+            Deep forensic analysis of public company filings.
+          </p>
+          {/* 4 reason cards */}
+          <ML color={C.muted} size={6.5} style={{ display:'block', marginBottom:10 }}>Why equity research?</ML>
+          <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:6, marginBottom:20 }}>
+            {[
+              ['01','10-K forensics reveal what management buries in footnotes'],
+              ['02','Accounting signals: useful-life tricks, off-BS exposure'],
+              ['03','FCF vs net income divergence — the tell of every blow-up'],
+              ['04','Every call backed by primary source evidence'],
+            ].map(([n,t]) => (
+              <div key={n} style={{ padding:'10px 11px', border:`1px solid ${C.border}`, background:C.faint }}>
+                <ML color={C.accent} size={6} style={{ display:'block', marginBottom:5 }}>{n}</ML>
+                <p style={{ ...SERIF, fontSize:10.5, lineHeight:1.6, color:C.ink, opacity:.68 }}>{t}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+        <div style={{ height:1, background:C.border }} />
+        {/* Article list */}
+        {[
+          { title:"Oracle: The Infrastructure Bet Nobody's Pricing", date:'Apr 2024', verdict:'SHORT', hasBrief:true },
+          { title:'EOG Resources: Base Case Priced In', date:'Mar 2024', verdict:'NEUTRAL', hasBrief:true },
+          { title:'High Yield: The Refinancing Wall', date:'Jan 2024', verdict:'SHORT', hasBrief:true },
+        ].map((art, i) => (
+          <div key={i} style={{ padding:'14px 18px', borderBottom:`1px solid ${C.border}`, cursor:'pointer' }}>
+            <div style={{ display:'flex', gap:8, alignItems:'center', marginBottom:7 }}>
+              <ML color={C.muted} size={6}>{art.date}</ML>
+              {art.hasBrief && <div style={{ padding:'2px 7px', background:C.ink }}><ML color={C.bg} size={5.5} style={{ letterSpacing:'0.08em' }}>Brief</ML></div>}
+              <div style={{ marginLeft:'auto', display:'flex', alignItems:'center', gap:4 }}>
+                <div style={{ width:5, height:5, borderRadius:'50%', background:art.verdict==='SHORT'?C.accent:'#2d7a4f' }} />
+                <ML color={art.verdict==='SHORT'?C.accent:'#2d7a4f'} size={6}>{art.verdict}</ML>
+              </div>
+            </div>
+            <p style={{ ...SERIF, fontSize:14, fontWeight:600, color:C.ink, lineHeight:1.3 }}>{art.title}</p>
+          </div>
+        ))}
+        <div style={{ height:20 }} />
+      </div>
+      <BottomNav active="equity" onTab={onNav} />
+    </div>
+  );
+}
+
+// ─── 2. MACRO LANDING ─────────────────────────────────────────
+function MacroScreen({ onNav }) {
+  const C = S.macro;
+  const inds = [
+    { k:'US 10Y Real Yield', v:'+1.82%', d:'-18bps', dir:-1 },
+    { k:'DXY Index',         v:'104.2',  d:'-0.8%',  dir:-1 },
+    { k:'2Y/10Y Spread',     v:'-48bps', d:'+4bps',  dir:1  },
+    { k:'Fed Funds',         v:'5.33%',  d:'unch',   dir:0  },
+    { k:'EUR/USD',           v:'1.0842', d:'+0.4%',  dir:1  },
+    { k:'Gold Spot',         v:'$2,389', d:'+1.1%',  dir:1  },
+  ];
+  return (
+    <div style={{ background:C.bg, height:'100%', position:'relative' }}>
+      <div style={{ height:'100%', overflowY:'auto', paddingBottom:72 }}>
+        <div style={{ height:62, background:C.bg }} />
+        <TopBar title="Macro" accent={C.accent} bg={C.bg} />
+        <div style={{ padding:'20px 18px 6px' }}>
+          <ML color={C.accent} size={6.5} style={{ display:'block', marginBottom:8 }}>Global Macro Research</ML>
+          <h1 style={{ ...SERIF, fontSize:24, fontWeight:700, color:C.ink, letterSpacing:'-0.025em', lineHeight:1.2, marginBottom:16 }}>
+            Structural views.<br /><em style={{ color:C.accent }}>Not noise.</em>
+          </h1>
+          <ML color={C.muted} size={6.5} style={{ display:'block', marginBottom:10 }}>Key Indicators · Apr 18, 2024</ML>
+          {inds.map((ind, i) => (
+            <div key={i} style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'9px 0', borderBottom:`1px solid ${C.border}` }}>
+              <ML color={C.muted} size={7}>{ind.k}</ML>
+              <div style={{ display:'flex', gap:10, alignItems:'center' }}>
+                <span style={{ ...MONO, fontSize:11, letterSpacing:'0.03em', color:C.ink }}>{ind.v}</span>
+                <ML color={ind.dir>0?'#2d7a4f':ind.dir<0?'#b83025':C.muted} size={7}>{ind.d}</ML>
+              </div>
+            </div>
+          ))}
+        </div>
+        <div style={{ padding:'16px 18px 4px' }}>
+          <ML color={C.muted} size={6.5} style={{ display:'block', marginBottom:12 }}>Research</ML>
+        </div>
+        {[
+          { title:'Dollar Weakness: Structural, Not Cyclical', date:'Feb 2024', verdict:'SHORT', hasBrief:true },
+          { title:'Gold and the De-dollarization Bid', date:'Mar 2024', verdict:'LONG', hasBrief:true },
+          { title:'The Eight-Body Problem: EM Oil', date:'Mar 2026', verdict:'WATCH', hasBrief:false },
+        ].map((art, i) => (
+          <div key={i} style={{ padding:'14px 18px', borderBottom:`1px solid ${C.border}` }}>
+            <div style={{ display:'flex', gap:8, alignItems:'center', marginBottom:7 }}>
+              <ML color={C.muted} size={6}>{art.date}</ML>
+              {art.hasBrief && <div style={{ padding:'2px 7px', background:C.ink }}><ML color={C.bg} size={5.5}>Brief</ML></div>}
+              <div style={{ marginLeft:'auto', display:'flex', alignItems:'center', gap:4 }}>
+                <div style={{ width:5, height:5, borderRadius:'50%', background:art.verdict==='LONG'?'#2d7a4f':art.verdict==='SHORT'?'#b83025':C.muted }} />
+                <ML color={art.verdict==='LONG'?'#2d7a4f':art.verdict==='SHORT'?'#b83025':C.muted} size={6}>{art.verdict}</ML>
+              </div>
+            </div>
+            <p style={{ ...SERIF, fontSize:14, fontWeight:600, color:C.ink, lineHeight:1.3 }}>{art.title}</p>
+          </div>
+        ))}
+        <div style={{ height:20 }} />
+      </div>
+      <BottomNav active="macro" onNav={onNav} onTab={onNav} />
+    </div>
+  );
+}
+
+// ─── 3. QUANT LANDING (no simulator) ─────────────────────────
+function QuantScreen({ onNav, onOpenPost }) {
+  const C = S.quant;
+  const posts = [
+    {
+      title:'Off-Plan Default Swaps', date:'Mar 2024', hasSim:true,
+      fw:[
+        { q:'What', a:'CDS on off-plan developer default' },
+        { q:'Why',  a:'Purchasers hold unhedged credit risk' },
+        { q:'When', a:'LTV >60%, completion >24 months' },
+        { q:'How',  a:'Implied spread model — try the simulator inside' },
+      ],
+    },
+    {
+      title:'Private Credit: First-Crack Wrapper', date:'Feb 2024', hasSim:false,
+      fw:[
+        { q:'What', a:'First-loss tranche structuring' },
+        { q:'Why',  a:'Outsized yield premium at margin' },
+        { q:'When', a:'Low default correlation, conservative recovery' },
+        { q:'How',  a:'Monte Carlo loss distribution model' },
+      ],
+    },
+  ];
+  return (
+    <div style={{ background:C.bg, height:'100%', position:'relative' }}>
+      <div style={{ height:'100%', overflowY:'auto', paddingBottom:72 }}>
+        <div style={{ height:62, background:C.bg }} />
+        <TopBar title="Quant" accent={C.accent} bg={C.bg} />
+        <div style={{ padding:'20px 18px 14px' }}>
+          <ML color={C.accent} size={6.5} style={{ display:'block', marginBottom:8 }}>Quantitative Research</ML>
+          <h1 style={{ ...MONO, fontSize:20, fontWeight:500, color:C.ink, letterSpacing:'-0.01em', lineHeight:1.2, marginBottom:10 }}>
+            QUANT<span style={{ color:C.accent }}>_</span>LAB
+          </h1>
+          <p style={{ ...SERIF, fontSize:12, lineHeight:1.7, color:C.muted, fontStyle:'italic' }}>
+            Options, derivatives, and interactive financial models.
+          </p>
+        </div>
+        <div style={{ height:1, background:C.border }} />
+        {/* Article list — each with What/Why/When/How */}
+        {posts.map((post, i) => (
+          <div key={i} onClick={onOpenPost} style={{ padding:'14px 18px', borderBottom:`1px solid ${C.border}`, cursor:'pointer' }}>
+            <div style={{ display:'flex', gap:8, alignItems:'center', marginBottom:8 }}>
+              <ML color={C.muted} size={6}>{post.date}</ML>
+              {post.hasSim && (
+                <div style={{ padding:'2px 7px', background:C.accent }}>
+                  <ML color='#fff' size={5.5} style={{ letterSpacing:'0.08em' }}>+ Simulator</ML>
+                </div>
+              )}
+            </div>
+            <p style={{ ...SERIF, fontSize:15, fontWeight:600, color:C.ink, lineHeight:1.3, marginBottom:10 }}>{post.title}</p>
+            <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:5 }}>
+              {post.fw.map(f => (
+                <div key={f.q} style={{ display:'flex', gap:8, alignItems:'flex-start', padding:'8px 10px', border:`1px solid ${C.border}`, background:C.faint }}>
+                  <div style={{ width:20, height:20, background:C.accent, display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
+                    <ML color='#fff' size={6.5} style={{ opacity:1 }}>{f.q}</ML>
+                  </div>
+                  <p style={{ ...SERIF, fontSize:10, lineHeight:1.6, color:C.ink, opacity:.65 }}>{f.a}</p>
+                </div>
+              ))}
+            </div>
+            <div style={{ display:'flex', alignItems:'center', gap:8, marginTop:10 }}>
+              <div style={{ width:14, height:1.5, background:C.accent }} />
+              <ML color={C.accent} size={6.5} style={{ opacity:1 }}>Read post {post.hasSim ? '+ run simulator' : ''} →</ML>
+            </div>
+          </div>
+        ))}
+        <div style={{ height:20 }} />
+      </div>
+      <BottomNav active="quant" onTab={onNav} />
+    </div>
+  );
+}
+
+// ─── 4. QUANT POST (simulator embedded IN article) ────────────
+function QuantPostScreen({ onBack, onNav }) {
+  const C = S.quant;
+  const [notional, setNotional] = useState(10);
+  const [spread,   setSpread]   = useState(150);
+  const [recovery, setRecovery] = useState(40);
+  const [triggered, setTriggered] = useState(false);
+  const scrollRef = useRef(null);
+  const [scrolled, setScrolled] = useState(false);
+
+  const prem   = (notional * 1e6 * spread / 10000 / 1e3).toFixed(0);
+  const payout = (notional * (1 - recovery/100)).toFixed(2);
+  const bep    = (spread / 100 / (1 - recovery/100)).toFixed(2);
+
+  return (
+    <div style={{ background:C.bg, height:'100%', position:'relative' }}>
+      <div ref={scrollRef} onScroll={() => setScrolled(scrollRef.current?.scrollTop > 50)} style={{ height:'100%', overflowY:'auto', paddingBottom:72 }}>
+        <div style={{ height:62, background:C.bg }} />
+        {/* Back bar */}
+        <div style={{
+          position:'sticky', top:0, zIndex:30, display:'flex', alignItems:'center', justifyContent:'space-between',
+          padding:'10px 16px', height:44,
+          background:'rgba(247,249,252,.96)', backdropFilter:'blur(10px)',
+          borderBottom:`0.5px solid ${scrolled ? C.border : 'transparent'}`, transition:'border-color 0.3s',
+        }}>
+          <button onClick={onBack} style={{ background:'none', border:'none', cursor:'pointer', display:'flex', alignItems:'center', gap:6 }}>
+            <svg width="8" height="14" viewBox="0 0 8 14" fill="none"><path d="M7 1L1 7l6 6" stroke={C.accent} strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/></svg>
+            <ML color={C.accent} size={7} style={{ opacity:1 }}>Quant</ML>
+          </button>
+          <ML color={C.muted} size={6.5}>Off-Plan CDS</ML>
+          <button style={{ background:'none', border:'none', cursor:'pointer' }}><ML color={C.muted} size={7}>Share</ML></button>
+        </div>
+
+        {/* Article header */}
+        <div style={{ padding:'20px 18px 16px' }}>
+          <ML color={C.accent} size={6.5} style={{ display:'block', marginBottom:8 }}>Quant Research · Mar 2024</ML>
+          <h1 style={{ ...SERIF, fontSize:22, fontWeight:700, color:C.ink, letterSpacing:'-0.02em', lineHeight:1.2, marginBottom:14 }}>
+            Off-Plan Default Swaps
+          </h1>
+          {/* What/Why/When/How grid */}
+          <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:6, marginBottom:16 }}>
+            {[
+              ['What','Pricing CDS on off-plan developer default'],
+              ['Why','Purchasers hold unhedged credit exposure'],
+              ['When','LTV >60%, completion >24 months'],
+              ['How','Interactive simulator below'],
+            ].map(([k,v]) => (
+              <div key={k} style={{ padding:'8px 10px', border:`1px solid ${C.border}`, background:C.faint }}>
+                <div style={{ display:'flex', gap:6, alignItems:'center', marginBottom:4 }}>
+                  <div style={{ width:18, height:18, background:C.accent, display:'flex', alignItems:'center', justifyContent:'center' }}>
+                    <ML color='#fff' size={6} style={{ opacity:1 }}>{k}</ML>
+                  </div>
+                </div>
+                <p style={{ ...SERIF, fontSize:10, lineHeight:1.6, color:C.ink, opacity:.65 }}>{v}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div style={{ height:1, background:C.border }} />
+
+        {/* Article body */}
+        <div style={{ padding:'16px 18px' }}>
+          <p style={{ ...SERIF, fontSize:13, lineHeight:1.88, color:C.ink, opacity:.68, marginBottom:14 }}>
+            A credit default swap on an off-plan property is a bilateral contract in which the protection buyer pays a periodic spread in exchange for a contingent payment upon developer default before completion.
+          </p>
+          <p style={{ ...SERIF, fontSize:13, lineHeight:1.88, color:C.ink, opacity:.68, marginBottom:16 }}>
+            The pricing challenge: most off-plan developers are private entities with no traded debt. We solve this with an implied spread model derived from leverage ratio and completion timeline.
+          </p>
+        </div>
+
+        {/* ── EMBEDDED SIMULATOR ── */}
+        <div style={{ margin:'4px 12px 16px', border:`1px solid ${C.border}`, background:'#fff', overflow:'hidden' }}>
+          <div style={{ padding:'11px 14px', borderBottom:`1px solid ${C.border}`, background:C.faint, display:'flex', justifyContent:'space-between', alignItems:'center' }}>
+            <ML color={C.accent} size={6.5} style={{ opacity:1 }}>Interactive Model</ML>
+            <ML color={C.muted} size={6}>CDS Simulator</ML>
+          </div>
+          <div style={{ padding:'14px' }}>
+            {[
+              { label:'Notional', val:notional, set:setNotional, min:1, max:50, step:1, fmt:v=>`$${v}M` },
+              { label:'Spread',   val:spread,   set:setSpread,   min:50, max:800, step:25, fmt:v=>`${v}bps` },
+              { label:'Recovery', val:recovery, set:setRecovery, min:0, max:80, step:5, fmt:v=>`${v}%` },
+            ].map(item => (
+              <div key={item.label} style={{ marginBottom:12 }}>
+                <div style={{ display:'flex', justifyContent:'space-between', marginBottom:5 }}>
+                  <ML color={C.muted} size={6.5}>{item.label}</ML>
+                  <span style={{ ...MONO, fontSize:9, letterSpacing:'0.03em', color:C.ink }}>{item.fmt(item.val)}</span>
+                </div>
+                <input type="range" min={item.min} max={item.max} step={item.step}
+                  value={item.val} onChange={e => item.set(+e.target.value)}
+                  style={{ width:'100%', accentColor:C.accent }}
+                />
+              </div>
+            ))}
+            <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', padding:'8px 0', borderTop:`1px solid ${C.border}`, marginBottom:10 }}>
+              <ML color={C.muted} size={6.5}>Trigger Default</ML>
+              <button onClick={() => setTriggered(t => !t)} style={{
+                padding:'4px 10px', border:`1px solid ${triggered?'#b83025':C.border}`,
+                background:triggered?'#b8302512':'transparent',
+                color:triggered?'#b83025':C.muted,
+                ...MONO, fontSize:7, letterSpacing:'0.08em', textTransform:'uppercase', cursor:'pointer',
+              }}>{triggered?'ON':'OFF'}</button>
+            </div>
+            <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:6 }}>
+              {[
+                { k:'Annual Premium', v:`$${prem}K` },
+                { k:'Payout on Default', v:`$${payout}M` },
+                { k:'Break-even Prob', v:`${bep}%/yr` },
+                { k:'Net Buyer P&L', v: triggered ? `+$${(notional*(1-recovery/100)-notional*spread/10000).toFixed(2)}M` : `-$${(notional*spread/10000*5).toFixed(2)}M`, col: triggered?'#2d7a4f':'#b83025' },
+              ].map(item => (
+                <div key={item.k} style={{ padding:'9px 10px', border:`1px solid ${C.border}`, background:C.faint }}>
+                  <ML color={C.muted} size={6} style={{ display:'block', marginBottom:3 }}>{item.k}</ML>
+                  <span style={{ ...MONO, fontSize:12, letterSpacing:'0.02em', color:item.col||C.ink }}>{item.v}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        <div style={{ padding:'0 18px 20px' }}>
+          <div style={{ borderLeft:`2px solid ${C.accent}`, paddingLeft:12 }}>
+            <ML color={C.muted} size={6.5} style={{ display:'block', marginBottom:6 }}>Model Note</ML>
+            <p style={{ ...SERIF, fontSize:12, lineHeight:1.8, color:C.ink, opacity:.65 }}>
+              Break-even default probability = spread ÷ (1 − recovery). At 150bps and 40% recovery, you need only 2.5% annualised default risk to justify buying protection.
+            </p>
+          </div>
+        </div>
+      </div>
+      <BottomNav active="quant" onTab={onNav} />
+    </div>
+  );
+}
+
+// ─── 5. MARKET NOTES ─────────────────────────────────────────
+function NotesScreen({ onNav }) {
+  const C = S.notes;
+  const notes = [
+    { month:'Mar', day:'18', title:'Fed Decision Week: Three Things to Watch', stat:'3 cuts in 2024 dot plot', read:'3 min' },
+    { month:'Mar', day:'12', title:'Liquidity Squeeze: Fed March 2026', stat:'RRP drawdown: $180B in 30d', read:'4 min' },
+    { month:'Mar', day:'05', title:'Prediction Markets: EM Oil March 2026', stat:'34% prob of OPEC+ cut at May', read:'5 min' },
+  ];
+  return (
+    <div style={{ background:C.bg, height:'100%', position:'relative' }}>
+      <div style={{ height:'100%', overflowY:'auto', paddingBottom:72 }}>
+        <div style={{ height:62, background:C.bg }} />
+        <TopBar title="Notes" accent={C.accent} bg={C.bg} />
+        <div style={{ padding:'20px 18px 14px' }}>
+          <ML color={C.accent} size={6.5} style={{ display:'block', marginBottom:8 }}>Market Notes</ML>
+          <h1 style={{ ...SERIF, fontSize:24, fontWeight:700, color:C.ink, letterSpacing:'-0.025em', lineHeight:1.2, marginBottom:10 }}>
+            Filed within <em style={{ color:C.accent }}>24 hours.</em>
+          </h1>
+          <p style={{ ...SERIF, fontSize:12, lineHeight:1.7, color:C.muted, fontStyle:'italic' }}>One stat. One view. Short read.</p>
+        </div>
+        <div style={{ height:1, background:C.border }} />
+        {notes.map((n, i) => (
+          <div key={i} style={{ padding:'16px 18px', borderBottom:`1px solid ${C.border}`, cursor:'pointer' }}>
+            <div style={{ display:'grid', gridTemplateColumns:'44px 1fr', gap:14, alignItems:'flex-start' }}>
+              <div>
+                <span style={{ ...MONO, fontSize:18, letterSpacing:'-0.02em', color:C.accent, display:'block', lineHeight:1 }}>{n.day}</span>
+                <ML color={C.muted} size={6.5} style={{ display:'block', marginTop:1 }}>{n.month}</ML>
+                <ML color={C.muted} size={6} style={{ display:'block', marginTop:6 }}>{n.read}</ML>
+              </div>
+              <div>
+                <p style={{ ...SERIF, fontSize:14, fontWeight:600, color:C.ink, lineHeight:1.3, marginBottom:9 }}>{n.title}</p>
+                <div style={{ display:'inline-flex', alignItems:'center', gap:8, padding:'5px 10px', border:`1px solid ${C.border}`, background:C.faint }}>
+                  <div style={{ width:5, height:5, borderRadius:'50%', background:C.accent, animation:'pulse-dot 2s infinite' }} />
+                  <ML color={C.muted} size={6}>Key figure</ML>
+                  <ML color={C.accent} size={7.5} style={{ opacity:1 }}>{n.stat}</ML>
+                </div>
+                <div style={{ display:'flex', alignItems:'center', gap:7, marginTop:9 }}>
+                  <div style={{ width:12, height:1.5, background:C.accent }} />
+                  <ML color={C.accent} size={6.5} style={{ opacity:1 }}>Read note →</ML>
+                </div>
+              </div>
+            </div>
+          </div>
+        ))}
+        <div style={{ height:20 }} />
+      </div>
+      <BottomNav active="notes" onTab={onNav} />
+    </div>
+  );
+}
+
+// ─── PHONE WRAPPER ────────────────────────────────────────────
+function Phone({ screen, label, sub }) {
+  return (
+    <div style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:18, flexShrink:0 }}>
+      <div style={{ textAlign:'center' }}>
+        <div style={{ ...MONO, fontSize:7.5, letterSpacing:'0.16em', textTransform:'uppercase', color:'rgba(245,242,235,.5)', marginBottom:4 }}>{label}</div>
+        {sub && <div style={{ ...SERIF, fontSize:10.5, color:'rgba(245,242,235,.28)', fontStyle:'italic' }}>{sub}</div>}
+      </div>
+      <IOSDevice dark={false} width={375} height={812}>
+        <div style={{ height:'100%', overflow:'hidden', position:'relative' }}>{screen}</div>
+      </IOSDevice>
+    </div>
+  );
+}
+
+// ─── APP ──────────────────────────────────────────────────────
+function App() {
+  const [quantView, setQuantView] = useState('landing'); // 'landing' | 'post'
+
+  return (
+    <div style={{ minHeight:'100vh', background:'#0a0a0a', display:'flex', alignItems:'flex-start', padding:'40px 60px', gap:44, overflowX:'auto', overflowY:'auto' }}>
+      <Phone label="01 — Equity Landing" sub="4 reasons + article list" screen={<EquityScreen onNav={() => {}} />} />
+      <Phone label="02 — Macro Landing" sub="Live indicators + articles" screen={<MacroScreen onNav={() => {}} />} />
+      <Phone label={quantView==='landing' ? "03 — Quant Landing" : "03 — Quant Post"} sub={quantView==='landing' ? "What·Why·When·How per article" : "Article + embedded simulator"} screen={
+        quantView === 'landing'
+          ? <QuantScreen onNav={() => {}} onOpenPost={() => setQuantView('post')} />
+          : <QuantPostScreen onBack={() => setQuantView('landing')} onNav={() => {}} />
+      } />
+      <Phone label="04 — Market Notes" sub="Date feed + one key stat" screen={<NotesScreen onNav={() => {}} />} />
+      <style>{`@keyframes pulse-dot{0%,100%{opacity:1}50%{opacity:.4}}`}</style>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>

@@ -1,0 +1,815 @@
+@import 'tailwindcss';
+@import 'tw-animate-css';
+
+@custom-variant dark (&:is(.dark *));
+
+:root {
+  color-scheme: light;
+  --bg: #faf9f7;
+  --surface: #ffffff;
+  --ink: #0f0f0f;
+  --muted: #5a5a5a;
+  --subtle: #909090;
+  --border: #e2e0db;
+  --accent: #c0392b;
+  --dark: #0a0a0a;
+  --font-display-family: var(--font-display);
+  --font-serif-family: var(--font-serif);
+  --font-mono-family: var(--font-mono);
+  --background: var(--bg);
+  --foreground: var(--ink);
+  --card: var(--surface);
+  --card-foreground: var(--ink);
+  --popover: var(--surface);
+  --popover-foreground: var(--ink);
+  --primary: var(--ink);
+  --primary-foreground: var(--bg);
+  --secondary: var(--surface);
+  --secondary-foreground: var(--ink);
+  --muted-foreground: var(--muted);
+  --accent-foreground: var(--surface);
+  --destructive: var(--accent);
+  --destructive-foreground: var(--surface);
+  --input: var(--border);
+  --ring: var(--ink);
+  --chart-1: oklch(0.13 0 0);
+  --chart-2: oklch(0.35 0 0);
+  --chart-3: oklch(0.55 0 0);
+  --chart-4: oklch(0.75 0 0);
+  --chart-5: oklch(0.90 0 0);
+  --radius: 0rem;
+  --sidebar: oklch(0.985 0 0);
+  --sidebar-foreground: oklch(0.13 0 0);
+  --sidebar-primary: oklch(0.13 0 0);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.96 0 0);
+  --sidebar-accent-foreground: oklch(0.13 0 0);
+  --sidebar-border: oklch(0.88 0 0);
+  --sidebar-ring: oklch(0.13 0 0);
+  --mobile-chrome-bg: #ffffff;
+  --mobile-chrome-fg: #0a0a0a;
+  --mobile-chrome-muted: rgba(10, 10, 10, 0.48);
+  --mobile-chrome-subtle: rgba(10, 10, 10, 0.16);
+  --mobile-chrome-border: rgba(10, 10, 10, 0.08);
+  --mobile-page-bg: #ffffff;
+  --mobile-page-fg: #0a0a0a;
+  --mobile-page-muted: rgba(10, 10, 10, 0.45);
+  --mobile-page-subtle: rgba(10, 10, 10, 0.2);
+  --mobile-page-line: rgba(10, 10, 10, 0.06);
+  --mobile-overlay-bg: #f1ede5;
+  --mobile-landing-bg: #f1ede5;
+  --mobile-landing-fg: #0f0f0f;
+  --mobile-landing-muted: rgba(15, 15, 15, 0.58);
+  --mobile-landing-soft: rgba(15, 15, 15, 0.2);
+  --mobile-landing-border: rgba(15, 15, 15, 0.08);
+  --mobile-card-line-strong: rgba(15, 15, 15, 0.1);
+  --mobile-card-line-medium: rgba(15, 15, 15, 0.07);
+  --mobile-card-line-soft: rgba(15, 15, 15, 0.05);
+  --mobile-panel-bg: #faf9f7;
+  --mobile-panel-alt-bg: #f5f3ee;
+  --mobile-panel-fg: #0f0f0f;
+  --mobile-panel-muted: #7d766f;
+  --mobile-panel-border: #e2e0db;
+  --mobile-panel-border-alt: #dedad4;
+  --mobile-cta-bg: #0a0a0a;
+  --mobile-cta-fg: #fff;
+  --mobile-shadow: none;
+  --mobile-shadow-active: none;
+  --mobile-coverage-page-bg: #f5f2eb;
+  --mobile-coverage-hero-bg: #f1ede5;
+  --mobile-coverage-hero-text: #0f0f0f;
+  --mobile-coverage-hero-muted: rgba(15, 15, 15, 0.62);
+  --mobile-coverage-panel-bg: rgba(255, 255, 255, 0.72);
+  --mobile-coverage-panel-border: rgba(15, 15, 15, 0.08);
+  --mobile-coverage-body-start: #f7f6f3;
+  --mobile-coverage-intro-bg: rgba(255, 255, 255, 0.96);
+}
+
+
+
+/* Force dark mode via ?dark=1 query param */
+:root.force-dark {
+  color-scheme: dark;
+  --background: #0c0c0d;
+  --surface: #121212;
+  --foreground: #f5f2eb;
+  --card: #121212;
+  --card-foreground: #f5f2eb;
+  --popover: #121212;
+  --popover-foreground: #f5f2eb;
+  --primary: #f5f2eb;
+  --primary-foreground: #0c0c0d;
+  --secondary: #181716;
+  --secondary-foreground: #f5f2eb;
+  --muted: #181716;
+  --muted-foreground: #b8b0a3;
+  --accent: #d25448;
+  --accent-foreground: #0c0c0d;
+  --destructive: #d25448;
+  --destructive-foreground: #0c0c0d;
+  --border: #2d2a25;
+  --input: #2d2a25;
+  --ring: #f5f2eb;
+  --mobile-chrome-bg: #080808;
+  --mobile-chrome-fg: #f5f2eb;
+  --mobile-chrome-muted: rgba(245, 242, 235, 0.5);
+  --mobile-chrome-subtle: rgba(245, 242, 235, 0.14);
+  --mobile-chrome-border: rgba(245, 242, 235, 0.08);
+  --mobile-page-bg: #0a0a0a;
+  --mobile-page-fg: #f5f2eb;
+  --mobile-page-muted: rgba(245, 242, 235, 0.42);
+  --mobile-page-subtle: rgba(245, 242, 235, 0.18);
+  --mobile-page-line: rgba(245, 242, 235, 0.06);
+  --mobile-overlay-bg: #080808;
+  --mobile-landing-bg: #080808;
+  --mobile-landing-fg: #f5f2eb;
+  --mobile-landing-muted: rgba(245, 242, 235, 0.58);
+  --mobile-landing-soft: rgba(245, 242, 235, 0.2);
+  --mobile-landing-border: rgba(245, 242, 235, 0.08);
+  --mobile-panel-bg: #141311;
+  --mobile-panel-alt-bg: #181614;
+  --mobile-panel-fg: #f5f2eb;
+  --mobile-panel-muted: #b8b0a3;
+  --mobile-panel-border: #2d2a25;
+  --mobile-panel-border-alt: #34302b;
+  --mobile-cta-bg: #f5f2eb;
+  --mobile-cta-fg: #111111;
+  --mobile-shadow: none;
+  --mobile-shadow-active: none;
+  --mobile-coverage-page-bg: #0b0b0b;
+  --mobile-coverage-hero-bg: #080808;
+  --mobile-coverage-hero-text: #f5f2eb;
+  --mobile-coverage-hero-muted: rgba(245, 242, 235, 0.72);
+  --mobile-coverage-panel-bg: rgba(255, 255, 255, 0.04);
+  --mobile-coverage-panel-border: rgba(255, 255, 255, 0.08);
+  --mobile-coverage-body-start: #0a0a0a;
+  --mobile-coverage-intro-bg: rgba(18, 18, 18, 0.96);
+}
+
+@theme inline {
+  --font-sans: var(--font-serif-family), Georgia, serif;
+  --font-serif: var(--font-serif-family), Georgia, serif;
+  --font-mono: var(--font-mono-family), 'Courier New', monospace;
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --radius-sm: calc(var(--radius) - 2px);
+  --radius-md: var(--radius);
+  --radius-lg: calc(var(--radius) + 2px);
+  --radius-xl: calc(var(--radius) + 4px);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+}
+
+@layer base {
+  html {
+    @apply bg-background text-foreground;
+    scroll-behavior: smooth;
+    scrollbar-gutter: stable;
+  }
+  * {
+    @apply border-border outline-ring/50;
+    border-radius: 0;
+    box-shadow: none;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-family: var(--font-serif-family), Georgia, serif;
+    margin: 0;
+    padding: 0;
+    overflow-y: scroll;
+  }
+}
+
+html::-webkit-scrollbar,
+body::-webkit-scrollbar {
+  width: 12px;
+}
+
+html::-webkit-scrollbar-track,
+body::-webkit-scrollbar-track {
+  background: var(--bg);
+}
+
+html::-webkit-scrollbar-thumb,
+body::-webkit-scrollbar-thumb {
+  background: color-mix(in srgb, var(--ink) 18%, var(--bg));
+  border: 3px solid var(--bg);
+}
+
+html::-webkit-scrollbar-thumb:hover,
+body::-webkit-scrollbar-thumb:hover {
+  background: color-mix(in srgb, var(--ink) 28%, var(--bg));
+}
+
+.fade-in-up {
+  opacity: 0;
+  transform: translateY(14px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+
+.fade-in-up.in-view {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Prose styles for markdown content */
+.prose {
+  @apply text-foreground leading-relaxed;
+}
+.prose h1 {
+  @apply font-serif text-3xl font-bold tracking-tight mb-6 text-foreground;
+}
+.prose h2 {
+  @apply font-serif text-2xl font-semibold tracking-tight mt-10 mb-4 text-foreground;
+}
+.prose h3 {
+  @apply font-serif text-xl font-semibold mt-8 mb-3 text-foreground;
+}
+.prose p {
+  @apply mb-5 leading-relaxed text-foreground;
+}
+.prose ul {
+  @apply list-disc pl-6 mb-5 text-foreground;
+}
+.prose ol {
+  @apply list-decimal pl-6 mb-5 text-foreground;
+}
+.prose li {
+  @apply mb-2 text-foreground;
+}
+.prose blockquote {
+  @apply border-l-2 border-foreground pl-5 italic my-6 text-muted-foreground;
+}
+.prose strong {
+  @apply font-semibold text-foreground;
+}
+.prose a {
+  @apply underline underline-offset-4 text-foreground hover:text-muted-foreground transition-colors;
+}
+.prose code {
+  @apply font-mono text-sm bg-secondary px-1.5 py-0.5 rounded text-foreground;
+}
+.prose hr {
+  @apply border-border my-8;
+}
+.prose table {
+  @apply w-full text-sm text-foreground overflow-x-auto block whitespace-nowrap;
+  border-collapse: collapse;
+}
+.prose thead {
+  @apply border-b border-border bg-secondary/50 text-foreground text-left;
+}
+.prose th, .prose td {
+  @apply p-3 border-b border-border;
+}
+.prose tbody tr:nth-child(even) {
+  @apply bg-muted/20;
+}
+.prose tbody tr:hover {
+  @apply bg-muted/40;
+}
+
+.wp-nav {
+  position: fixed;
+  top: 0;
+  right: 0;
+  left: 0;
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  gap: 36px;
+  height: 52px;
+  padding: 0 48px;
+  border-bottom: 1px solid transparent;
+  transition:
+    background 0.4s ease,
+    border-color 0.4s ease,
+    color 0.3s ease,
+    backdrop-filter 0.4s ease,
+    -webkit-backdrop-filter 0.4s ease;
+}
+
+.wp-nav.over-hero {
+  background: transparent;
+}
+
+.wp-nav.scrolled,
+.wp-nav.over-light {
+  background: rgba(250, 249, 247, 0.96);
+  border-bottom-color: var(--border);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+.wp-nav-logo {
+  color: rgba(255, 255, 255, 0.92);
+  font-family: var(--font-display-family), Georgia, serif;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1;
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.wp-nav.scrolled .wp-nav-logo,
+.wp-nav.over-light .wp-nav-logo {
+  color: var(--ink);
+}
+
+.wp-nav-links {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+}
+
+.wp-nav-link {
+  color: rgba(255, 255, 255, 0.3);
+  font-family: var(--font-mono-family), monospace;
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  line-height: 1;
+  text-decoration: none;
+  text-transform: uppercase;
+  transition: color 0.2s ease;
+}
+
+.wp-nav-link:hover,
+.wp-nav-link.is-active {
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.wp-nav.scrolled .wp-nav-link,
+.wp-nav.over-light .wp-nav-link {
+  color: rgba(15, 15, 15, 0.62);
+}
+
+.wp-nav.scrolled .wp-nav-link:hover,
+.wp-nav.scrolled .wp-nav-link.is-active,
+.wp-nav.over-light .wp-nav-link:hover,
+.wp-nav.over-light .wp-nav-link.is-active {
+  color: var(--accent);
+}
+
+.wp-nav-right {
+  margin-left: auto;
+  color: rgba(255, 255, 255, 0.18);
+  font-family: var(--font-mono-family), monospace;
+  font-size: 8px;
+  letter-spacing: 0.16em;
+  line-height: 1;
+  text-transform: uppercase;
+  transition: color 0.3s ease;
+}
+
+.wp-nav.scrolled .wp-nav-right,
+.wp-nav.over-light .wp-nav-right {
+  color: rgba(15, 15, 15, 0.46);
+}
+
+.wp-hero {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  overflow: hidden;
+  background: var(--dark);
+  padding: 100px 48px 80px;
+}
+
+.wp-hero-grain {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  opacity: 0.035;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n' x='0' y='0'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+}
+
+.wp-hero-rule {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 5;
+  height: 2px;
+  background: var(--accent);
+}
+
+.wp-hero-inner {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  max-width: 960px;
+}
+
+.wp-hero-doc-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 0;
+  width: 100%;
+}
+
+.wp-hero-doc {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  padding: 32px 36px;
+  opacity: 0;
+  background: rgba(255, 255, 255, 0.025);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  transition: opacity 0.9s ease, filter 1.2s ease;
+}
+
+.wp-hero-doc.doc-visible {
+  opacity: 1;
+}
+
+.wp-hero-doc.doc-dimmed {
+  opacity: 0.1;
+  filter: blur(0.5px);
+}
+
+.wp-doc-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 16px;
+  margin-bottom: 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.wp-doc-header-left,
+.wp-doc-header-right {
+  font-family: var(--font-mono-family), monospace;
+  font-size: 7.5px;
+  text-transform: uppercase;
+}
+
+.wp-doc-header-left {
+  color: rgba(255, 255, 255, 0.18);
+  letter-spacing: 0.22em;
+}
+
+.wp-doc-header-right {
+  color: rgba(255, 255, 255, 0.12);
+  letter-spacing: 0.18em;
+}
+
+.wp-doc-body {
+  color: rgba(255, 255, 255, 0.28);
+  font-family: var(--font-serif-family), Georgia, serif;
+  font-size: 12px;
+  font-weight: 300;
+  line-height: 1.95;
+}
+
+.wp-doc-para {
+  margin: 0 0 14px;
+}
+
+.wp-doc-para:last-child {
+  margin-bottom: 0;
+}
+
+.wp-ann {
+  position: relative;
+  color: rgba(255, 255, 255, 0.5);
+  transition: color 0.35s ease;
+}
+
+.wp-ann::after {
+  content: "";
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  width: 100%;
+  height: 1.5px;
+  background: var(--accent);
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.wp-ann.ann-active {
+  color: rgba(255, 255, 255, 0.82);
+}
+
+.wp-ann.ann-active::after {
+  transform: scaleX(1);
+}
+
+.wp-ann-circle {
+  position: relative;
+}
+
+.wp-note-panel {
+  position: relative;
+  flex-shrink: 0;
+  width: 200px;
+  min-height: 200px;
+  padding-left: 16px;
+}
+
+.wp-mnote {
+  position: absolute;
+  left: 0;
+  display: flex;
+  align-items: flex-start;
+  opacity: 0;
+  transform: translateX(-10px);
+  transition: opacity 0.5s ease, transform 0.5s ease;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+.wp-mnote.note-visible {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.wp-mnote-line {
+  width: 22px;
+  height: 1px;
+  flex-shrink: 0;
+  margin-top: 9px;
+  margin-right: 8px;
+  background: var(--accent);
+}
+
+.wp-mnote-text {
+  color: var(--accent);
+  font-family: var(--font-mono-family), monospace;
+  font-size: 9px;
+  line-height: 1.6;
+  letter-spacing: 0.05em;
+}
+
+.wp-hero-tagline {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 0 48px;
+  opacity: 0;
+  pointer-events: none;
+  text-align: center;
+  transform: translateY(16px);
+  transition: opacity 1s ease, transform 1s ease;
+}
+
+.wp-hero-tagline.tagline-visible {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0);
+}
+
+.wp-tagline-eyebrow {
+  margin-bottom: 28px;
+  color: rgba(255, 255, 255, 0.22);
+  font-family: var(--font-mono-family), monospace;
+  font-size: 8px;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+}
+
+.wp-tagline-headline {
+  margin: 0 0 28px;
+  color: rgba(255, 255, 255, 0.96);
+  font-family: var(--font-display-family), Georgia, serif;
+  font-size: clamp(44px, 7vw, 80px);
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.04em;
+}
+
+.wp-tagline-headline em {
+  color: var(--accent);
+  font-style: italic;
+  font-weight: 600;
+}
+
+.wp-tagline-sub {
+  max-width: 440px;
+  margin: 0 0 36px;
+  color: rgba(255, 255, 255, 0.35);
+  font-family: var(--font-serif-family), Georgia, serif;
+  font-size: 14px;
+  font-weight: 300;
+  line-height: 1.7;
+}
+
+.wp-tagline-actions {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.wp-tagline-cta-primary {
+  display: inline-block;
+  padding: 10px 22px;
+  color: var(--dark);
+  background: rgba(250, 249, 247, 0.92);
+  font-family: var(--font-mono-family), monospace;
+  font-size: 9px;
+  letter-spacing: 0.16em;
+  text-decoration: none;
+  text-transform: uppercase;
+  transition: background 0.2s ease;
+}
+
+.wp-tagline-cta-primary:hover {
+  background: #fff;
+}
+
+.wp-tagline-cta-secondary {
+  padding-bottom: 1px;
+  color: rgba(255, 255, 255, 0.35);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  font-family: var(--font-mono-family), monospace;
+  font-size: 9px;
+  letter-spacing: 0.16em;
+  text-decoration: none;
+  text-transform: uppercase;
+  transition: color 0.2s ease, border-color 0.2s ease;
+}
+
+.wp-tagline-cta-secondary:hover {
+  color: rgba(255, 255, 255, 0.7);
+  border-bottom-color: rgba(255, 255, 255, 0.35);
+}
+
+.wp-scroll-hint {
+  position: absolute;
+  bottom: 28px;
+  left: 50%;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  opacity: 0;
+  text-decoration: none;
+  transform: translateX(-50%);
+  transition: opacity 0.6s ease;
+}
+
+.wp-scroll-hint.hint-visible {
+  opacity: 1;
+}
+
+.wp-scroll-line {
+  position: relative;
+  display: block;
+  width: 1px;
+  height: 32px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.wp-scroll-line::after {
+  content: "";
+  position: absolute;
+  top: -100%;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.4);
+  animation: scrollDrop 1.8s ease-in-out infinite;
+}
+
+.wp-scroll-label {
+  color: rgba(255, 255, 255, 0.18);
+  font-family: var(--font-mono-family), monospace;
+  font-size: 7px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+.wp-replay-btn {
+  position: absolute;
+  right: 48px;
+  bottom: 28px;
+  z-index: 10;
+  opacity: 0;
+  padding: 0;
+  color: rgba(255, 255, 255, 0.18);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-family: var(--font-mono-family), monospace;
+  font-size: 8px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  transition: color 0.2s ease, opacity 0.6s ease;
+}
+
+.wp-replay-btn.btn-visible {
+  opacity: 1;
+}
+
+.wp-replay-btn:hover {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+@keyframes scrollDrop {
+  0% {
+    top: -100%;
+  }
+
+  100% {
+    top: 100%;
+  }
+}
+
+@media (max-width: 1200px) {
+  .wp-nav {
+    padding: 0 32px;
+  }
+
+  .wp-hero {
+    padding-right: 32px;
+    padding-left: 32px;
+  }
+
+  .wp-hero-tagline {
+    padding-right: 32px;
+    padding-left: 32px;
+  }
+
+  .wp-replay-btn {
+    right: 32px;
+  }
+}
+
+/* "Shooting Bullet" Loader for Desktop */
+@media (min-width: 769px) {
+  #nprogress .bar {
+    top: 50% !important;
+    height: 1px !important;
+    background: rgba(255, 255, 255, 0.1) !important;
+    box-shadow: none !important;
+    opacity: 0;
+    animation: nprogress-fade-in 0s linear 300ms forwards !important;
+  }
+  
+  #nprogress .bar::after {
+    content: "";
+    position: absolute;
+    right: 0px;
+    top: -5px;
+    width: 10px;
+    height: 10px;
+    background: var(--accent);
+    border-radius: 50%;
+    box-shadow: 0 0 10px var(--accent), 0 0 20px var(--accent);
+    transform: none !important;
+  }
+
+  /* Hide centered static bullet from previous version */
+  #nprogress::after {
+    display: none !important;
+  }
+}
+
+@keyframes nprogress-fade-in {
+  to { opacity: 1; }
+}
+
+

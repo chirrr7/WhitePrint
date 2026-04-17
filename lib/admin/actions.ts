@@ -1333,6 +1333,46 @@ export async function saveAboutSettingsAction(formData: FormData) {
   redirect(withMessage('/admin/settings', 'success', 'About page settings saved.'))
 }
 
+export async function saveBriefDataAction(formData: FormData): Promise<{ ok: boolean; error?: string }> {
+  await requireAdminIdentity()
+
+  const id = readOptionalNumber(formData, 'id')
+  const briefJson = readString(formData, 'brief_data')
+
+  if (!id) {
+    return { ok: false, error: 'Missing post id — save the post first.' }
+  }
+
+  let briefData: unknown
+  try {
+    briefData = JSON.parse(briefJson)
+  } catch {
+    return { ok: false, error: 'Invalid JSON in brief_data.' }
+  }
+
+  const supabase = await createClient()
+  // brief_data may not exist as a typed column yet; use a cast to bypass types
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { error } = await (supabase.from('posts') as any)
+    .update({ brief_data: briefData })
+    .eq('id', id)
+
+  if (error) {
+    if ((error as { code?: string }).code === '42703') {
+      return { ok: false, error: 'brief_data column not found — run the DB migration to add it.' }
+    }
+    return { ok: false, error: (error as { message?: string }).message || 'Unable to save brief.' }
+  }
+
+  revalidatePath(`/admin/posts/${id}`)
+  const { data: postSlug } = await supabase.from('posts').select('slug').eq('id', id).single()
+  if (postSlug?.slug) {
+    revalidatePath(`/posts/${postSlug.slug}`)
+  }
+
+  return { ok: true }
+}
+
 export async function createTopicAction(formData: FormData) {
   await requireAdminIdentity()
 

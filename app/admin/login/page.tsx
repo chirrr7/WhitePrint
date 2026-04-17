@@ -22,14 +22,13 @@ export default async function AdminLoginPage({ searchParams }: AdminLoginPagePro
   }
 
   return (
-    <div className={styles.loginShell}>
+    <div className={styles.loginWrap}>
+      <div className={styles.loginGrain} aria-hidden="true" />
       <div className={styles.loginCard}>
-        <p className={styles.eyebrow}>Whiteprint admin</p>
-        <h1 className={styles.loginTitle}>Sign in to the private editorial panel.</h1>
-        <p className={styles.loginIntro}>
-          Supabase Auth handles the session, and the admin allowlist in Postgres
-          decides who gets through.
-        </p>
+        <h1 className={styles.loginLogo}>
+          Whiteprint <em>Research</em>
+        </h1>
+        <p className={styles.loginIntro}>Private editorial panel</p>
 
         {message ? (
           <div className={styles.message} data-tone={message.tone}>
@@ -38,77 +37,59 @@ export default async function AdminLoginPage({ searchParams }: AdminLoginPagePro
         ) : null}
 
         {user ? (
-          <div className={styles.noteCard} style={{ marginTop: '1rem' }}>
-            <h2 className={styles.noteTitle}>Current session detected</h2>
+          <div className={styles.noteCard}>
+            <h2 className={styles.noteTitle}>Session detected</h2>
             <p className={styles.noteBody}>
-              You are signed in as <strong>{user.email}</strong>, but that account
-              is not on the admin allowlist yet.
+              Signed in as <strong>{user.email}</strong>, but not on the admin allowlist.
             </p>
             <div className={styles.buttonRow}>
               <form action={claimAdminAccessAction}>
-                <button type="submit" className={styles.primaryButton}>
-                  Activate admin access
+                <button type="submit" className={`${styles.btn} ${styles.btnPrimary}`}>
+                  Activate access
                 </button>
               </form>
               <form action={logoutAction}>
-                <button type="submit" className={styles.secondaryButton}>
-                  Use a different account
+                <button type="submit" className={`${styles.btn} ${styles.btnGhost}`}>
+                  Use different account
                 </button>
               </form>
             </div>
           </div>
         ) : null}
 
-        <form action={loginAction} className={styles.panel} style={{ marginTop: '1rem' }}>
-          <div className={styles.panelHeader}>
-            <div>
-              <h2 className={styles.panelTitle}>Sign in</h2>
-              <p className={styles.panelIntro}>
-                Use the admin email you want to control the site with.
-              </p>
-            </div>
-          </div>
-          <div className={styles.formGrid}>
-            <label className={styles.field}>
-              <span className={styles.label}>Email</span>
-              <input
-                className={styles.input}
-                type="email"
-                name="email"
-                placeholder="admin@whiteprintresearch.com"
-                required
-              />
-            </label>
-            <label className={styles.field}>
-              <span className={styles.label}>Password</span>
-              <input
-                className={styles.input}
-                type="password"
-                name="password"
-                placeholder="Your Supabase password"
-                required
-              />
-            </label>
-          </div>
-
-          <div className={styles.buttonRow}>
-            <button type="submit" className={styles.primaryButton}>
-              Sign in
-            </button>
-          </div>
+        <form action={loginAction} className={styles.formGrid}>
+          <label className={styles.field}>
+            <span className={styles.label}>Email</span>
+            <input
+              className={styles.input}
+              type="email"
+              name="email"
+              placeholder="admin@whiteprintresearch.com"
+              required
+            />
+          </label>
+          <label className={styles.field}>
+            <span className={styles.label}>Password</span>
+            <input
+              className={styles.input}
+              type="password"
+              name="password"
+              placeholder="••••••••"
+              required
+            />
+          </label>
+          <button type="submit" className={`${styles.btn} ${styles.btnPrimary} ${styles.btnFull}`}>
+            Sign in
+          </button>
         </form>
 
         {!user ? (
-          <form action={signupAction} className={styles.panel} style={{ marginTop: '1rem' }}>
-            <div className={styles.panelHeader}>
-              <div>
-                <h2 className={styles.panelTitle}>Create admin account</h2>
-                <p className={styles.panelIntro}>
-                  If you do not have a Supabase login yet, create it here first.
-                </p>
-              </div>
-            </div>
-            <div className={styles.formGrid}>
+          <>
+            <div className={styles.loginDivider} />
+            <form action={signupAction} className={styles.formGrid}>
+              <p className={styles.label} style={{ textAlign: 'center' }}>
+                Or create admin account
+              </p>
               <label className={styles.field}>
                 <span className={styles.label}>Email</span>
                 <input
@@ -129,14 +110,14 @@ export default async function AdminLoginPage({ searchParams }: AdminLoginPagePro
                   required
                 />
               </label>
-            </div>
-
-            <div className={styles.buttonRow}>
-              <button type="submit" className={styles.secondaryButton}>
+              <button
+                type="submit"
+                className={`${styles.btn} ${styles.btnGhost} ${styles.btnFull}`}
+              >
                 Create account
               </button>
-            </div>
-          </form>
+            </form>
+          </>
         ) : null}
       </div>
     </div>

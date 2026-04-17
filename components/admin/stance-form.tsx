@@ -24,18 +24,17 @@ export function StanceForm({ linkedPosts, message, mode, stance, topics }: Stanc
   return (
     <div className={styles.pageStack}>
       <div className={styles.pageHeader}>
-        <div>
+        <div className={styles.pageHeaderInner}>
           <p className={styles.eyebrow}>Coverage</p>
           <h1 className={styles.pageTitle}>
-            {mode === 'create' ? 'New coverage record' : 'Edit coverage record'}
+            {mode === 'create' ? 'New stance' : 'Edit stance'}
           </h1>
           <p className={styles.pageIntro}>
-            These fields now drive the public coverage page, ticker, and home stance
-            strip directly. Link posts to a coverage record from the post editor.
+            These fields drive the public coverage page, ticker, and stance strip.
           </p>
         </div>
         <Link href="/admin/stances" className={styles.secondaryButton}>
-          Back to coverage
+          Back to stances
         </Link>
       </div>
 
@@ -46,6 +45,7 @@ export function StanceForm({ linkedPosts, message, mode, stance, topics }: Stanc
       ) : null}
 
       <form action={saveStanceAction} className={styles.panel}>
+        <div className={styles.panelPadded}>
         {stance ? <input type="hidden" name="id" value={String(stance.id)} /> : null}
 
         <div className={styles.formGrid}>
@@ -352,17 +352,17 @@ export function StanceForm({ linkedPosts, message, mode, stance, topics }: Stanc
 
         <div className={styles.buttonRow}>
           <button type="submit" className={styles.primaryButton}>
-            {mode === 'create' ? 'Create coverage record' : 'Save changes'}
+            {mode === 'create' ? 'Create stance' : 'Save changes'}
           </button>
           <Link href="/admin/stances" className={styles.secondaryButton}>
             Cancel
           </Link>
         </div>
+        </div>
       </form>
 
       {mode === 'edit' && stance ? (
         <form action={deleteStanceAction} className={styles.panel}>
-          <input type="hidden" name="id" value={String(stance.id)} />
           <div className={styles.panelHeader}>
             <div>
               <h2 className={styles.panelTitle}>Danger zone</h2>
@@ -372,9 +372,12 @@ export function StanceForm({ linkedPosts, message, mode, stance, topics }: Stanc
               </p>
             </div>
           </div>
-          <button type="submit" className={styles.dangerButton}>
-            Delete coverage record
-          </button>
+          <div className={styles.panelPadded}>
+            <input type="hidden" name="id" value={String(stance.id)} />
+            <button type="submit" className={styles.dangerButton}>
+              Delete stance
+            </button>
+          </div>
         </form>
       ) : null}
     </div>

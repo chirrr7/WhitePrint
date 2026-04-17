@@ -144,6 +144,36 @@ export interface Database {
         }
         Relationships: []
       }
+      macro_indicators: {
+        Row: {
+          id: number
+          label: string
+          value: string
+          delta: string | null
+          direction: number | null
+          sort_order: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          id?: number
+          label: string
+          value: string
+          delta?: string | null
+          direction?: number | null
+          sort_order?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          id?: number
+          label?: string
+          value?: string
+          delta?: string | null
+          direction?: number | null
+          sort_order?: number | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       pipeline: {
         Row: {
           category: string[]
@@ -193,11 +223,13 @@ export interface Database {
         Row: {
           body: string
           body_mdx: string
+          brief_data: Json | null
           created_at: string
           featured: boolean
           homepage: boolean
           id: number
           linked_model_id: number | null
+          meta: Json | null
           published_at: string | null
           scenarios_count: number | null
           slug: string
@@ -212,11 +244,13 @@ export interface Database {
         Insert: {
           body?: string
           body_mdx?: string
+          brief_data?: Json | null
           created_at?: string
           featured?: boolean
           homepage?: boolean
           id?: number
           linked_model_id?: number | null
+          meta?: Json | null
           published_at?: string | null
           scenarios_count?: number | null
           slug: string
@@ -231,11 +265,13 @@ export interface Database {
         Update: {
           body?: string
           body_mdx?: string
+          brief_data?: Json | null
           created_at?: string
           featured?: boolean
           homepage?: boolean
           id?: number
           linked_model_id?: number | null
+          meta?: Json | null
           published_at?: string | null
           scenarios_count?: number | null
           slug?: string

@@ -1,0 +1,815 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>WhitePrint — Feature Prototype</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600;1,700&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet" />
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; border-radius: 0 !important; }
+    html, body { height: 100%; overflow: hidden; }
+    body { font-family: 'Playfair Display', Georgia, serif; }
+    ::-webkit-scrollbar { width: 7px; height: 7px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: rgba(128,128,128,0.18); }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(128,128,128,0.32); }
+    button { font-family: inherit; }
+    @keyframes pulse-dot {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(0.85); }
+    }
+    @keyframes fade-in-up {
+      from { opacity: 0; transform: translateY(8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes grain-shift {
+      0%   { transform: translate(0,0); }
+      20%  { transform: translate(-1px, 1px); }
+      40%  { transform: translate(1px, -1px); }
+      60%  { transform: translate(-1px, -1px); }
+      80%  { transform: translate(1px, 1px); }
+      100% { transform: translate(0,0); }
+    }
+    .grain {
+      position: absolute; inset: -40%;
+      width: 180%; height: 180%;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+      opacity: 0.028; pointer-events: none; z-index: 0;
+      animation: grain-shift 0.18s steps(1) infinite;
+    }
+    .fade-enter { animation: fade-in-up 0.35s ease both; }
+  </style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { useState, useEffect, useRef, useCallback, useMemo } = React;
+
+// ─── DEFAULTS ────────────────────────────────────────────────────────────────
+const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
+  "variant": "C",
+  "darkMode": true,
+  "accent": "#b83025"
+}/*EDITMODE-END*/;
+
+// ─── COLOR SYSTEM ────────────────────────────────────────────────────────────
+function getC(dark, accent) {
+  return dark ? {
+    bg:         '#0a0a0a',
+    surface:    '#111110',
+    surfaceAlt: '#181614',
+    ink:        '#f5f2eb',
+    muted:      'rgba(245,242,235,0.48)',
+    subtle:     'rgba(245,242,235,0.22)',
+    faint:      'rgba(245,242,235,0.05)',
+    border:     'rgba(245,242,235,0.08)',
+    accent,
+    accentBg:   accent + '18',
+    accentBorder: accent + '45',
+  } : {
+    bg:         '#faf9f7',
+    surface:    '#ffffff',
+    surfaceAlt: '#f1ede5',
+    ink:        '#0f0f0f',
+    muted:      'rgba(15,15,15,0.5)',
+    subtle:     'rgba(15,15,15,0.22)',
+    faint:      'rgba(15,15,15,0.04)',
+    border:     '#e2e0db',
+    accent,
+    accentBg:   accent + '12',
+    accentBorder: accent + '40',
+  };
+}
+
+// ─── PRIMITIVES ───────────────────────────────────────────────────────────────
+const MONO = { fontFamily: "'JetBrains Mono', monospace" };
+const SERIF = { fontFamily: "'Playfair Display', Georgia, serif" };
+
+function Mono({ children, size = 8, color, opacity = 1, style = {}, ...props }) {
+  return (
+    <span style={{ ...MONO, fontSize: size, letterSpacing: '0.14em', textTransform: 'uppercase', color, opacity, ...style }} {...props}>
+      {children}
+    </span>
+  );
+}
+
+function Rule({ C, vertical, length = '100%', style = {} }) {
+  return vertical
+    ? <div style={{ width: 1, height: length, background: C.border, flexShrink: 0, ...style }} />
+    : <div style={{ height: 1, width: length, background: C.border, ...style }} />;
+}
+
+// ─── VARIANT A — FORENSIC READER ─────────────────────────────────────────────
+const ANNS = [
+  {
+    id: 'a1',
+    label: '$6,866 million',
+    tag:   '↑ 10× vs FY2022',
+    src:   '10-K FY2024 · Note 6 — PP&E',
+    quote: 'Capital expenditures for fiscal 2024 were $6,866 million, compared to $3,299 million for fiscal 2023 and $1,347 million for fiscal 2022.',
+    note:  'A 10× step-change in three years is not organic growth — it is commitment-driven acceleration that precedes revenue by 18–36 months. Watch depreciation drag in FY2026.',
+  },
+  {
+    id: 'a2',
+    label: 'extended the estimated useful life from four years to five years',
+    tag:   '+$1.2B to op. income',
+    src:   '10-K FY2024 · Note 1 — Accounting Estimates',
+    quote: 'This change in accounting estimate increased operating income by approximately $1.2 billion in fiscal 2024.',
+    note:  'Useful-life extensions are a well-documented earnings management tool. The timing — mid capex acceleration cycle — raises the question: is management smoothing depreciation to defend margins?',
+  },
+  {
+    id: 'a3',
+    label: '$261 billion',
+    tag:   'Off-balance sheet',
+    src:   '10-K FY2024 · Note 9 — Commitments',
+    quote: 'Lease commitments of approximately $261 billion that had not yet commenced and are not reflected on our consolidated balance sheet. Initial terms of 10 to 19 years.',
+    note:  '$261B in off-balance sheet obligations is 11× Oracle\'s FY2024 revenue. When these leases commence they become on-balance sheet liabilities with depreciation and interest. This is a decade-long pressure on FCF.',
+  },
+  {
+    id: 'a4',
+    label: '$(394) million',
+    tag:   'FCF: +$13.8B → −$394M',
+    src:   '10-K FY2024 · Cash Flow Statement',
+    quote: 'Free cash flow for fiscal 2024 was $(394) million, compared to $13,757 million for fiscal 2021.',
+    note:  'A $14B swing in three years. Net income grew; FCF collapsed. The delta is entirely capex. The market is pricing net income. This is a structural divergence, not a cyclical one.',
+  },
+];
+
+const DOC_PARAS = [
+  [
+    { t: 'text', v: 'Capital expenditures for fiscal 2024 were ' },
+    { t: 'ann',  v: 'a1' },
+    { t: 'text', v: ', compared to $3,299 million for fiscal 2023 and $1,347 million for fiscal 2022. The increase reflects continued investment in cloud data centers and network infrastructure.' },
+  ],
+  [
+    { t: 'text', v: 'In fiscal 2024, we completed a review of the estimated useful lives of certain server equipment and ' },
+    { t: 'ann',  v: 'a2' },
+    { t: 'text', v: '. This change in accounting estimate increased operating income by approximately $1.2 billion.' },
+  ],
+  [
+    { t: 'text', v: 'As of May 31, 2024, we had data center lease commitments of approximately ' },
+    { t: 'ann',  v: 'a3' },
+    { t: 'text', v: ' that had not yet commenced and are not reflected on our consolidated balance sheet. These commitments have initial terms of 10 to 19 years.' },
+  ],
+  [
+    { t: 'text', v: 'Free cash flow for fiscal 2024 was ' },
+    { t: 'ann',  v: 'a4' },
+    { t: 'text', v: ', compared to $13,757 million for fiscal 2021. The decline reflects the significant increase in capital expenditures partially offset by higher operating income.' },
+  ],
+];
+
+function ForensicReader({ C }) {
+  const [active, setActive]   = useState(null);
+  const [seen, setSeen]       = useState(new Set());
+  const scrollRef             = useRef(null);
+  const annRefs               = useRef({});
+  const panelAnn              = ANNS.find(a => a.id === active);
+
+  useEffect(() => {
+    const obs = new IntersectionObserver(entries => {
+      entries.forEach(e => {
+        if (e.isIntersecting) setSeen(s => new Set([...s, e.target.dataset.aid]));
+      });
+    }, { threshold: 0.6, root: scrollRef.current });
+    Object.entries(annRefs.current).forEach(([, el]) => el && obs.observe(el));
+    return () => obs.disconnect();
+  }, []);
+
+  return (
+    <div style={{ display: 'flex', height: '100%', overflow: 'hidden' }}>
+      {/* ── Document ── */}
+      <div ref={scrollRef} style={{ flex: 1, overflowY: 'auto', padding: '44px 56px', position: 'relative' }}>
+        {/* Byline */}
+        <div style={{ marginBottom: 36 }}>
+          <Mono color={C.accent} size={7} style={{ display: 'block', marginBottom: 10 }}>Forensic Equity Analysis · ORCL · NYSE</Mono>
+          <h1 style={{ ...SERIF, fontSize: 30, fontWeight: 700, color: C.ink, lineHeight: 1.18, letterSpacing: '-0.025em', marginBottom: 14 }}>
+            Oracle Corporation<br />
+            <em style={{ color: C.accent, fontWeight: 600 }}>The Infrastructure Bet Nobody's Pricing</em>
+          </h1>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
+            <Mono color={C.muted} size={7}>Filed April 2024</Mono>
+            <Rule C={C} vertical length={12} />
+            <Mono color={C.muted} size={7}>Whiteprint Research</Mono>
+            <Rule C={C} vertical length={12} />
+            <Mono color={C.accent} size={7} style={{ opacity: 1 }}>Verdict: Short</Mono>
+          </div>
+        </div>
+
+        <Rule C={C} style={{ marginBottom: 28 }} />
+
+        {/* Signal counter */}
+        <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '6px 14px', border: `1px solid ${C.border}`, background: C.faint, marginBottom: 28 }}>
+          <div style={{ width: 6, height: 6, borderRadius: '50%', background: C.accent, animation: 'pulse-dot 2s ease-in-out infinite' }} />
+          <Mono color={C.ink} size={7} style={{ opacity: 1 }}>Signals surfaced: {seen.size} / {ANNS.length}</Mono>
+          <Mono color={C.subtle} size={7} style={{ opacity: 1 }}>— click any underline to read evidence</Mono>
+        </div>
+
+        {/* Source document */}
+        <div style={{ border: `1px solid ${C.border}`, background: C.faint, padding: '22px 26px', marginBottom: 36 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', paddingBottom: 14, marginBottom: 18, borderBottom: `1px solid ${C.border}` }}>
+            <Mono color={C.muted} size={7}>Form 10-K · Oracle Corporation · FY2024 · Selected Excerpt</Mono>
+            <Mono color={C.subtle} size={7}>Note 6 — PP&amp;E</Mono>
+          </div>
+          {DOC_PARAS.map((para, pi) => (
+            <p key={pi} style={{ ...SERIF, fontSize: 13.5, lineHeight: 2.05, color: C.ink, opacity: 0.72, marginBottom: pi < DOC_PARAS.length - 1 ? 18 : 0 }}>
+              {para.map((seg, si) => {
+                if (seg.t === 'text') return <span key={si}>{seg.v}</span>;
+                const ann = ANNS.find(a => a.id === seg.v);
+                const isSeen   = seen.has(seg.v);
+                const isActive = active === seg.v;
+                return (
+                  <span
+                    key={si}
+                    ref={el => annRefs.current[seg.v] = el}
+                    data-aid={seg.v}
+                    onClick={() => setActive(isActive ? null : seg.v)}
+                    style={{
+                      color:        isActive ? C.accent : C.ink,
+                      opacity:      isSeen ? 1 : 0.38,
+                      borderBottom: `1.5px solid ${isActive ? C.accent : isSeen ? C.accent + '70' : 'transparent'}`,
+                      cursor:       isSeen ? 'pointer' : 'default',
+                      fontWeight:   isActive ? 600 : 400,
+                      transition:   'all 0.35s ease',
+                      padding:      '0 1px',
+                    }}
+                  >
+                    {ann.label}
+                    {isSeen && !isActive && (
+                      <sup style={{ ...MONO, fontSize: 6.5, color: C.accent, marginLeft: 1.5, opacity: 0.8 }}>▲</sup>
+                    )}
+                  </span>
+                );
+              })}
+            </p>
+          ))}
+        </div>
+
+        {/* Thesis block */}
+        <div style={{ display: 'flex', gap: 0 }}>
+          <div style={{ width: 2, background: C.accent, flexShrink: 0 }} />
+          <div style={{ paddingLeft: 20 }}>
+            <Mono color={C.accent} size={7} style={{ display: 'block', marginBottom: 10, opacity: 1 }}>Whiteprint Thesis</Mono>
+            <p style={{ ...SERIF, fontSize: 13, lineHeight: 1.9, color: C.ink, opacity: 0.68 }}>
+              Oracle is making a multi-hundred-billion-dollar infrastructure bet that the market is treating as a growth story.
+              We treat it as an accounting story. The useful-life extension, the off-balance sheet commitments, and the FCF collapse
+              are not isolated events — they form a system. Scroll through the excerpt and click any underlined figure to read the evidence.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* ── Evidence panel ── */}
+      <div style={{
+        width: panelAnn ? 340 : 0, flexShrink: 0,
+        overflow: 'hidden',
+        transition: 'width 0.42s cubic-bezier(0.22,1,0.36,1)',
+        borderLeft: `1px solid ${C.border}`,
+        background: C.surface,
+      }}>
+        {panelAnn && (
+          <div className="fade-enter" style={{ width: 340, height: '100%', overflowY: 'auto', padding: '32px 28px' }}>
+            <button onClick={() => setActive(null)} style={{
+              background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8, marginBottom: 28
+            }}>
+              <Mono color={C.muted} size={7} style={{ opacity: 1 }}>← Close</Mono>
+            </button>
+
+            {/* Tag badge */}
+            <div style={{ display: 'inline-block', padding: '4px 10px', background: C.accentBg, border: `1px solid ${C.accentBorder}`, marginBottom: 20 }}>
+              <Mono color={C.accent} size={7} style={{ opacity: 1 }}>{panelAnn.tag}</Mono>
+            </div>
+
+            <Mono color={C.muted} size={7} style={{ display: 'block', marginBottom: 6, opacity: 1 }}>Primary Source</Mono>
+            <Mono color={C.accent} size={7} style={{ display: 'block', marginBottom: 18, opacity: 1 }}>{panelAnn.src}</Mono>
+
+            <div style={{ border: `1px solid ${C.border}`, padding: '14px 18px', background: C.faint, marginBottom: 22 }}>
+              <p style={{ ...SERIF, fontSize: 12.5, lineHeight: 1.85, color: C.ink, opacity: 0.62, fontStyle: 'italic' }}>
+                "{panelAnn.quote}"
+              </p>
+            </div>
+
+            <div style={{ width: 20, height: 1.5, background: C.accent, marginBottom: 14 }} />
+            <Mono color={C.muted} size={7} style={{ display: 'block', marginBottom: 10, opacity: 1 }}>Whiteprint Annotation</Mono>
+            <p style={{ ...SERIF, fontSize: 12.5, lineHeight: 1.85, color: C.ink, opacity: 0.72 }}>
+              {panelAnn.note}
+            </p>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ─── VARIANT B — CONVICTION MATRIX ───────────────────────────────────────────
+const STANCES = [
+  { id:'s1', ticker:'ORCL', name:'Oracle Corp.',      type:'Equity', dir:'Short',   cv:0.88, hz:0.14, thesis:'Capex acceleration + useful-life manipulation + $261B off-balance sheet. FCF has collapsed from +$13.8B to −$394M. Market is pricing net income; we are pricing cash.',  filed:'Apr 2024' },
+  { id:'s2', ticker:'NVDA', name:'Nvidia Corp.',      type:'Equity', dir:'Long',    cv:0.72, hz:0.84, thesis:'Sovereign AI buildout extends hyperscaler dependency through 2027. Gross margin expansion has runway. Blackwell ramp is clean.',                                             filed:'Mar 2024' },
+  { id:'s3', ticker:'DXY',  name:'US Dollar Index',   type:'Macro',  dir:'Short',   cv:0.80, hz:0.44, thesis:'Fed rate-cut cycle + fiscal deterioration = structural dollar weakness. EUR/USD targeting 1.15 over 12 months.',                                                           filed:'Feb 2024' },
+  { id:'s4', ticker:'HYG',  name:'High Yield Credit', type:'Credit', dir:'Short',   cv:0.65, hz:0.26, thesis:'Spreads price in soft landing; refinancing wall hits in 2025–26. Default rate will overshoot consensus by 200–300bps.',                                                    filed:'Jan 2024' },
+  { id:'s5', ticker:'WTI',  name:'Crude Oil',         type:'Macro',  dir:'Neutral', cv:0.41, hz:0.36, thesis:'OPEC+ compliance deteriorating, but demand from EM offsets supply. No edge — sitting out.',                                                                                 filed:'Apr 2024' },
+  { id:'s6', ticker:'GLD',  name:'Gold',              type:'Macro',  dir:'Long',    cv:0.78, hz:0.76, thesis:'Central bank accumulation structurally shifted demand. De-dollarization trade is intact. Real rates matter less than they used to.',                                        filed:'Mar 2024' },
+  { id:'s7', ticker:'TSLA', name:'Tesla Inc.',        type:'Equity', dir:'Short',   cv:0.58, hz:0.52, thesis:'EV price war erodes margins; robotaxi optionality priced in at current multiple. No moat in energy storage.',                                                              filed:'Feb 2024' },
+  { id:'s8', ticker:'BTC',  name:'Bitcoin',           type:'Crypto', dir:'Long',    cv:0.70, hz:0.80, thesis:'ETF approval unlocks institutional flow; halving supply shock lands Apr 2024. Structural, not tactical.',                                                                   filed:'Jan 2024' },
+  { id:'s9', ticker:'SPX',  name:'S&P 500',           type:'Macro',  dir:'Neutral', cv:0.55, hz:0.32, thesis:'Earnings resilience vs. multiple compression. 20× forward is not cheap with the Fed still restrictive. No directional edge.',                                              filed:'Apr 2024' },
+];
+
+const TYPE_C = { Equity:'#b83025', Macro:'#7a6040', Credit:'#3d6b5f', Crypto:'#5e4f8a' };
+const DIR_C  = { Long:'#2d7a4f', Short:'#b83025', Neutral:'#6a6a6a' };
+
+function ConvictionMatrix({ C }) {
+  const [sel, setSel]     = useState(null);
+  const [filter, setFilter] = useState('All');
+  const [hov, setHov]     = useState(null);
+
+  const TYPES = ['All','Equity','Macro','Credit','Crypto'];
+  const shown = filter === 'All' ? STANCES : STANCES.filter(s => s.type === filter);
+  const selS  = STANCES.find(s => s.id === sel);
+
+  const PW = 560, PH = 400;
+
+  const ticks = { x: [0,0.25,0.5,0.75,1], y: [0,0.25,0.5,0.75,1] };
+  const xLabel = v => v === 0 ? 'Near' : v === 0.5 ? 'Mid' : v === 1 ? 'Long' : '';
+  const yLabel = v => v === 0 ? 'High' : v === 0.5 ? 'Med' : v === 1 ? 'Low' : '';
+
+  return (
+    <div style={{ display: 'flex', height: '100%', overflow: 'hidden' }}>
+      {/* ── Plot pane ── */}
+      <div style={{ flex: 1, overflowY: 'auto', padding: '40px 48px' }}>
+        {/* Header row */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 32 }}>
+          <div>
+            <Mono color={C.accent} size={7} style={{ display: 'block', marginBottom: 10, opacity: 1 }}>Live Research Stances</Mono>
+            <h1 style={{ ...SERIF, fontSize: 28, fontWeight: 700, color: C.ink, letterSpacing: '-0.025em', lineHeight: 1.1 }}>Conviction Matrix</h1>
+            <p style={{ ...SERIF, fontSize: 12.5, color: C.muted, marginTop: 8, fontStyle: 'italic' }}>
+              Active positions mapped by conviction and time horizon
+            </p>
+          </div>
+          {/* Filter strip */}
+          <div style={{ display: 'flex', gap: 1 }}>
+            {TYPES.map(t => (
+              <button key={t} onClick={() => setFilter(t)} style={{
+                padding: '6px 14px', border: `1px solid ${filter === t ? C.accent : C.border}`,
+                background: filter === t ? C.accent : 'transparent',
+                color: filter === t ? '#fff' : C.muted, cursor: 'pointer',
+                ...MONO, fontSize: 7.5, letterSpacing: '0.12em', textTransform: 'uppercase',
+                transition: 'all 0.15s',
+              }}>{t}</button>
+            ))}
+          </div>
+        </div>
+
+        {/* SVG plot */}
+        <div style={{ position: 'relative', marginBottom: 28 }}>
+          <svg width={PW} height={PH} style={{ display: 'block', overflow: 'visible' }}>
+            {/* Grid */}
+            {ticks.x.map(v => (
+              <line key={'xg'+v} x1={v*PW} y1={0} x2={v*PW} y2={PH}
+                stroke={C.border} strokeWidth={1} />
+            ))}
+            {ticks.y.map(v => (
+              <line key={'yg'+v} x1={0} y1={v*PH} x2={PW} y2={v*PH}
+                stroke={C.border} strokeWidth={1} />
+            ))}
+
+            {/* Axis labels */}
+            {ticks.x.filter(v => xLabel(v)).map(v => (
+              <text key={'xl'+v} x={v*PW} y={PH+18} textAnchor="middle"
+                style={{ ...MONO, fontSize: 7.5, letterSpacing: '0.1em', textTransform:'uppercase' }}
+                fill={C.subtle}>{xLabel(v)}-term</text>
+            ))}
+            {ticks.y.filter(v => yLabel(v)).map(v => (
+              <text key={'yl'+v} x={-10} y={(1-v)*PH+4} textAnchor="end"
+                style={{ ...MONO, fontSize: 7, letterSpacing: '0.1em', textTransform:'uppercase' }}
+                fill={C.subtle}>{yLabel(v)}</text>
+            ))}
+
+            {/* Quadrant label */}
+            <text x={8} y={14} style={{ ...MONO, fontSize: 6.5, letterSpacing:'0.14em', textTransform:'uppercase' }} fill={C.subtle}>High Conviction</text>
+            <text x={8} y={PH-6} style={{ ...MONO, fontSize: 6.5, letterSpacing:'0.14em', textTransform:'uppercase' }} fill={C.subtle}>Tentative</text>
+
+            {/* Stances */}
+            {shown.map(s => {
+              const cx = s.hz * PW;
+              const cy = (1 - s.cv) * PH;
+              const isSel = sel === s.id;
+              const isHov = hov === s.id;
+              const tc = TYPE_C[s.type] || C.accent;
+              const dc = DIR_C[s.dir];
+              const r  = isSel ? 20 : isHov ? 17 : 13;
+
+              return (
+                <g key={s.id} style={{ cursor: 'pointer' }}
+                  onClick={() => setSel(isSel ? null : s.id)}
+                  onMouseEnter={() => setHov(s.id)}
+                  onMouseLeave={() => setHov(null)}
+                >
+                  {/* Type ring */}
+                  <circle cx={cx} cy={cy} r={r}
+                    fill={isSel || isHov ? tc+'18' : 'transparent'}
+                    stroke={isSel ? tc : isHov ? tc+'90' : tc+'40'}
+                    strokeWidth={isSel ? 1.5 : 1}
+                    style={{ transition: 'all 0.2s' }} />
+                  {/* Direction dot */}
+                  <circle cx={cx} cy={cy} r={5}
+                    fill={dc} style={{ transition: 'all 0.2s' }} />
+                  {/* Ticker */}
+                  <text x={cx} y={cy - r - 5} textAnchor="middle"
+                    style={{ ...MONO, fontSize: 8, letterSpacing: '0.06em' }}
+                    fill={isSel || isHov ? C.ink : C.muted}
+                  >{s.ticker}</text>
+                </g>
+              );
+            })}
+          </svg>
+        </div>
+
+        {/* Legend */}
+        <div style={{ display: 'flex', gap: 28, alignItems: 'center', flexWrap: 'wrap' }}>
+          <div style={{ display:'flex', gap:16 }}>
+            {Object.entries(DIR_C).map(([d,col]) => (
+              <div key={d} style={{ display:'flex', alignItems:'center', gap:6 }}>
+                <div style={{ width:8, height:8, borderRadius:'50%', background:col }} />
+                <Mono color={C.muted} size={7} style={{ opacity:1 }}>{d}</Mono>
+              </div>
+            ))}
+          </div>
+          <Rule C={C} vertical length={14} />
+          <div style={{ display:'flex', gap:16 }}>
+            {Object.entries(TYPE_C).map(([t,col]) => (
+              <div key={t} style={{ display:'flex', alignItems:'center', gap:6 }}>
+                <div style={{ width:14, height:1.5, background:col }} />
+                <Mono color={C.muted} size={7} style={{ opacity:1 }}>{t}</Mono>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* ── Stance detail ── */}
+      <div style={{
+        width: selS ? 320 : 0, flexShrink: 0, overflow: 'hidden',
+        transition: 'width 0.42s cubic-bezier(0.22,1,0.36,1)',
+        borderLeft: `1px solid ${C.border}`, background: C.surface,
+      }}>
+        {selS && (
+          <div className="fade-enter" style={{ width: 320, height: '100%', overflowY: 'auto', padding: '32px 28px' }}>
+            <button onClick={() => setSel(null)} style={{ background:'none', border:'none', cursor:'pointer', marginBottom:28 }}>
+              <Mono color={C.muted} size={7} style={{ opacity:1 }}>← Close</Mono>
+            </button>
+
+            <div style={{ marginBottom: 6 }}>
+              <span style={{ ...SERIF, fontSize: 38, fontWeight: 700, color: C.ink, letterSpacing: '-0.04em' }}>{selS.ticker}</span>
+            </div>
+            <p style={{ ...SERIF, fontSize: 13, color: C.muted, marginBottom: 24 }}>{selS.name}</p>
+
+            {/* Stats */}
+            <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:6, marginBottom:24 }}>
+              {[
+                { k:'Direction', v: selS.dir, col: DIR_C[selS.dir] },
+                { k:'Asset',     v: selS.type, col: TYPE_C[selS.type] },
+              ].map(item => (
+                <div key={item.k} style={{ padding:'10px 12px', border:`1px solid ${C.border}`, background:C.faint }}>
+                  <Mono color={C.subtle} size={6.5} style={{ display:'block', marginBottom:5, opacity:1 }}>{item.k}</Mono>
+                  <Mono color={item.col} size={9} style={{ opacity:1 }}>{item.v}</Mono>
+                </div>
+              ))}
+            </div>
+
+            {/* Conviction bar */}
+            <div style={{ marginBottom: 24 }}>
+              <div style={{ display:'flex', justifyContent:'space-between', marginBottom:8 }}>
+                <Mono color={C.muted} size={7} style={{ opacity:1 }}>Conviction</Mono>
+                <Mono color={C.ink} size={7} style={{ opacity:1 }}>{Math.round(selS.cv*100)}%</Mono>
+              </div>
+              <div style={{ height:2, background:C.faint }}>
+                <div style={{ height:'100%', width:`${selS.cv*100}%`, background:C.accent, transition:'width 0.6s ease' }} />
+              </div>
+            </div>
+
+            {/* Time horizon bar */}
+            <div style={{ marginBottom: 28 }}>
+              <div style={{ display:'flex', justifyContent:'space-between', marginBottom:8 }}>
+                <Mono color={C.muted} size={7} style={{ opacity:1 }}>Time Horizon</Mono>
+                <Mono color={C.ink} size={7} style={{ opacity:1 }}>{selS.hz < 0.35 ? 'Near-term' : selS.hz < 0.65 ? 'Mid-term' : 'Long-term'}</Mono>
+              </div>
+              <div style={{ height:2, background:C.faint }}>
+                <div style={{ height:'100%', width:`${selS.hz*100}%`, background:C.subtle, transition:'width 0.6s ease' }} />
+              </div>
+            </div>
+
+            <div style={{ width:20, height:1.5, background:C.accent, marginBottom:14 }} />
+            <Mono color={C.muted} size={7} style={{ display:'block', marginBottom:10, opacity:1 }}>Thesis</Mono>
+            <p style={{ ...SERIF, fontSize:12.5, lineHeight:1.88, color:C.ink, opacity:0.72 }}>{selS.thesis}</p>
+
+            <div style={{ marginTop:24 }}>
+              <Mono color={C.subtle} size={7} style={{ opacity:1 }}>Filed {selS.filed}</Mono>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ─── VARIANT C — THE BRIEF ────────────────────────────────────────────────────
+const COUNTS = [
+  {
+    id:'c1', num:'I',
+    title:'Capex Acceleration — Pattern Break',
+    signal:'High Signal',
+    summary:'Capital expenditures grew 10× from FY2022 to FY2024, from $1.3B to $6.9B. The rate of change exceeds any comparable period in Oracle\'s 47-year history and is driven entirely by signed data center commitments, not organic demand.',
+    src:'Form 10-K · FY2024 · Note 6',
+    quote:'Capital expenditures for fiscal 2024 were $6,866 million, compared to $3,299 million for fiscal 2023 and $1,347 million for fiscal 2022.',
+    note:'Commitment-driven capex precedes revenue by 18–36 months. Depreciation drag in FY2026 is not in consensus. The market is treating committed spend as earned growth.',
+  },
+  {
+    id:'c2', num:'II',
+    title:'Useful-Life Extension — Earnings Management',
+    signal:'High Signal',
+    summary:'Oracle extended the estimated useful life of server equipment from four to five years in FY2024, mechanically adding $1.2 billion to operating income in a single period. This is a non-recurring, non-cash accounting benefit.',
+    src:'Form 10-K · FY2024 · Note 1',
+    quote:'This change in accounting estimate increased operating income by approximately $1.2 billion in fiscal 2024.',
+    note:'Consensus models extrapolating FY2024 margins forward are wrong by ~$1.2B. The extension will not repeat. Analysts anchoring on FY2024 operating income are anchoring on a manipulated base.',
+  },
+  {
+    id:'c3', num:'III',
+    title:'Off-Balance Sheet Exposure — $261 Billion',
+    signal:'Critical',
+    summary:'Oracle has signed data center lease commitments of $261B that do not appear on the balance sheet. At 11× FY2024 revenue, this is the largest unreported obligation in Oracle\'s history — and will materialize over the next decade.',
+    src:'Form 10-K · FY2024 · Note 9',
+    quote:'Lease commitments of approximately $261 billion that had not yet commenced and are not reflected on our consolidated balance sheet. Initial terms of 10 to 19 years.',
+    note:'When these leases commence, they become on-balance sheet liabilities with depreciation and interest. FCF will remain structurally impaired for a decade. Wall Street is not modeling this.',
+  },
+  {
+    id:'c4', num:'IV',
+    title:'Free Cash Flow — Structural Deterioration',
+    signal:'High Signal',
+    summary:'FCF swung from +$13.8B in FY2021 to −$394M in FY2024 — a $14.2B reversal in three years. Net income rose over the same period. The divergence is entirely capex-driven and is structural, not cyclical.',
+    src:'Form 10-K · FY2024 · Cash Flow Statement',
+    quote:'Free cash flow for fiscal 2024 was $(394) million, compared to $13,757 million for fiscal 2021.',
+    note:'Net income is no longer a reliable proxy for cash generation. The market is pricing Oracle on P/E; the cash reality is negative FCF. Returns on the capex build are unknown and will not be legible for 18–36 months.',
+  },
+];
+
+function TheBrief({ C }) {
+  const [open, setOpen] = useState(null);
+
+  const sigCol = s => s === 'Critical' ? C.accent : C.ink;
+
+  return (
+    <div style={{ height:'100%', overflowY:'auto', padding:'40px 56px' }}>
+      {/* Memo block */}
+      <div style={{ border:`1px solid ${C.border}`, background:C.faint, padding:'20px 24px', marginBottom:40 }}>
+        <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', rowGap:8, columnGap:48, marginBottom:16 }}>
+          {[
+            ['To',             'Whiteprint Subscribers'],
+            ['From',           'Whiteprint Research Desk'],
+            ['Re',             'Oracle Corporation — Forensic Equity Analysis'],
+            ['Case No.',       'WP-2024-ORCL'],
+            ['Date',           'April 18, 2024'],
+            ['Classification', 'Proprietary · Research Only'],
+          ].map(([k,v]) => (
+            <div key={k} style={{ display:'flex', gap:12, alignItems:'baseline' }}>
+              <Mono color={C.muted} size={7} style={{ flexShrink:0, width:88, opacity:1 }}>{k}:</Mono>
+              <Mono color={C.ink}   size={7} style={{ opacity:1 }}>{v}</Mono>
+            </div>
+          ))}
+        </div>
+        <Rule C={C} style={{ marginBottom:14 }} />
+        <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center' }}>
+          <Mono color={C.muted} size={7} style={{ opacity:1 }}>Subject: Forensic Equity · Four Counts Below · Click Each to Expand Evidence</Mono>
+          <div style={{ padding:'5px 14px', background:C.accent }}>
+            <Mono color='#fff' size={8} style={{ opacity:1 }}>Verdict: Short</Mono>
+          </div>
+        </div>
+      </div>
+
+      {/* Counts */}
+      <div style={{ display:'flex', flexDirection:'column', gap:2 }}>
+        {COUNTS.map(count => {
+          const isOpen = open === count.id;
+          return (
+            <div key={count.id} style={{ border:`1px solid ${isOpen ? C.accent+'55' : C.border}`, transition:'border-color 0.25s' }}>
+              {/* Header row */}
+              <button
+                onClick={() => setOpen(isOpen ? null : count.id)}
+                style={{
+                  width:'100%', display:'flex', alignItems:'center', gap:20,
+                  padding:'18px 22px', background: isOpen ? C.faint : 'transparent',
+                  border:'none', cursor:'pointer', textAlign:'left', transition:'background 0.2s',
+                }}
+              >
+                {/* Roman numeral */}
+                <div style={{
+                  width:34, height:34, border:`1px solid ${isOpen ? C.accent : C.border}`,
+                  display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0,
+                  ...SERIF, fontSize:13, fontWeight:700, fontStyle:'italic',
+                  color: isOpen ? C.accent : C.ink, transition:'color 0.2s, border-color 0.2s',
+                }}>
+                  {count.num}
+                </div>
+
+                <div style={{ flex:1 }}>
+                  <Mono color={isOpen ? C.accent : C.muted} size={7} style={{ display:'block', marginBottom:5, opacity:1 }}>
+                    Count {count.num}
+                  </Mono>
+                  <div style={{ ...SERIF, fontSize:14.5, fontWeight:600, color:C.ink, letterSpacing:'-0.01em' }}>
+                    {count.title}
+                  </div>
+                </div>
+
+                <div style={{ display:'flex', alignItems:'center', gap:14, flexShrink:0 }}>
+                  <div style={{ padding:'3px 9px', border:`1px solid ${sigCol(count.signal)+'40'}`, background:sigCol(count.signal)+'0e' }}>
+                    <Mono color={sigCol(count.signal)} size={6.5} style={{ opacity:1 }}>{count.signal}</Mono>
+                  </div>
+                  <Mono color={C.subtle} size={11} style={{ opacity:1 }}>{isOpen ? '−' : '+'}</Mono>
+                </div>
+              </button>
+
+              {/* Expanded body */}
+              {isOpen && (
+                <div className="fade-enter" style={{ padding:'0 22px 28px 76px' }}>
+                  <p style={{ ...SERIF, fontSize:13, lineHeight:1.9, color:C.ink, opacity:0.7, marginBottom:22 }}>
+                    {count.summary}
+                  </p>
+
+                  {/* Source */}
+                  <div style={{ border:`1px solid ${C.border}`, padding:'14px 18px', background:C.faint, marginBottom:18 }}>
+                    <Mono color={C.muted} size={7} style={{ display:'block', marginBottom:10, opacity:1 }}>
+                      Primary Source — {count.src}
+                    </Mono>
+                    <p style={{ ...SERIF, fontSize:12.5, lineHeight:1.85, color:C.ink, opacity:0.62, fontStyle:'italic' }}>
+                      "{count.quote}"
+                    </p>
+                  </div>
+
+                  {/* Annotation */}
+                  <div style={{ display:'flex', gap:14 }}>
+                    <div style={{ width:2, background:C.accent, flexShrink:0, alignSelf:'stretch' }} />
+                    <p style={{ ...SERIF, fontSize:12.5, lineHeight:1.85, color:C.ink, opacity:0.68 }}>
+                      {count.note}
+                    </p>
+                  </div>
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Conclusion */}
+      <div style={{ marginTop:44, borderTop:`2px solid ${C.accent}`, paddingTop:28 }}>
+        <Mono color={C.accent} size={7} style={{ display:'block', marginBottom:14, opacity:1 }}>Conclusion</Mono>
+        <p style={{ ...SERIF, fontSize:13.5, lineHeight:1.92, color:C.ink, opacity:0.7, maxWidth:680 }}>
+          The four counts above are not independent. They form a system: management is smoothing earnings through
+          accounting changes while committing the company to a decade of capital-intensive infrastructure spend.
+          The market is pricing Oracle as a software company. The 10-K describes a construction company.
+          We are short.
+        </p>
+      </div>
+    </div>
+  );
+}
+
+// ─── TWEAKS PANEL ─────────────────────────────────────────────────────────────
+function TweaksPanel({ tweaks, setTweaks, visible }) {
+  const C = getC(tweaks.darkMode, tweaks.accent);
+  if (!visible) return null;
+
+  const VARIANTS = [
+    { id:'A', label:'Forensic Reader',    desc:'Annotated 10-K with evidence panels' },
+    { id:'B', label:'Conviction Matrix',  desc:'2D stance map by conviction × horizon' },
+    { id:'C', label:'The Brief',          desc:'Legal-brief structured research memo' },
+  ];
+  const ACCENTS = ['#b83025','#2d5a8e','#4a7c6f','#7a5c2a'];
+
+  return (
+    <div style={{
+      position:'fixed', bottom:24, right:24, zIndex:9999,
+      background: C.surface, border:`1px solid ${C.border}`,
+      width:270, padding:22,
+    }}>
+      <Mono color={C.ink} size={9} style={{ display:'block', marginBottom:18, opacity:1 }}>Tweaks</Mono>
+
+      {/* Variant */}
+      <Mono color={C.muted} size={7} style={{ display:'block', marginBottom:8, opacity:1 }}>Variant</Mono>
+      <div style={{ display:'flex', flexDirection:'column', gap:2, marginBottom:18 }}>
+        {VARIANTS.map(v => (
+          <button key={v.id} onClick={() => setTweaks(t => ({...t, variant:v.id}))} style={{
+            padding:'8px 12px', border:`1px solid ${tweaks.variant === v.id ? C.accent : C.border}`,
+            background: tweaks.variant === v.id ? C.accentBg : 'transparent',
+            cursor:'pointer', textAlign:'left', display:'flex', alignItems:'center', gap:10,
+            transition:'all 0.15s',
+          }}>
+            <Mono color={tweaks.variant === v.id ? C.accent : C.muted} size={9} style={{ opacity:1, width:12, flexShrink:0 }}>{v.id}</Mono>
+            <div>
+              <Mono color={tweaks.variant === v.id ? C.ink : C.muted} size={7.5} style={{ display:'block', opacity:1 }}>{v.label}</Mono>
+            </div>
+          </button>
+        ))}
+      </div>
+
+      {/* Dark/Light */}
+      <Mono color={C.muted} size={7} style={{ display:'block', marginBottom:8, opacity:1 }}>Mode</Mono>
+      <button onClick={() => setTweaks(t => ({...t, darkMode:!t.darkMode}))} style={{
+        width:'100%', padding:'8px 12px', border:`1px solid ${C.border}`,
+        background:'transparent', color:C.muted, cursor:'pointer',
+        ...MONO, fontSize:8, letterSpacing:'0.12em', textTransform:'uppercase',
+        textAlign:'left', marginBottom:18, transition:'border-color 0.15s',
+      }}>
+        {tweaks.darkMode ? '◑  Dark  →  Switch to Light' : '◐  Light  →  Switch to Dark'}
+      </button>
+
+      {/* Accent */}
+      <Mono color={C.muted} size={7} style={{ display:'block', marginBottom:8, opacity:1 }}>Accent Color</Mono>
+      <div style={{ display:'flex', gap:6 }}>
+        {ACCENTS.map(col => (
+          <button key={col} onClick={() => setTweaks(t => ({...t, accent:col}))} style={{
+            width:32, height:32, background:col, cursor:'pointer',
+            border: tweaks.accent === col ? `2px solid ${C.ink}` : `1px solid ${C.border}`,
+            transition:'border 0.15s',
+          }} title={col} />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ─── NAV ──────────────────────────────────────────────────────────────────────
+const NAV_LABELS = { A:'Forensic Reader', B:'Conviction Matrix', C:'The Brief' };
+
+function Nav({ C, variant }) {
+  return (
+    <div style={{
+      height:50, display:'flex', alignItems:'center', padding:'0 40px',
+      borderBottom:`1px solid ${C.border}`, flexShrink:0, background:C.bg,
+      justifyContent:'space-between',
+    }}>
+      <div style={{ display:'flex', alignItems:'center', gap:28 }}>
+        <span style={{ ...SERIF, fontSize:15, fontWeight:700, color:C.ink }}>
+          Whiteprint <em style={{ color:C.accent }}>Research</em>
+        </span>
+        <Rule C={C} vertical length={14} />
+        <Mono color={C.accent} size={7.5} style={{ opacity:1 }}>{NAV_LABELS[variant]}</Mono>
+      </div>
+      <div style={{ display:'flex', gap:24 }}>
+        {['Research','Stances','Models','Macro','About'].map(l => (
+          <Mono key={l} color={C.muted} size={7.5} style={{ opacity:1, cursor:'pointer' }}>{l}</Mono>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ─── APP ──────────────────────────────────────────────────────────────────────
+function App() {
+  const [tweaks, setTweaks] = useState(() => {
+    try {
+      const saved = localStorage.getItem('wp-proto-v2');
+      return saved ? { ...TWEAK_DEFAULTS, ...JSON.parse(saved) } : { ...TWEAK_DEFAULTS };
+    } catch { return { ...TWEAK_DEFAULTS }; }
+  });
+  const [tweaksVisible, setTweaksVisible] = useState(false);
+
+  useEffect(() => {
+    try { localStorage.setItem('wp-proto-v2', JSON.stringify(tweaks)); } catch {}
+    window.parent.postMessage({ type:'__edit_mode_set_keys', edits: tweaks }, '*');
+  }, [tweaks]);
+
+  useEffect(() => {
+    const handler = e => {
+      if (e.data?.type === '__activate_edit_mode')   setTweaksVisible(true);
+      if (e.data?.type === '__deactivate_edit_mode') setTweaksVisible(false);
+    };
+    window.addEventListener('message', handler);
+    window.parent.postMessage({ type:'__edit_mode_available' }, '*');
+    return () => window.removeEventListener('message', handler);
+  }, []);
+
+  const C = getC(tweaks.darkMode, tweaks.accent);
+
+  return (
+    <div style={{ height:'100vh', display:'flex', flexDirection:'column', background:C.bg, color:C.ink, transition:'background 0.35s, color 0.35s', position:'relative', overflow:'hidden' }}>
+      <div className="grain" style={{ opacity: tweaks.darkMode ? 0.028 : 0.012 }} />
+      <div style={{ position:'relative', zIndex:1, display:'flex', flexDirection:'column', height:'100%' }}>
+        <Nav C={C} variant={tweaks.variant} />
+        <div style={{ flex:1, overflow:'hidden' }}>
+          {tweaks.variant === 'A' && <ForensicReader C={C} />}
+          {tweaks.variant === 'B' && <ConvictionMatrix C={C} />}
+          {tweaks.variant === 'C' && <TheBrief C={C} />}
+        </div>
+      </div>
+      <TweaksPanel tweaks={tweaks} setTweaks={setTweaks} visible={tweaksVisible} />
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>

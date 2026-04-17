@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>WhitePrint — Research</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet" />
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+  <style>
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; border-radius:0 !important; }
+    html, body { height:100%; background:#0a0a0a; color:#f5f2eb; overflow:hidden; }
+    ::-webkit-scrollbar { width:6px; }
+    ::-webkit-scrollbar-track { background:transparent; }
+    ::-webkit-scrollbar-thumb { background:rgba(245,242,235,0.1); }
+    input[type=range] { -webkit-appearance:none; appearance:none; height:2px; outline:none; cursor:pointer; }
+    input[type=range]::-webkit-slider-thumb { -webkit-appearance:none; width:14px; height:14px; border-radius:50%; cursor:pointer; }
+    @keyframes grid-scroll { from { transform:translate(0,0); } to { transform:translate(40px,40px); } }
+    @keyframes fade-up { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+    @keyframes count-up { from { opacity:0; } to { opacity:1; } }
+    @keyframes scanline { 0%,100% { opacity:0.03; } 50% { opacity:0.06; } }
+    .fade-up { animation: fade-up 0.35s ease both; }
+    .section-content { animation: fade-up 0.3s ease both; }
+  </style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { useState, useEffect, useRef, useMemo, useCallback } = React;
+
+const MONO  = { fontFamily:"'JetBrains Mono', monospace" };
+const SERIF = { fontFamily:"'Playfair Display', Georgia, serif" };
+
+// ─── SECTION CONFIG ───────────────────────────────────────────
+const SECTIONS = {
+  equity: {
+    label:'Equity',
+    tag:'Forensic Equity Research',
+    bg:'#0a0a0a', surface:'#111110', border:'rgba(245,242,235,0.08)',
+    ink:'#f5f2eb', muted:'rgba(245,242,235,0.45)', subtle:'rgba(245,242,235,0.2)',
+    faint:'rgba(245,242,235,0.05)',
+    accent:'#b83025',
+    desc:'Deep forensic analysis of public company filings. We read the footnotes.',
+  },
+  macro: {
+    label:'Macro',
+    tag:'Global Macro Research',
+    bg:'#080806', surface:'#100f0c', border:'rgba(245,242,235,0.07)',
+    ink:'#f5f2eb', muted:'rgba(245,242,235,0.45)', subtle:'rgba(245,242,235,0.2)',
+    faint:'rgba(245,242,235,0.05)',
+    accent:'#8a6c3a',
+    desc:'Structural views on rates, currencies, and global capital flows.',
+  },
+  quant: {
+    label:'Quant',
+    tag:'Quantitative Research & Tools',
+    bg:'#060810', surface:'#0c0f1a', border:'rgba(50,80,140,0.2)',
+    ink:'#e8eef8', muted:'rgba(180,200,240,0.45)', subtle:'rgba(180,200,240,0.2)',
+    faint:'rgba(50,80,140,0.08)',
+    accent:'#2d6ab8',
+    desc:'Options pricing, derivatives analysis, and interactive financial models.',
+  },
+  'market-notes': {
+    label:'Market Notes',
+    tag:'Short-form Market Commentary',
+    bg:'#080908', surface:'#0f100e', border:'rgba(245,242,235,0.07)',
+    ink:'#f5f2eb', muted:'rgba(245,242,235,0.45)', subtle:'rgba(245,242,235,0.2)',
+    faint:'rgba(245,242,235,0.05)',
+    accent:'#2d7a4f',
+    desc:'Quick reads on market events. Filed within 24 hours of the data.',
+  },
+};
+
+// ─── ARTICLES DATA ────────────────────────────────────────────
+const ARTICLES = {
+  equity: [
+    { title:"Oracle: The Infrastructure Bet Nobody's Pricing", date:'Apr 2024', read:'14 min', verdict:'SHORT', hasBrief:true, excerpt:'Capital expenditures for fiscal 2024 were $6,866 million — a 10× step from FY2022. The useful-life extension added $1.2B to op. income.' },
+    { title:'EOG Resources: The Base Case Is Priced In', date:'Mar 2024', read:'11 min', verdict:'NEUTRAL', hasBrief:true, excerpt:'EOG is priced for continued execution at $75 WTI. The base case is consensus.' },
+    { title:'High Yield Credit: The Refinancing Wall', date:'Jan 2024', read:'9 min', verdict:'SHORT', hasBrief:true, excerpt:'Spreads are pricing a soft landing. The refinancing wall hits 2025–26.' },
+  ],
+  macro: [
+    { title:'Dollar Weakness: Structural, Not Cyclical', date:'Feb 2024', read:'9 min', verdict:'SHORT', hasBrief:true, excerpt:'Real yield advantage compressing. Current account widening. Fed pivot confirmed.' },
+    { title:'Gold and the De-dollarization Bid', date:'Mar 2024', read:'7 min', verdict:'LONG', hasBrief:true, excerpt:'Central bank accumulation has structurally shifted demand. The bid is not tactical.' },
+    { title:'The Eight-Body Problem: EM Oil March 2026', date:'Mar 2026', read:'31 min', verdict:'WATCH', hasBrief:false, excerpt:'A deep-dive on the geopolitics and economics of the next oil price cycle.' },
+  ],
+  quant: [
+    { title:'Off-Plan Default Swaps', date:'Mar 2024', read:'12 min', verdict:'', hasBrief:false, excerpt:'A quantitative framework for pricing credit default swaps on off-plan real estate. Includes the interactive model below.', featured:true },
+    { title:'Private Credit: First-Crack Wrapper', date:'Feb 2024', read:'8 min', verdict:'', hasBrief:false, excerpt:'Structuring a first-loss tranche in private credit: recovery rate sensitivity and optimal attachment points.' },
+  ],
+  'market-notes': [
+    { title:'Fed Decision Week: Three Things to Watch', date:'Mar 18, 2026', read:'3 min', verdict:'', hasBrief:false, excerpt:'Dot plot, press conference tone, and balance sheet trajectory.' },
+    { title:'Liquidity Squeeze: Fed March 2026', date:'Mar 2026', read:'4 min', verdict:'', hasBrief:false, excerpt:'Repo market stress signals emerging. RRP drawdown accelerating.' },
+    { title:'Prediction Markets: EM Oil March 2026', date:'Mar 2026', read:'5 min', verdict:'SHORT', hasBrief:false, excerpt:'Prediction markets pricing a 34% chance of OPEC+ cut at May meeting.' },
+  ],
+};
+
+// ─── NAV ──────────────────────────────────────────────────────
+function SiteNav({ section, setSection }) {
+  const S = SECTIONS[section];
+  return (
+    <div style={{
+      height:50, display:'flex', alignItems:'center', padding:'0 48px',
+      borderBottom:`1px solid ${S.border}`, flexShrink:0,
+      background:S.bg, justifyContent:'space-between',
+      transition:'background 0.4s, border-color 0.4s',
+    }}>
+      <span style={{ ...SERIF, fontSize:14, fontWeight:700, color:S.ink }}>
+        Whiteprint <em style={{ color:S.accent }}>Research</em>
+      </span>
+      <div style={{ display:'flex', gap:1 }}>
+        {Object.entries(SECTIONS).map(([k,v]) => (
+          <button key={k} onClick={() => setSection(k)} style={{
+            padding:'7px 16px', border:`1px solid ${section===k ? v.accent : S.border}`,
+            background: section===k ? v.accent + '18' : 'transparent',
+            color: section===k ? v.accent : S.muted,
+            cursor:'pointer', transition:'all 0.15s',
+            ...MONO, fontSize:7.5, letterSpacing:'0.12em', textTransform:'uppercase',
+          }}>{v.label}</button>
+        ))}
+      </div>
+      <div style={{ display:'flex', gap:20 }}>
+        {['Stances','Models','About'].map(l => (
+          <span key={l} style={{ ...MONO, fontSize:7.5, letterSpacing:'0.12em', textTransform:'uppercase', color:S.muted, cursor:'pointer' }}>{l}</span>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ─── ARTICLE CARD ─────────────────────────────────────────────
+function ArticleCard({ art, S, style={} }) {
+  const [hov, setHov] = useState(false);
+  return (
+    <div
+      onMouseEnter={() => setHov(true)}
+      onMouseLeave={() => setHov(false)}
+      style={{
+        border:`1px solid ${hov ? S.accent+'50' : S.border}`,
+        background: hov ? S.faint : 'transparent',
+        padding:'24px 28px', cursor:'pointer',
+        transition:'all 0.2s', ...style,
+      }}
+    >
+      <div style={{ display:'flex', alignItems:'center', gap:12, marginBottom:10 }}>
+        <span style={{ ...MONO, fontSize:6.5, letterSpacing:'0.12em', textTransform:'uppercase', color:S.muted }}>{art.date}</span>
+        <div style={{ width:1, height:10, background:S.border }} />
+        <span style={{ ...MONO, fontSize:6.5, letterSpacing:'0.12em', textTransform:'uppercase', color:S.muted }}>{art.read} read</span>
+        {art.verdict && (
+          <>
+            <div style={{ width:1, height:10, background:S.border }} />
+            <span style={{ ...MONO, fontSize:6.5, letterSpacing:'0.12em', textTransform:'uppercase',
+              color: art.verdict==='LONG' ? '#2d7a4f' : art.verdict==='SHORT' ? '#b83025' : S.muted }}>
+              {art.verdict}
+            </span>
+          </>
+        )}
+        {art.hasBrief && (
+          <div style={{ marginLeft:'auto', padding:'2px 8px', background:S.ink, display:'inline-block' }}>
+            <span style={{ ...MONO, fontSize:6, letterSpacing:'0.1em', textTransform:'uppercase', color:S.bg }}>Brief</span>
+          </div>
+        )}
+        {art.featured && (
+          <div style={{ marginLeft:'auto', padding:'2px 8px', background:S.accent, display:'inline-block' }}>
+            <span style={{ ...MONO, fontSize:6, letterSpacing:'0.1em', textTransform:'uppercase', color:'#fff' }}>+ Simulator</span>
+          </div>
+        )}
+      </div>
+      <h2 style={{ ...SERIF, fontSize:18, fontWeight:700, color:S.ink, letterSpacing:'-0.02em', lineHeight:1.25, marginBottom:10 }}>
+        {art.title}
+      </h2>
+      <p style={{ ...SERIF, fontSize:12.5, lineHeight:1.8, color:S.muted, fontStyle:'italic' }}>{art.excerpt}</p>
+    </div>
+  );
+}
+
+// ─── EQUITY SECTION ───────────────────────────────────────────
+function EquitySection({ S }) {
+  return (
+    <div className="section-content" style={{ maxWidth:900, margin:'0 auto', padding:'52px 48px' }}>
+      <div style={{ marginBottom:40 }}>
+        <span style={{ ...MONO, fontSize:7, letterSpacing:'0.18em', textTransform:'uppercase', color:S.accent, display:'block', marginBottom:12 }}>
+          {S.tag}
+        </span>
+        <h1 style={{ ...SERIF, fontSize:32, fontWeight:700, color:S.ink, letterSpacing:'-0.025em', lineHeight:1.15, marginBottom:14 }}>
+          We read <em style={{ color:S.accent }}>the footnotes.</em>
+        </h1>
+        <p style={{ ...SERIF, fontSize:14, lineHeight:1.8, color:S.muted, maxWidth:540 }}>{S.desc}</p>
+      </div>
+      <div style={{ height:1, background:S.border, marginBottom:32 }} />
+      <div style={{ display:'flex', flexDirection:'column', gap:2 }}>
+        {ARTICLES.equity.map((art, i) => <ArticleCard key={i} art={art} S={S} />)}
+      </div>
+    </div>
+  );
+}
+
+// ─── MACRO SECTION ────────────────────────────────────────────
+function MacroYieldCurve({ S }) {
+  const points = [
+    [0.25,4.8],[0.5,4.9],[1,4.95],[2,4.7],[3,4.5],[5,4.35],[7,4.4],[10,4.45],[20,4.6],[30,4.65]
+  ];
+  const W=560, H=90, xMin=0, xMax=30, yMin=4.0, yMax=5.2;
+  const px = x => ((x-xMin)/(xMax-xMin))*W;
+  const py = y => H - ((y-yMin)/(yMax-yMin))*H;
+  const pathD = points.map((p,i) => `${i===0?'M':'L'}${px(p[0])},${py(p[1])}`).join(' ');
+
+  return (
+    <div style={{ padding:'20px 28px', border:`1px solid ${S.border}`, background:S.faint, marginBottom:32 }}>
+      <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:12 }}>
+        <span style={{ ...MONO, fontSize:7, letterSpacing:'0.14em', textTransform:'uppercase', color:S.muted }}>US Treasury Yield Curve</span>
+        <span style={{ ...MONO, fontSize:7, letterSpacing:'0.1em', color:S.subtle }}>As of Apr 18, 2024</span>
+      </div>
+      <svg width={W} height={H} style={{ display:'block', overflow:'visible' }}>
+        {[4.2,4.6,5.0].map(y => (
+          <g key={y}>
+            <line x1={0} y1={py(y)} x2={W} y2={py(y)} stroke={S.border} strokeWidth={1} />
+            <text x={-6} y={py(y)+4} textAnchor="end" style={{ ...MONO, fontSize:7, fill:S.subtle }}>{y}%</text>
+          </g>
+        ))}
+        {[1,5,10,30].map(x => (
+          <text key={x} x={px(x)} y={H+14} textAnchor="middle" style={{ ...MONO, fontSize:7, fill:S.subtle }}>{x}Y</text>
+        ))}
+        <path d={pathD} fill="none" stroke={S.accent} strokeWidth={1.5} />
+        {points.map((p,i) => (
+          <circle key={i} cx={px(p[0])} cy={py(p[1])} r={2.5} fill={S.accent} />
+        ))}
+      </svg>
+      <div style={{ display:'flex', gap:24, marginTop:14 }}>
+        {[['2Y/10Y Spread','-50bps'],['5Y/30Y Spread','+30bps'],['Real Yield (10Y)','+1.8%']].map(([k,v]) => (
+          <div key={k}>
+            <span style={{ ...MONO, fontSize:6.5, letterSpacing:'0.1em', textTransform:'uppercase', color:S.subtle }}>{k} </span>
+            <span style={{ ...MONO, fontSize:8, letterSpacing:'0.06em', color:S.accent }}>{v}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function MacroSection({ S }) {
+  return (
+    <div className="section-content" style={{ maxWidth:900, margin:'0 auto', padding:'52px 48px' }}>
+      <div style={{ marginBottom:32 }}>
+        <span style={{ ...MONO, fontSize:7, letterSpacing:'0.18em', textTransform:'uppercase', color:S.accent, display:'block', marginBottom:12 }}>
+          {S.tag}
+        </span>
+        <h1 style={{ ...SERIF, fontSize:32, fontWeight:700, color:S.ink, letterSpacing:'-0.025em', lineHeight:1.15, marginBottom:14 }}>
+          Structural views.<br /><em style={{ color:S.accent }}>Not noise.</em>
+        </h1>
+        <p style={{ ...SERIF, fontSize:14, lineHeight:1.8, color:S.muted, maxWidth:540 }}>{S.desc}</p>
+      </div>
+      <MacroYieldCurve S={S} />
+      <div style={{ display:'flex', flexDirection:'column', gap:2 }}>
+        {ARTICLES.macro.map((art, i) => <ArticleCard key={i} art={art} S={S} />)}
+      </div>
+    </div>
+  );
+}
+
+// ─── CDS SIMULATOR ────────────────────────────────────────────
+function CDSSimulator({ S }) {
+  const [notional,  setNotional]  = useState(10);
+  const [spread,    setSpread]    = useState(150);
+  const [maturity,  setMaturity]  = useState(5);
+  const [recovery,  setRecovery]  = useState(40);
+  const [defYear,   setDefYear]   = useState(3);
+  const [defaults,  setDefaults]  = useState(false);
+  const [persp,     setPersp]     = useState('buyer');
+
+  const annualPrem = useMemo(() => notional * 1e6 * spread / 10000, [notional, spread]);
+  const payout     = useMemo(() => notional * 1e6 * (1 - recovery/100), [notional, recovery]);
+  const totalPrem  = useMemo(() => annualPrem * (defaults ? defYear : maturity), [annualPrem, defaults, defYear, maturity]);
+  const breakeven  = useMemo(() => ((spread / 100) / (1 - recovery/100)).toFixed(2), [spread, recovery]);
+
+  const buyerNet  = defaults ? payout - annualPrem * defYear : -annualPrem * maturity;
+  const sellerNet = -buyerNet;
+  const net       = persp === 'buyer' ? buyerNet : sellerNet;
+  const netColor  = net >= 0 ? '#2d7a4f' : '#b83025';
+
+  const fmt = (v) => {
+    const abs = Math.abs(v);
+    const sign = v >= 0 ? '+' : '-';
+    if (abs >= 1e6) return `${sign}$${(abs/1e6).toFixed(2)}M`;
+    return `${sign}$${(abs/1000).toFixed(0)}K`;
+  };
+
+  // Chart: year-by-year cash flows (SVG bar chart)
+  const W=440, H=140, years = Array.from({length:maturity}, (_,i) => i+1);
+  const maxVal = Math.max(payout, annualPrem * maturity) / 1e6;
+  const barW = Math.max(20, (W - 40) / maturity - 6);
+  const midY = H * 0.55;
+
+  const buyerBars = years.map(yr => {
+    const isDefault = defaults && yr === defYear;
+    const val = isDefault ? (payout / 1e6) : -(annualPrem / 1e6);
+    return { yr, val, isDefault };
+  });
+  const bars = persp === 'buyer' ? buyerBars : buyerBars.map(b => ({ ...b, val: -b.val }));
+
+  return (
+    <div style={{
+      border:`1px solid ${S.border}`, background:S.surface,
+      marginBottom:28, padding:'28px',
+      position:'relative', overflow:'hidden',
+    }}>
+      {/* Subtle grid background */}
+      <div style={{
+        position:'absolute', inset:0, pointerEvents:'none',
+        backgroundImage:`linear-gradient(${S.border} 1px, transparent 1px), linear-gradient(90deg, ${S.border} 1px, transparent 1px)`,
+        backgroundSize:'40px 40px', opacity:0.5,
+      }} />
+
+      <div style={{ position:'relative', zIndex:1 }}>
+        <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', marginBottom:24 }}>
+          <div>
+            <span style={{ ...MONO, fontSize:7, letterSpacing:'0.16em', textTransform:'uppercase', color:S.accent, display:'block', marginBottom:8 }}>
+              Interactive Model
+            </span>
+            <h2 style={{ ...SERIF, fontSize:20, fontWeight:700, color:S.ink, letterSpacing:'-0.02em' }}>
+              Credit Default Swap Simulator
+            </h2>
+            <p style={{ ...SERIF, fontSize:12, color:S.muted, marginTop:6, fontStyle:'italic' }}>
+              Adjust parameters to see payoff for each counterparty
+            </p>
+          </div>
+          {/* Perspective toggle */}
+          <div style={{ display:'flex', gap:1 }}>
+            {[['buyer','Protection Buyer'],['seller','Protection Seller']].map(([k,l]) => (
+              <button key={k} onClick={() => setPersp(k)} style={{
+                padding:'7px 14px', border:`1px solid ${persp===k ? S.accent : S.border}`,
+                background: persp===k ? S.accent+'20' : 'transparent',
+                color: persp===k ? S.accent : S.muted,
+                cursor:'pointer', ...MONO, fontSize:7, letterSpacing:'0.1em', textTransform:'uppercase',
+                transition:'all 0.15s',
+              }}>{l}</button>
+            ))}
+          </div>
+        </div>
+
+        <div style={{ display:'grid', gridTemplateColumns:'280px 1fr', gap:24 }}>
+          {/* Controls */}
+          <div>
+            {[
+              { label:'Notional', val:notional, set:setNotional, min:1, max:100, step:1, fmt:v=>`$${v}M` },
+              { label:'CDS Spread', val:spread, set:setSpread, min:25, max:1000, step:25, fmt:v=>`${v} bps` },
+              { label:'Maturity', val:maturity, set:setMaturity, min:1, max:10, step:1, fmt:v=>`${v} years` },
+              { label:'Recovery Rate', val:recovery, set:setRecovery, min:0, max:80, step:5, fmt:v=>`${v}%` },
+            ].map(item => (
+              <div key={item.label} style={{ marginBottom:16 }}>
+                <div style={{ display:'flex', justifyContent:'space-between', marginBottom:6 }}>
+                  <span style={{ ...MONO, fontSize:7, letterSpacing:'0.1em', textTransform:'uppercase', color:S.muted }}>{item.label}</span>
+                  <span style={{ ...MONO, fontSize:8, letterSpacing:'0.04em', color:S.ink }}>{item.fmt(item.val)}</span>
+                </div>
+                <input type="range" min={item.min} max={item.max} step={item.step}
+                  value={item.val} onChange={e => item.set(+e.target.value)}
+                  style={{ width:'100%', accentColor:S.accent, background:`linear-gradient(to right, ${S.accent} 0%, ${S.accent} ${((item.val-item.min)/(item.max-item.min))*100}%, rgba(180,200,240,0.15) ${((item.val-item.min)/(item.max-item.min))*100}%, rgba(180,200,240,0.15) 100%)` }}
+                />
+              </div>
+            ))}
+
+            {/* Default toggle */}
+            <div style={{ padding:'12px', border:`1px solid ${S.border}`, background:S.faint, marginTop:8 }}>
+              <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom: defaults ? 10 : 0 }}>
+                <span style={{ ...MONO, fontSize:7, letterSpacing:'0.1em', textTransform:'uppercase', color:S.muted }}>Trigger Default</span>
+                <button onClick={() => setDefaults(d => !d)} style={{
+                  padding:'4px 10px', border:`1px solid ${defaults ? '#b83025' : S.border}`,
+                  background: defaults ? '#b8302520' : 'transparent',
+                  color: defaults ? '#b83025' : S.muted,
+                  cursor:'pointer', ...MONO, fontSize:7, letterSpacing:'0.08em', textTransform:'uppercase',
+                }}>{defaults ? 'ON' : 'OFF'}</button>
+              </div>
+              {defaults && (
+                <div>
+                  <div style={{ display:'flex', justifyContent:'space-between', marginBottom:6 }}>
+                    <span style={{ ...MONO, fontSize:6.5, color:S.muted }}>Default at Year</span>
+                    <span style={{ ...MONO, fontSize:8, color:'#b83025' }}>{defYear}</span>
+                  </div>
+                  <input type="range" min={1} max={maturity} step={1}
+                    value={defYear} onChange={e => setDefYear(+e.target.value)}
+                    style={{ width:'100%', accentColor:'#b83025' }}
+                  />
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Visualization */}
+          <div>
+            {/* Key metrics */}
+            <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:6, marginBottom:20 }}>
+              {[
+                { k:'Annual Premium', v:`$${(annualPrem/1e3).toFixed(0)}K` },
+                { k:'Payout on Default', v:`$${(payout/1e6).toFixed(2)}M` },
+                { k:'Break-even Prob', v:`${breakeven}% / yr` },
+              ].map(item => (
+                <div key={item.k} style={{ padding:'12px', border:`1px solid ${S.border}`, background:S.faint }}>
+                  <span style={{ ...MONO, fontSize:6, letterSpacing:'0.1em', textTransform:'uppercase', color:S.muted, display:'block', marginBottom:5 }}>{item.k}</span>
+                  <span style={{ ...MONO, fontSize:13, letterSpacing:'0.02em', color:S.ink }}>{item.v}</span>
+                </div>
+              ))}
+            </div>
+
+            {/* Bar chart */}
+            <div style={{ padding:'16px', border:`1px solid ${S.border}`, background:S.faint, marginBottom:12 }}>
+              <span style={{ ...MONO, fontSize:6.5, letterSpacing:'0.1em', textTransform:'uppercase', color:S.muted, display:'block', marginBottom:10 }}>
+                {persp==='buyer' ? 'Protection Buyer' : 'Protection Seller'} — Annual Cash Flows ($M)
+              </span>
+              <svg width="100%" viewBox={`0 0 ${W} ${H}`} style={{ display:'block' }}>
+                {/* Zero line */}
+                <line x1={0} y1={midY} x2={W} y2={midY} stroke={S.border} strokeWidth={1} />
+                <text x={0} y={midY - 4} style={{ ...MONO, fontSize:7, fill:S.subtle }}>0</text>
+
+                {bars.map((b, i) => {
+                  const bh = Math.abs(b.val / maxVal) * (midY * 0.85);
+                  const x = 20 + i * ((W-40)/maturity);
+                  const color = b.val >= 0 ? '#2d7a4f' : '#b83025';
+                  return (
+                    <g key={i}>
+                      <rect x={x} y={b.val >= 0 ? midY - bh : midY} width={barW} height={bh}
+                        fill={color + (b.isDefault ? 'ff' : '90')}
+                        style={{ transition:'all 0.3s' }}
+                      />
+                      <text x={x + barW/2} y={H-2} textAnchor="middle"
+                        style={{ ...MONO, fontSize:7, fill:S.subtle }}>
+                        {b.yr}Y
+                      </text>
+                      {b.isDefault && (
+                        <text x={x + barW/2} y={b.val >= 0 ? midY - bh - 4 : midY + bh + 12}
+                          textAnchor="middle" style={{ ...MONO, fontSize:6.5, fill:color }}>
+                          DEFAULT
+                        </text>
+                      )}
+                    </g>
+                  );
+                })}
+              </svg>
+            </div>
+
+            {/* Net P&L */}
+            <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'12px 16px', border:`1px solid ${netColor}40`, background:`${netColor}0a` }}>
+              <span style={{ ...MONO, fontSize:7, letterSpacing:'0.1em', textTransform:'uppercase', color:S.muted }}>
+                {persp==='buyer' ? 'Buyer' : 'Seller'} Net P&L · {defaults ? `Default at Year ${defYear}` : 'No Default'}
+              </span>
+              <span style={{ ...MONO, fontSize:16, letterSpacing:'0.02em', color:netColor, transition:'color 0.3s' }}>
+                {fmt(net)}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── QUANT SECTION ────────────────────────────────────────────
+const QUANT_FRAMEWORKS = {
+  'Off-Plan Default Swaps': [
+    { q:'What', a:'Pricing CDS on off-plan developer default — a credit instrument for uncollateralised pre-completion exposure.' },
+    { q:'Why',  a:'Off-plan purchasers hold unhedged credit risk. No public debt market exists for most private developers.' },
+    { q:'When', a:'Most material when developer LTV exceeds 60% and completion timeline is 24+ months.' },
+    { q:'How',  a:'Implied spread model solved numerically. Interactive CDS simulator inside the post.' },
+  ],
+  'Private Credit: First-Crack Wrapper': [
+    { q:'What', a:'First-loss tranche structuring in private credit — optimal attachment and detachment points.' },
+    { q:'Why',  a:'First-crack tranches offer outsized yield premium for marginal additional risk if sized correctly.' },
+    { q:'When', a:'Relevant when portfolio default correlation is low and recovery assumptions are conservative.' },
+    { q:'How',  a:'Monte Carlo loss distribution across obligors. Recovery rate sensitivity inside the post.' },
+  ],
+};
+
+function QuantArticleCard({ art, S }) {
+  const [hov, setHov] = useState(false);
+  const fw = QUANT_FRAMEWORKS[art.title];
+  return (
+    <div
+      onMouseEnter={() => setHov(true)} onMouseLeave={() => setHov(false)}
+      style={{ border:`1px solid ${hov ? S.accent+'50' : S.border}`, background:hov ? S.faint : 'transparent', padding:'24px 28px', cursor:'pointer', transition:'all 0.2s' }}
+    >
+      <div style={{ display:'flex', alignItems:'center', gap:12, marginBottom:12 }}>
+        <span style={{ ...MONO, fontSize:6.5, letterSpacing:'0.12em', textTransform:'uppercase', color:S.muted }}>{art.date}</span>
+        <div style={{ width:1, height:10, background:S.border }} />
+        <span style={{ ...MONO, fontSize:6.5, letterSpacing:'0.12em', textTransform:'uppercase', color:S.muted }}>{art.read} read</span>
+        {art.featured && (
+          <div style={{ marginLeft:'auto', padding:'2px 8px', background:S.accent }}>
+            <span style={{ ...MONO, fontSize:6, letterSpacing:'0.1em', textTransform:'uppercase', color:'#fff' }}>+ Simulator</span>
+          </div>
+        )}
+      </div>
+      <h2 style={{ ...SERIF, fontSize:18, fontWeight:700, color:S.ink, letterSpacing:'-0.02em', lineHeight:1.25, marginBottom:14 }}>
+        {art.title}
+      </h2>
+      {fw && (
+        <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:6, marginBottom:12 }}>
+          {fw.map(f => (
+            <div key={f.q} style={{ display:'flex', gap:10, alignItems:'flex-start', padding:'10px 12px', border:`1px solid ${S.border}`, background:S.faint }}>
+              <div style={{ width:22, height:22, background:S.accent, display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
+                <span style={{ ...MONO, fontSize:7, color:'#fff' }}>{f.q}</span>
+              </div>
+              <p style={{ ...SERIF, fontSize:11, lineHeight:1.65, color:S.ink, opacity:.65 }}>{f.a}</p>
+            </div>
+          ))}
+        </div>
+      )}
+      <div style={{ display:'flex', alignItems:'center', gap:8 }}>
+        <div style={{ width:16, height:1.5, background:S.accent }} />
+        <span style={{ ...MONO, fontSize:7, letterSpacing:'0.1em', textTransform:'uppercase', color:S.accent }}>Read post →</span>
+      </div>
+    </div>
+  );
+}
+
+function QuantSection({ S }) {
+  return (
+    <div className="section-content" style={{ maxWidth:900, margin:'0 auto', padding:'52px 48px' }}>
+      <div style={{ marginBottom:36 }}>
+        <span style={{ ...MONO, fontSize:7, letterSpacing:'0.18em', textTransform:'uppercase', color:S.accent, display:'block', marginBottom:12 }}>
+          {S.tag}
+        </span>
+        <h1 style={{ ...MONO, fontSize:28, fontWeight:500, color:S.ink, letterSpacing:'-0.01em', lineHeight:1.15, marginBottom:14 }}>
+          QUANT<span style={{ color:S.accent }}>_</span>LAB
+        </h1>
+        <p style={{ ...SERIF, fontSize:13.5, lineHeight:1.8, color:S.muted, maxWidth:540 }}>{S.desc}</p>
+      </div>
+      <div style={{ height:1, background:S.border, marginBottom:32 }} />
+      <div style={{ display:'flex', flexDirection:'column', gap:12 }}>
+        {ARTICLES.quant.map((art, i) => <QuantArticleCard key={i} art={art} S={S} />)}
+      </div>
+    </div>
+  );
+}
+
+// ─── MARKET NOTES ─────────────────────────────────────────────
+function MarketNotesSection({ S }) {
+  return (
+    <div className="section-content" style={{ maxWidth:800, margin:'0 auto', padding:'52px 48px' }}>
+      <div style={{ marginBottom:36 }}>
+        <span style={{ ...MONO, fontSize:7, letterSpacing:'0.18em', textTransform:'uppercase', color:S.accent, display:'block', marginBottom:12 }}>
+          {S.tag}
+        </span>
+        <h1 style={{ ...SERIF, fontSize:32, fontWeight:700, color:S.ink, letterSpacing:'-0.025em', lineHeight:1.15, marginBottom:14 }}>
+          Filed within <em style={{ color:S.accent }}>24 hours.</em>
+        </h1>
+        <p style={{ ...SERIF, fontSize:14, lineHeight:1.8, color:S.muted, maxWidth:480 }}>{S.desc}</p>
+      </div>
+
+      <div style={{ height:1, background:S.border, marginBottom:32 }} />
+
+      {/* Feed layout */}
+      <div style={{ display:'flex', flexDirection:'column' }}>
+        {ARTICLES['market-notes'].map((art, i) => (
+          <div key={i} style={{ display:'grid', gridTemplateColumns:'80px 1fr', gap:20, paddingBottom:24, marginBottom:24, borderBottom:`1px solid ${S.border}`, cursor:'pointer' }}>
+            {/* Date stamp */}
+            <div>
+              <span style={{ ...MONO, fontSize:7, letterSpacing:'0.12em', textTransform:'uppercase', color:S.accent }}>{art.date.split(' ')[0]}</span>
+              <span style={{ ...MONO, fontSize:9, display:'block', color:S.muted, marginTop:2 }}>{art.date.split(' ').slice(1).join(' ')}</span>
+              <span style={{ ...MONO, fontSize:6.5, letterSpacing:'0.08em', color:S.subtle, display:'block', marginTop:6 }}>{art.read} read</span>
+            </div>
+            {/* Content */}
+            <div>
+              <h2 style={{ ...SERIF, fontSize:17, fontWeight:600, color:S.ink, letterSpacing:'-0.01em', lineHeight:1.3, marginBottom:8 }}>
+                {art.title}
+              </h2>
+              <p style={{ ...SERIF, fontSize:12.5, lineHeight:1.8, color:S.muted, fontStyle:'italic' }}>{art.excerpt}</p>
+              <div style={{ display:'flex', alignItems:'center', gap:10, marginTop:10 }}>
+                <div style={{ width:20, height:1.5, background:S.accent }} />
+                <span style={{ ...MONO, fontSize:7, letterSpacing:'0.1em', textTransform:'uppercase', color:S.accent }}>Read note →</span>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ─── APP ──────────────────────────────────────────────────────
+function App() {
+  const [section, setSection] = useState(() => {
+    try { return localStorage.getItem('wp-section') || 'equity'; } catch { return 'equity'; }
+  });
+
+  useEffect(() => {
+    try { localStorage.setItem('wp-section', section); } catch {}
+  }, [section]);
+
+  const S = SECTIONS[section];
+
+  return (
+    <div style={{ height:'100vh', display:'flex', flexDirection:'column', background:S.bg, color:S.ink, transition:'background 0.4s, color 0.3s' }}>
+      <SiteNav section={section} setSection={setSection} />
+      <div key={section} style={{ flex:1, overflowY:'auto' }}>
+        {section === 'equity'       && <EquitySection S={S} />}
+        {section === 'macro'        && <MacroSection S={S} />}
+        {section === 'quant'        && <QuantSection S={S} />}
+        {section === 'market-notes' && <MarketNotesSection S={S} />}
+      </div>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>

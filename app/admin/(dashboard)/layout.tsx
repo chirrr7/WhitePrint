@@ -13,11 +13,11 @@ export default async function AdminDashboardLayout({
   const admin = await requireAdminIdentity()
 
   return (
-    <div className={styles.adminShell}>
+    <div className={styles.shell}>
       <AdminSidebar email={admin.email} />
-      <div className={styles.content}>
-        <div className={styles.contentInner}>{children}</div>
-      </div>
+      <main className={styles.main}>
+        <div className={styles.page}>{children}</div>
+      </main>
     </div>
   )
 }

@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation"
+import dynamic from "next/dynamic"
 import Link from "next/link"
 import type { Metadata } from "next"
 import {
@@ -18,8 +19,17 @@ import { isMobilePreviewEnabled, withMobilePreviewHref } from "@/lib/mobile-prev
 import { cn } from "@/lib/utils"
 import { ArticleProgressBar } from "./progress-bar"
 import { MobileArticleViewer } from "@/components/mobile-article-viewer"
+import type { BriefData } from "@/components/TheBrief"
+import { BriefToggle } from "./brief-toggle"
 import s from "./article.module.css"
 import marketNoteStyles from "./market-note.module.css"
+
+// SimulatorSlot is created by another agent — import defensively
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const SimulatorSlot = dynamic(
+  () =>
+    import("@/components/simulators/index").then((mod) => mod.SimulatorSlot).catch(() => () => null)
+)
 
 interface Props {
   params: Promise<{ slug: string }>
@@ -59,12 +69,46 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
 }
 
+// Fetch brief_data + meta extras from Supabase without touching the main post layer
+async function getPostExtras(slug: string): Promise<{
+  briefData: BriefData | null
+  simulatorType: string | null
+}> {
+  try {
+    const { createClient } = await import("@/lib/supabase/server")
+    const supabase = await createClient()
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data } = await (supabase.from("posts") as any)
+      .select("brief_data, meta")
+      .eq("slug", slug)
+      .maybeSingle()
+    if (!data) return { briefData: null, simulatorType: null }
+    const briefData =
+      data.brief_data && typeof data.brief_data === "object"
+        ? (data.brief_data as BriefData)
+        : null
+    const simulatorType =
+      data.meta &&
+      typeof data.meta === "object" &&
+      typeof (data.meta as Record<string, unknown>).simulator_type === "string"
+        ? ((data.meta as Record<string, unknown>).simulator_type as string)
+        : null
+    return { briefData, simulatorType }
+  } catch {
+    return { briefData: null, simulatorType: null }
+  }
+}
+
 export default async function PostPage({ params, searchParams }: Props) {
   const { slug } = await params
   const resolvedSearchParams = searchParams ? await searchParams : {}
   const forceMobilePreview = isMobilePreviewEnabled(resolvedSearchParams.mobile)
-  const post = await getArticleBySlug(slug)
+  const [post, postExtras] = await Promise.all([
+    getArticleBySlug(slug),
+    getPostExtras(slug),
+  ])
   if (!post) notFound()
+  const { briefData, simulatorType } = postExtras
 
   const categoryHref = getPostCategoryHref(post.category)
   const categoryLabel = getPostCategoryLabel(post.category)
@@ -290,10 +334,17 @@ export default async function PostPage({ params, searchParams }: Props) {
           </div>
         </div>
 
+        {/* Brief — above article body, collapsed by default on desktop */}
+        {briefData ? (
+          <div style={{ maxWidth: 760, margin: "0 auto 32px", padding: "0 40px" }}>
+            <BriefToggle brief={briefData} postTitle={post.title} postSlug={post.slug} />
+          </div>
+        ) : null}
+
         {/* Body layout */}
         <div className={s.layout}>
           {/* Main article */}
-          <div className={s.article}>
+          <div id="article-body" className={s.article}>
             {post.marketNoteTable ? (
               <MarketNoteTable
                 heading={getSummaryHeading(post.category)}
@@ -301,6 +352,10 @@ export default async function PostPage({ params, searchParams }: Props) {
               />
             ) : null}
             {post.content}
+            {/* Simulator slot — rendered if meta.simulator_type is set */}
+            {simulatorType ? (
+              <SimulatorSlot type={simulatorType} />
+            ) : null}
           </div>
 
           {/* Sidebar */}

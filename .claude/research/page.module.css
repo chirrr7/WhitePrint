@@ -1,0 +1,273 @@
+.page {
+  min-height: 100vh;
+  background: var(--bg);
+}
+
+.hero {
+  padding: 112px 0 48px;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+}
+
+.wrap {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 0 48px;
+}
+
+.eyebrow {
+  margin-bottom: 20px;
+  color: var(--subtle);
+  font-family: var(--font-mono-family), monospace;
+  font-size: 8px;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+}
+
+.title {
+  margin: 0 0 18px;
+  color: var(--ink);
+  font-family: var(--font-display-family), Georgia, serif;
+  font-size: clamp(38px, 6vw, 72px);
+  font-weight: 700;
+  line-height: 0.98;
+  letter-spacing: -0.04em;
+}
+
+.sub {
+  max-width: 560px;
+  margin: 0;
+  color: var(--muted);
+  font-family: var(--font-serif-family), Georgia, serif;
+  font-size: 16px;
+  font-weight: 300;
+  line-height: 1.75;
+}
+
+.listing {
+  padding: 0 0 80px;
+  background: var(--bg);
+}
+
+.header,
+.archiveHeader {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  border-bottom: 1px solid var(--border);
+}
+
+.header {
+  padding-top: 28px;
+}
+
+.archiveHeader {
+  margin-top: 52px;
+}
+
+.label,
+.count {
+  flex-shrink: 0;
+  padding-bottom: 16px;
+  color: #8ea1b8;
+  font-family: var(--font-mono-family), monospace;
+  font-size: 8.5px;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+}
+
+.count {
+  letter-spacing: 0.14em;
+}
+
+.rule {
+  flex: 1;
+  align-self: flex-end;
+  height: 1px;
+  margin-bottom: 1px;
+  background: rgba(226, 224, 219, 0.5);
+}
+
+.cards,
+.archiveList {
+  border: 1px solid var(--border);
+  border-top: none;
+}
+
+.card,
+.archiveItem {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 40px;
+  align-items: start;
+  padding: 28px 36px 26px;
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+}
+
+.card {
+  color: inherit;
+  text-decoration: none;
+  transition: background 0.15s ease;
+}
+
+.card:first-child,
+.archiveItem:first-child {
+  border-top: none;
+}
+
+.card:hover {
+  background: #f4f2ed;
+}
+
+.cardKicker {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.pill {
+  padding: 3px 8px;
+  font-family: var(--font-mono-family), monospace;
+  font-size: 8.5px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.pillDark {
+  color: #fff;
+  background: var(--ink);
+}
+
+.pillTag {
+  color: var(--subtle);
+  background: #edeae4;
+  border: 1px solid var(--border);
+}
+
+.date {
+  color: #8ea1b8;
+  font-family: var(--font-mono-family), monospace;
+  font-size: 8.5px;
+  letter-spacing: 0.1em;
+}
+
+.cardTitle,
+.archiveTitle {
+  margin: 0 0 8px;
+  color: var(--ink);
+  font-family: var(--font-display-family), Georgia, serif;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.cardTitle {
+  font-size: 18px;
+  line-height: 1.2;
+}
+
+.cardTitle em,
+.archiveTitle em {
+  color: var(--accent);
+  font-style: italic;
+}
+
+.archiveTitle {
+  font-size: 20px;
+  line-height: 1.18;
+}
+
+.cardDeck,
+.archiveDeck {
+  margin: 0;
+  color: var(--muted);
+  font-family: var(--font-serif-family), Georgia, serif;
+  font-weight: 300;
+  line-height: 1.72;
+}
+
+.cardDeck {
+  font-size: 13px;
+}
+
+.modelLink {
+  display: inline-block;
+  margin-top: 12px;
+  color: var(--accent);
+  font-family: var(--font-mono-family), monospace;
+  font-size: 8.5px;
+  letter-spacing: 0.18em;
+  text-decoration: none;
+  text-transform: uppercase;
+}
+
+.modelLink:hover {
+  color: var(--ink);
+}
+
+.archiveDeck {
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+.cardAside {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 12px;
+  padding-top: 4px;
+  flex-shrink: 0;
+}
+
+.meta,
+.archiveDate,
+.archiveStatus {
+  color: #8ea1b8;
+  font-family: var(--font-mono-family), monospace;
+  font-size: 8px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.meta {
+  text-align: right;
+}
+
+.archiveDate {
+  margin-bottom: 10px;
+}
+
+.archiveStatus {
+  color: var(--subtle);
+}
+
+.cta {
+  padding-bottom: 1px;
+  color: var(--muted);
+  border-bottom: 1px solid var(--border);
+  font-family: var(--font-mono-family), monospace;
+  font-size: 8.5px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  transition: color 0.15s ease, border-color 0.15s ease;
+}
+
+.card:hover .cta {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
+.archiveEmpty {
+  padding: 24px 32px;
+  color: var(--muted);
+  font-family: var(--font-serif-family), Georgia, serif;
+  font-size: 14px;
+}
+
+@media (max-width: 1200px) {
+  .wrap {
+    padding: 0 32px;
+  }
+}

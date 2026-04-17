@@ -128,6 +128,7 @@ export interface StanceEditorData {
 export interface InProgressListItem {
   id: number
   priority: number
+  redacted: boolean
   slug: string
   status: string
   summary: string
@@ -455,13 +456,14 @@ export async function getInProgressPageData() {
   const supabase = await createClient()
   const { data } = await supabase
     .from('in_progress_items')
-    .select('id, title, slug, summary, status, priority, updated_at')
+    .select('id, title, slug, summary, status, priority, redacted, updated_at')
     .order('priority', { ascending: false })
     .order('updated_at', { ascending: false })
 
   const items: InProgressListItem[] = (data ?? []).map((item) => ({
     id: item.id,
     priority: item.priority,
+    redacted: item.redacted ?? false,
     slug: item.slug,
     status: item.status,
     summary: item.summary,
