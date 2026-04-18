@@ -58,6 +58,8 @@ export interface PostEditorData {
   post: {
     body: string
     body_mdx: string
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    brief_data: Record<string, any> | null
     featured: boolean
     homepage: boolean
     id: number
@@ -306,7 +308,7 @@ export async function getPostEditorData(id?: number): Promise<PostEditorData> {
       ? supabase
           .from('posts')
           .select(
-            'id, title, slug, summary, body, body_mdx, status, topic_id, featured, homepage, stance_id, linked_model_id, published_at',
+            'id, title, slug, summary, body, body_mdx, status, topic_id, featured, homepage, stance_id, linked_model_id, published_at, brief_data',
           )
           .eq('id', id)
           .single()
@@ -326,7 +328,7 @@ export async function getPostEditorData(id?: number): Promise<PostEditorData> {
 
     postResult = {
       ...fallback,
-      data: fallback.data ? { ...fallback.data, body_mdx: '' } : null,
+      data: fallback.data ? { ...fallback.data, body_mdx: '', brief_data: null } : null,
     } as typeof initialPostResult
   }
 

@@ -479,6 +479,10 @@ function resolveDatabasePostCategory(topic: PublicTopic | null | undefined): Pos
     return "market-notes"
   }
 
+  if (candidates.some((value) => value === "quant" || value === "quant-research" || value === "quantitative")) {
+    return "quant"
+  }
+
   return "macro"
 }
 

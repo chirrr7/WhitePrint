@@ -360,9 +360,10 @@ interface BriefTabProps {
 }
 
 function BriefTab({ post }: BriefTabProps) {
-  // Try to parse existing brief_data from post if available
-  // The column may not exist yet; we handle that gracefully
-  const initialBrief: BriefData = emptyBrief()
+  const initialBrief: BriefData =
+    post?.brief_data && typeof post.brief_data === 'object' && Array.isArray((post.brief_data as BriefData).counts)
+      ? (post.brief_data as BriefData)
+      : emptyBrief()
 
   const [brief, setBrief] = useState<BriefData>(initialBrief)
   const [saving, setSaving] = useState(false)

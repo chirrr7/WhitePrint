@@ -392,34 +392,6 @@ export function TheBrief({ brief, postTitle, postSlug, variant = 'article' }: Th
         </div>
       )}
 
-      {/* Read full analysis link — only in article variant */}
-      {variant === 'article' && (
-        <div
-          style={{
-            padding: '16px 40px',
-            borderTop: `1px solid ${tokens.border}`,
-            display: 'flex',
-            justifyContent: 'flex-end',
-          }}
-        >
-          <a
-            href="#article-body"
-            style={{
-              fontFamily: tokens.fontMono,
-              fontSize: 10,
-              letterSpacing: '0.12em',
-              textTransform: 'uppercase',
-              color: tokens.accent,
-              textDecoration: 'none',
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: 6,
-            }}
-          >
-            Read Full Analysis ↗
-          </a>
-        </div>
-      )}
     </div>
   )
 }
