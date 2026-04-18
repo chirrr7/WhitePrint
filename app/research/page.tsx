@@ -2,6 +2,7 @@ import type { Metadata } from "next"
 import Link from "next/link"
 import { getAllPosts } from "@/lib/posts"
 import { SEO_CONFIG } from "@/lib/seo.config"
+import { sectionAccent, tokens } from "@/lib/tokens"
 import s from "./page.module.css"
 
 export const revalidate = 60
@@ -37,7 +38,7 @@ export default async function ResearchIndexPage() {
 
           <div className={s.cards}>
             {posts.map((post) => (
-              <Link key={post.slug} href={`/posts/${post.slug}`} className={`${s.card} fade-in-up`}>
+              <Link key={post.slug} href={`/posts/${post.slug}`} className={`${s.card} fade-in-up`} style={{ '--accent': sectionAccent[post.category] ?? tokens.accent } as React.CSSProperties}>
                 <div>
                   <div className={s.cardKicker}>
                     <span className={`${s.pill} ${s.pillDark}`}>{post.topicLabel ?? post.category}</span>

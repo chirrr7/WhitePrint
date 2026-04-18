@@ -5,10 +5,14 @@ import {
   getPostCategoryLabel,
   type PostMeta,
 } from "@/lib/post-meta"
+import { sectionAccent, tokens } from "@/lib/tokens"
 
 export function PostCard({ post }: { post: PostMeta }) {
   return (
-    <article className="group py-6 border-b border-border last:border-b-0">
+    <article
+      className="group py-6 border-b border-border last:border-b-0"
+      style={{ '--accent': sectionAccent[post.category] ?? tokens.accent } as React.CSSProperties}
+    >
       <div className="flex flex-col gap-2">
         <div className="flex items-center gap-3 text-xs text-muted-foreground">
           <Link

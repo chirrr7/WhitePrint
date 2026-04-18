@@ -1,18 +1,18 @@
 'use client'
 
 import React, {
-  useCallback,
-  useEffect,
   useRef,
   useState,
 } from 'react'
 import Link from 'next/link'
+import matter from 'gray-matter'
 import { savePostAction, saveBriefDataAction } from '@/lib/admin/actions'
 import type { PageMessage } from '@/lib/admin/messages'
 import type { PostEditorData } from '@/lib/admin/data'
 import { TheBrief } from '@/components/TheBrief'
 import type { BriefData, BriefCount } from '@/components/TheBrief'
 import { tokens } from '@/lib/tokens'
+import { RichEditor } from '@/components/admin/rich-editor'
 
 /* ─── Types ─────────────────────────────────────────────── */
 
@@ -130,90 +130,6 @@ const btnGhost: React.CSSProperties = {
   cursor: 'pointer',
 }
 
-/* ─── Floating format toolbar ─────────────────────────────── */
-
-interface FloatToolbarProps {
-  show: boolean
-  top: number
-  left: number
-  savedRange: React.RefObject<Range | null>
-  editorRef: React.RefObject<HTMLDivElement | null>
-}
-
-function FloatToolbar({ show, top, left, savedRange, editorRef }: FloatToolbarProps) {
-  // eslint-disable-next-line @typescript-eslint/no-deprecated
-  function exec(cmd: string, value?: string) {
-    if (!editorRef.current) return
-    if (savedRange.current) {
-      const sel = window.getSelection()
-      if (sel) {
-        sel.removeAllRanges()
-        sel.addRange(savedRange.current)
-      }
-    }
-    editorRef.current.focus()
-    // eslint-disable-next-line @typescript-eslint/no-deprecated
-    document.execCommand(cmd, false, value)
-  }
-
-  function insertLink() {
-    const url = prompt('URL:')
-    if (url) exec('createLink', url)
-  }
-
-  if (!show) return null
-
-  const btns: Array<{ label: string; action: () => void }> = [
-    { label: 'B', action: () => exec('bold') },
-    { label: 'I', action: () => exec('italic') },
-    { label: 'U', action: () => exec('underline') },
-    { label: 'H2', action: () => exec('formatBlock', 'h2') },
-    { label: 'H3', action: () => exec('formatBlock', 'h3') },
-    { label: '"', action: () => exec('formatBlock', 'blockquote') },
-    { label: '{}', action: () => exec('formatBlock', 'pre') },
-    { label: '↗', action: insertLink },
-  ]
-
-  return (
-    <div
-      style={{
-        position: 'fixed',
-        top,
-        left,
-        zIndex: 9999,
-        background: '#1a1816',
-        border: `1px solid rgba(245,242,235,0.14)`,
-        display: 'flex',
-        gap: 0,
-        boxShadow: '0 4px 16px rgba(0,0,0,0.6)',
-      }}
-    >
-      {btns.map(({ label, action }) => (
-        <button
-          key={label}
-          type="button"
-          onMouseDown={(e) => e.preventDefault()}
-          onClick={action}
-          style={{
-            background: 'none',
-            border: 'none',
-            borderRight: `1px solid rgba(245,242,235,0.08)`,
-            color: S.ink,
-            fontFamily: label === 'B' || label === 'I' ? S.serif : S.mono,
-            fontWeight: label === 'B' ? 700 : 400,
-            fontStyle: label === 'I' ? 'italic' : 'normal',
-            fontSize: 12,
-            padding: '6px 10px',
-            cursor: 'pointer',
-          }}
-        >
-          {label}
-        </button>
-      ))}
-    </div>
-  )
-}
-
 /* ─── Article tab ─────────────────────────────────────────── */
 
 interface ArticleTabProps {
@@ -225,33 +141,15 @@ interface ArticleTabProps {
 }
 
 function ArticleTab({ post, topics, stances, models, mode }: ArticleTabProps) {
-  const textareaRef = useRef<HTMLTextAreaElement | null>(null)
   const titleRef = useRef<HTMLDivElement | null>(null)
 
   const [wc, setWc] = useState(0)
   const [titleFocused, setTitleFocused] = useState(false)
-  const [bodyHtml, setBodyHtml] = useState(post?.body_mdx ?? post?.body ?? '')
+  const [bodyMdx, setBodyMdx] = useState(() => {
+    const raw = post?.body_mdx ?? post?.body ?? ''
+    return matter(raw).content
+  })
   const [title, setTitle] = useState(post?.title ?? '')
-
-  function execTextarea(wrapperLeft: string, wrapperRight: string) {
-    if (!textareaRef.current) return
-    const el = textareaRef.current
-    const start = el.selectionStart
-    const end = el.selectionEnd
-    const selected = el.value.slice(start, end)
-    const before = el.value.slice(0, start)
-    const after = el.value.slice(end)
-    const replacement = wrapperLeft + selected + wrapperRight
-
-    const newHtml = before + replacement + after
-    setBodyHtml(newHtml)
-    setWc(wordCount(newHtml))
-    
-    setTimeout(() => {
-      el.focus()
-      el.setSelectionRange(start + wrapperLeft.length, end + wrapperLeft.length)
-    }, 0)
-  }
 
   const toolbarBtn: React.CSSProperties = {
     background: 'transparent',
@@ -263,73 +161,6 @@ function ArticleTab({ post, topics, stances, models, mode }: ArticleTabProps) {
     cursor: 'pointer',
     borderRadius: 2,
   }
-
-  // Sync word count when editor changes
-  function onEditorInput() {
-    if (editorRef.current) {
-      setBodyHtml(editorRef.current.innerHTML)
-      setWc(wordCount(editorRef.current.innerHTML))
-    }
-  }
-
-  // Save selection
-  function saveSelection() {
-    const sel = window.getSelection()
-    if (sel && sel.rangeCount > 0) {
-      savedRange.current = sel.getRangeAt(0)
-    }
-  }
-
-  // Show floating toolbar on selection
-  function onSelectionChange() {
-    const sel = window.getSelection()
-    if (!sel || sel.isCollapsed || !editorRef.current) {
-      setToolbar((t) => ({ ...t, show: false }))
-      return
-    }
-    // Only show when selection is inside our editor
-    const range = sel.getRangeAt(0)
-    if (!editorRef.current.contains(range.commonAncestorContainer)) {
-      setToolbar((t) => ({ ...t, show: false }))
-      return
-    }
-    savedRange.current = range.cloneRange()
-    const rect = range.getBoundingClientRect()
-    setToolbar({
-      show: true,
-      top: rect.top + window.scrollY - 44,
-      left: Math.max(8, rect.left + window.scrollX),
-    })
-  }
-
-  useEffect(() => {
-    document.addEventListener('selectionchange', onSelectionChange)
-    return () => document.removeEventListener('selectionchange', onSelectionChange)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
-
-  // Insert block from gutter
-  // eslint-disable-next-line @typescript-eslint/no-deprecated
-  function insertBlock(type: 'p' | 'h2' | 'hr' | 'table') {
-    if (!editorRef.current) return
-    editorRef.current.focus()
-    if (type === 'p') {
-      // eslint-disable-next-line @typescript-eslint/no-deprecated
-      document.execCommand('formatBlock', false, 'p')
-    } else if (type === 'h2') {
-      // eslint-disable-next-line @typescript-eslint/no-deprecated
-      document.execCommand('formatBlock', false, 'h2')
-    } else if (type === 'hr') {
-      // eslint-disable-next-line @typescript-eslint/no-deprecated
-      document.execCommand('insertHorizontalRule')
-    } else if (type === 'table') {
-      const tbl = `<table style="border-collapse:collapse;width:100%;color:${S.ink};background:${S.surfaceB};margin:1.5em 0"><thead><tr>${['A', 'B', 'C'].map((h) => `<th style="border:1px solid ${S.border};padding:8px 12px;font-family:${S.mono};font-size:11px;text-align:left;color:${S.muted}">${h}</th>`).join('')}</tr></thead><tbody>${[1, 2, 3].map(() => `<tr>${[0, 1, 2].map(() => `<td style="border:1px solid ${S.border};padding:8px 12px;font-size:13px"> </td>`).join('')}</tr>`).join('')}</tbody></table>`
-      // eslint-disable-next-line @typescript-eslint/no-deprecated
-      document.execCommand('insertHTML', false, tbl)
-    }
-  }
-
-  const [gutterHover, setGutterHover] = useState(false)
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
@@ -409,6 +240,22 @@ function ArticleTab({ post, topics, stances, models, mode }: ArticleTabProps) {
 
       {/* Inline title */}
       <div style={{ padding: '24px 40px 0', background: S.bg }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
+          <span style={{ ...labelBase, margin: 0 }}>Title</span>
+          <button
+            type="button"
+            style={toolbarBtn}
+            onClick={() => {
+              const sel = window.getSelection()
+              if (!sel || sel.isCollapsed || !titleRef.current?.contains(sel.anchorNode)) return
+              const text = sel.toString()
+              // eslint-disable-next-line @typescript-eslint/no-deprecated
+              document.execCommand('insertText', false, `*${text}*`)
+            }}
+          >
+            Highlight
+          </button>
+        </div>
         <div
           ref={titleRef}
           contentEditable
@@ -439,54 +286,15 @@ function ArticleTab({ post, topics, stances, models, mode }: ArticleTabProps) {
         <input type="hidden" name="title" value={title} readOnly />
       </div>
 
-      {/* Editor area with toolbar */}
-      <div style={{ background: S.surfaceB, borderBottom: `1px solid ${S.border}`, padding: '8px 16px', display: 'flex', gap: 6 }}>
-        <button type="button" onClick={() => execTextarea('**', '**')} style={toolbarBtn}>B</button>
-        <button type="button" onClick={() => execTextarea('*', '*')} style={{...toolbarBtn, fontStyle: 'italic'}}>I</button>
-        <button type="button" onClick={() => execTextarea('### ', '')} style={toolbarBtn}>H3</button>
-        <button type="button" onClick={() => execTextarea('>', '')} style={toolbarBtn}>Quote</button>
-        <button type="button" onClick={() => execTextarea('```\n', '\n```')} style={toolbarBtn}>Code</button>
-        <div style={{ width: 1, height: 16, background: S.border, margin: 'auto 6px' }} />
-        <button type="button" onClick={() => execTextarea('<span style="color:#b83025">', '</span>')} style={{...toolbarBtn, color: '#b83025'}}>Red</button>
-        <button type="button" onClick={() => execTextarea('<span style="color:#2d7a4f">', '</span>')} style={{...toolbarBtn, color: '#2d7a4f'}}>Green</button>
-      </div>
-      <div style={{ position: 'relative', display: 'flex', background: S.bg }}>
-        {/* Editable content area */}
-        <div
-          style={{
-            flex: 1,
-            maxWidth: 720,
-            margin: '0 auto',
-            paddingRight: 40,
-            paddingLeft: 40,
-          }}
-        >
-          <textarea
-            ref={textareaRef}
-            name="body_mdx"
-            value={bodyHtml}
-            onChange={(e) => {
-              setBodyHtml(e.target.value)
-              setWc(wordCount(e.target.value))
-            }}
-            placeholder="Start writing…"
-            style={{
-              fontFamily: S.mono,
-              fontSize: 13,
-              lineHeight: 1.95,
-              color: S.ink,
-              background: 'transparent',
-              border: 'none',
-              outline: 'none',
-              width: '100%',
-              minHeight: 600,
-              padding: '24px 0 64px',
-              resize: 'vertical',
-            }}
-            spellCheck={false}
-          />
-        </div>
-      </div>
+      {/* Body editor */}
+      <input type="hidden" name="body_mdx" value={bodyMdx} readOnly />
+      <RichEditor
+        initialContent={bodyMdx}
+        onChange={(md) => {
+          setBodyMdx(md)
+          setWc(wordCount(md))
+        }}
+      />
 
       {/* Remaining metadata in a compact panel */}
       <div

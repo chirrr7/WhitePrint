@@ -17,6 +17,7 @@ import {
 } from "@/lib/posts"
 import { isMobilePreviewEnabled, withMobilePreviewHref } from "@/lib/mobile-preview"
 import { cn } from "@/lib/utils"
+import { sectionAccent } from "@/lib/tokens"
 import { ArticleProgressBar } from "./progress-bar"
 import { MobileArticleViewer } from "@/components/mobile-article-viewer"
 import type { BriefData } from "@/components/TheBrief"
@@ -274,6 +275,7 @@ export default async function PostPage({ params, searchParams }: Props) {
           s.wrapper,
           post.category === "market-notes" && marketNoteStyles.wrapper,
         )}
+        style={{ '--accent': sectionAccent[post.category] } as React.CSSProperties}
       >
         <ArticleProgressBar />
 

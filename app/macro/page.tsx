@@ -31,13 +31,6 @@ interface Indicator {
   direction: 1 | -1
 }
 
-const FALLBACK_INDICATORS: Indicator[] = [
-  { label: "US 10Y", value: "4.52%", delta: "+3bps", direction: 1 },
-  { label: "DXY", value: "104.2", delta: "-0.3", direction: -1 },
-  { label: "WTI", value: "$78.4", delta: "+1.2", direction: 1 },
-  { label: "VIX", value: "14.8", delta: "-0.4", direction: -1 },
-]
-
 async function getMacroIndicators(): Promise<Indicator[]> {
   try {
     const supabase = await createClient()
@@ -48,12 +41,12 @@ async function getMacroIndicators(): Promise<Indicator[]> {
       .order("sort_order", { ascending: true })
 
     if (error || !data || data.length === 0) {
-      return FALLBACK_INDICATORS
+      return []
     }
 
     return data as Indicator[]
   } catch {
-    return FALLBACK_INDICATORS
+    return []
   }
 }
 
@@ -200,77 +193,79 @@ export default async function MacroPage() {
             Structural views. Not noise.
           </h1>
 
-          {/* Indicators strip */}
-          <div>
-            <p
-              style={{
-                margin: "0 0 12px",
-                fontFamily: MONO,
-                fontSize: 9,
-                color: MUTED,
-                letterSpacing: "0.16em",
-                textTransform: "uppercase",
-                textAlign: "right",
-              }}
-            >
-              Key Indicators · {today}
-            </p>
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(4, 1fr)",
-                border: `1px solid ${BORDER}`,
-                background: BORDER,
-                gap: 1,
-              }}
-            >
-              {indicators.map((ind) => (
-                <div
-                  key={ind.label}
-                  style={{
-                    background: SURFACE,
-                    padding: "14px 16px",
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: 4,
-                  }}
-                >
-                  <span
+          {/* Indicators strip — only rendered when live data is available */}
+          {indicators.length > 0 && (
+            <div>
+              <p
+                style={{
+                  margin: "0 0 12px",
+                  fontFamily: MONO,
+                  fontSize: 9,
+                  color: MUTED,
+                  letterSpacing: "0.16em",
+                  textTransform: "uppercase",
+                  textAlign: "right",
+                }}
+              >
+                Key Indicators · {today}
+              </p>
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "repeat(4, 1fr)",
+                  border: `1px solid ${BORDER}`,
+                  background: BORDER,
+                  gap: 1,
+                }}
+              >
+                {indicators.map((ind) => (
+                  <div
+                    key={ind.label}
                     style={{
-                      fontFamily: MONO,
-                      fontSize: 10,
-                      color: MUTED,
-                      letterSpacing: "0.1em",
-                      textTransform: "uppercase",
+                      background: SURFACE,
+                      padding: "14px 16px",
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: 4,
                     }}
                   >
-                    {ind.label}
-                  </span>
-                  <span
-                    style={{
-                      fontFamily: MONO,
-                      fontSize: 13,
-                      color: INK,
-                      letterSpacing: "0.04em",
-                      fontWeight: 500,
-                    }}
-                  >
-                    {ind.value}
-                  </span>
-                  <span
-                    style={{
-                      fontFamily: MONO,
-                      fontSize: 10,
-                      color: ind.direction === 1 ? "#2d7a4f" : "#b83025",
-                      letterSpacing: "0.06em",
-                    }}
-                  >
-                    {ind.delta}
-                  </span>
-                </div>
-              ))}
+                    <span
+                      style={{
+                        fontFamily: MONO,
+                        fontSize: 10,
+                        color: MUTED,
+                        letterSpacing: "0.1em",
+                        textTransform: "uppercase",
+                      }}
+                    >
+                      {ind.label}
+                    </span>
+                    <span
+                      style={{
+                        fontFamily: MONO,
+                        fontSize: 13,
+                        color: INK,
+                        letterSpacing: "0.04em",
+                        fontWeight: 500,
+                      }}
+                    >
+                      {ind.value}
+                    </span>
+                    <span
+                      style={{
+                        fontFamily: MONO,
+                        fontSize: 10,
+                        color: ind.direction === 1 ? "#2d7a4f" : "#b83025",
+                        letterSpacing: "0.06em",
+                      }}
+                    >
+                      {ind.delta}
+                    </span>
+                  </div>
+                ))}
+              </div>
             </div>
-          </div>
+          )}
         </div>
       </section>
 

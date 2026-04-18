@@ -85,8 +85,10 @@ function escapeHtml(value: string) {
 }
 
 function deriveDisplayTitle(rawTitle: string) {
+  // normalize **word** → *word* before processing so double-asterisk bold doesn't leak into cleanTitle
+  const normalized = rawTitle.replace(/\*\*([^*]+)\*\*/g, '*$1*')
   const emphasisPattern = /\*([^*]+)\*/g
-  const cleanTitle = rawTitle.replace(emphasisPattern, '$1').replace(/\s+/g, ' ').trim()
+  const cleanTitle = normalized.replace(emphasisPattern, '$1').replace(/\s+/g, ' ').trim()
 
   if (!cleanTitle) {
     return {
@@ -95,19 +97,19 @@ function deriveDisplayTitle(rawTitle: string) {
     }
   }
 
-  if (emphasisPattern.test(rawTitle)) {
+  if (emphasisPattern.test(normalized)) {
     emphasisPattern.lastIndex = 0
     let html = ''
     let lastIndex = 0
     let match: RegExpExecArray | null
 
-    while ((match = emphasisPattern.exec(rawTitle)) !== null) {
-      html += escapeHtml(rawTitle.slice(lastIndex, match.index))
+    while ((match = emphasisPattern.exec(normalized)) !== null) {
+      html += escapeHtml(normalized.slice(lastIndex, match.index))
       html += `<em>${escapeHtml(match[1])}</em>`
       lastIndex = match.index + match[0].length
     }
 
-    html += escapeHtml(rawTitle.slice(lastIndex))
+    html += escapeHtml(normalized.slice(lastIndex))
 
     return {
       cleanTitle,

@@ -45,9 +45,9 @@ function parseDateParts(date: string) {
   }
 }
 
-function NoteRow({ post }: { post: MarketNotePostMeta }) {
+function NoteRow({ post }: { post: PostMeta }) {
   const { day, month, year } = parseDateParts(post.date)
-  const keyStat = post.meta?.key_stat
+  const keyStat = (post as MarketNotePostMeta).meta?.key_stat
 
   return (
     <Link
@@ -172,7 +172,7 @@ function NoteRow({ post }: { post: MarketNotePostMeta }) {
 }
 
 export default async function MarketNotesPage() {
-  const posts = (await getPostsByCategory("market-notes")) as MarketNotePostMeta[]
+  const posts = await getPostsByCategory("market-notes")
 
   return (
     <div style={{ background: BG, minHeight: "100vh", color: INK }}>
