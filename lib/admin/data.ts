@@ -59,7 +59,7 @@ export interface PostEditorData {
     body: string
     body_mdx: string
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    brief_data: Record<string, any> | null
+    brief_data: any
     featured: boolean
     homepage: boolean
     id: number

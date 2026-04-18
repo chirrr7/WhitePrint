@@ -1,4 +1,4 @@
-export const postCategories = ["macro", "equity", "market-notes"] as const
+export const postCategories = ["macro", "equity", "market-notes", "quant"] as const
 
 export type PostCategory = (typeof postCategories)[number]
 export type SidebarValueTone = "neutral" | "positive" | "warning" | "negative"
@@ -82,6 +82,8 @@ export function getPostCategoryLabel(category: PostCategory): string {
       return "Equity Research"
     case "market-notes":
       return "Market Notes"
+    case "quant":
+      return "Quant Research"
     default:
       return category
   }
@@ -95,6 +97,8 @@ export function getPostCategoryHref(category: PostCategory): string {
       return "/equity"
     case "market-notes":
       return "/market-notes"
+    case "quant":
+      return "/quant"
     default:
       return "/"
   }
